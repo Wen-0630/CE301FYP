@@ -3,32 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"
-        integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous">
+    <title>Stovest Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 </head>
 <body>
     <div class="container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="flash-messages">
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}">
-                            {% if category == 'success' %}
-                                <i class="fas fa-check-circle"></i>
-                            {% elif category == 'error' %}
-                                <i class="fas fa-exclamation-circle"></i>
-                            {% elif category == 'info' %}
-                                <i class="fas fa-info-circle"></i>
-                            {% endif %}
-                            {{ message }}
-                        </div>
-                    {% endfor %}
+        <aside class="sidebar">
+            <div class="logo">Stovest</div>
+            <nav class="main-menu">
+                <ul>
+                    <li><a href="dashboard.html" class="active">Dashboard</a></li>
+                    <li><a href="#">Portfolio</a></li>
+                    <li><a href="#">Analysis</a></li>
+                    <li><a href="#">Market</a></li>
+                </ul>
+            </nav>
+            <div class="support-menu">
+                <ul>
+                    <li><a href="#">Community</a></li>
+                    <li><a href="#">Help & Support</a></li>
+                </ul>
+            </div>
+        </aside>
+        <main class="main-content">
+            <header class="header">
+                <input type="text" placeholder="Ask stocks.ai anything">
+                <div class="user-info">
+                    <img src="profile-pic.png" alt="Profile Picture">
+                    <span>Naya Rachel</span>
                 </div>
-            {% endif %}
-        {% endwith %}
-        {% block content %}{% endblock %}
+                <button class="logout-button">Logout</button>
+            </header>
+            <div class="content">
+                <!-- Content will go here -->
+                {% block content %}{% endblock %}
+            </div>
+        </main>
     </div>
 </body>
 </html>

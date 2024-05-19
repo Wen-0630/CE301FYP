@@ -1,15 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-
-<body>
-    <h1>Welcome to the Dashboard!</h1>
-</body>
-
-</html>
+{% block content %}
+<div class="dashboard">
+    <h2>Welcome, Naya</h2>
+    <p>Here's your stock portfolio overview</p>
+    <div class="overview">
+        <div class="total-holding">
+            <h3>Total Holding</h3>
+            <p>$12,304.11</p>
+            <p>Return <span class="return-positive">+3.5% ($532)</span></p>
+        </div>
+        <div class="portfolio">
+            <h3>My Portfolio</h3>
+            <div class="portfolio-items">
+                <div class="portfolio-item">
+                    <p>$1,721.3</p>
+                    <p>+12.31 (0.7%)</p>
+                    <p>AAPL</p>
+                    <p>Units 104</p>
+                </div>
+                <div class="portfolio-item">
+                    <p>$1,521.3</p>
+                    <p>-12.31 (0.7%)</p>
+                    <p>TSLA</p>
+                    <p>Units 124</p>
+                </div>
+                <div class="portfolio-item">
+                    <p>$1,721.3</p>
+                    <p>+12.31 (0.7%)</p>
+                    <p>MSFT</p>
+                    <p>Units 10</p>
+                </div>
+                <div class="portfolio-item">
+                    <p>$1,721.3</p>
+                    <p>+12.31 (0.7%)</p>
+                    <p>GOOG</p>
+                    <p>Units 110</p>
+                </div>
+                <div class="portfolio-item">
+                    <p>$1,721.3</p>
+                    <p>+12.31 (0.7%)</p>
+                    <p>NVDA</p>
+                    <p>Units 104</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
