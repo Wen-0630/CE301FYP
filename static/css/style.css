@@ -1,0 +1,205 @@
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap');
+
+* {
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+    font-family: 'Merriweather', sans-serif;
+}
+
+.flex-r, .flex-c {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+.flex-c {
+    flex-direction: column;
+}
+.flex-r {
+    flex-direction: row;
+}
+
+/* Add background image to body */
+body {
+    background: url('/static/img/loginBackground.jpg') no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh; /* Ensure minimum height covers the full viewport */
+    margin: 0; /* Remove default margin */
+    color: white; /* Default text color */
+}
+
+.container {
+    width: 100%;
+    min-height: 100vh;
+    padding: 20px 10px;
+    background-color: rgba(255, 255, 255, 0.1);  /* Black semi-transparent background */
+    position: relative;
+}
+
+.login-text {
+    background-color: rgba(0, 0, 0, 0.7);  /* Black slightly transparent background */
+    max-width: 400px;
+    min-height: 500px;
+    border-radius: 10px;
+    padding: 10px 20px;
+    color: white;  /* Ensure text inside login-text is white */
+}
+
+.logo {
+    margin-bottom: 15px;
+}
+.logo span, .logo span i {
+    font-size: 30px;
+    color: #ffffff;
+}
+
+.login-text h1 {
+    text-align: center;
+    font-size: 25px;
+    color: #f369f3;
+}
+.login-text p {
+    font-size: 15px;
+    color: #ffffff;
+}
+
+form {
+    align-items: flex-start !important;
+    width: 100%;
+    margin-top: 15px;
+}
+
+.input-box {
+    margin: 10px 0px;
+    width: 100%;
+}
+
+.label {
+    font-size: 15px;
+    color: white;  /* Label text color */
+    margin-bottom: 3px;
+}
+
+.input {
+    background-color: rgba(255, 255, 255, 0.2);  /* Light semi-transparent background */
+    padding: 0px 5px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 10px;
+    overflow: hidden;
+    justify-content: flex-start;
+}
+
+input {
+    border: none;
+    outline: none;
+    padding: 10px 5px;
+    background-color: rgba(255, 255, 255, 0.2);  /* Light semi-transparent background */
+    color: white;  /* Input text color */
+    flex: 1;
+}
+.input i {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.check span {
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.btn {
+    color: #ffffff;
+    border-radius: 30px;
+    padding: 10px 15px;
+    background: linear-gradient(122.33deg, #a4508b 30.62%, #5f0a87 100%);
+    margin-top: 20px;
+    margin-bottom: 15px;
+    font-size: 16px;
+    transition: all 0.3s linear;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.extra-line {
+    font-size: 15px;
+    font-weight: 600;
+    transition: color 0.3s ease;
+    margin-bottom: 15px;
+}
+.extra-line a {
+    color: #5fd8f0; 
+}
+
+/* Flash Messages Styling */
+.flash-messages {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 600px;
+    text-align: center; /* Center-align the text */
+    z-index: 1000;
+}
+
+/* General Alert Styling */
+.alert {
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 14px;
+    line-height: 1.5;
+    display: inline-flex; /* Use inline-flex to center the alerts */
+    align-items: center;
+    justify-content: center; /* Center the content within the alert */
+    animation: fadeIn 0.5s ease-in-out, fadeOut 0.5s 3s ease-in-out forwards; /* Fade in and out */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: left; /* Text alignment within the alert box */
+}
+
+/* Add some margin between icon and text */
+.alert i {
+    margin-right: 10px;
+}
+
+/* Success Alert Styling */
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+/* Error Alert Styling */
+.alert-error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+/* Info Alert Styling */
+.alert-info {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+}
+
+/* Fade In and Out Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}

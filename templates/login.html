@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="flex-r container">
+    <div class="flex-r login-wrapper">
+        <div class="login-text">
+            <div class="logo">
+                <i class="fas fa-coins"></i>
+                <span>NetPlus</span>
+            </div>
+            <h1 style="margin-bottom: 10px;">Sign In</h1>
+            <p>Ready to take control of your financial future? Let's log in!</p>
+
+            <form class="flex-c" action="{{ url_for('auth.login') }}" method="post">
+                <div class="input-box">
+                    <span class="label">E-mail</span>
+                    <div class="flex-r input">
+                        <input type="text" name="email" placeholder="user@gmail.com" required>
+                        <i class="fas fa-paper-plane"></i>
+                    </div>
+                </div>
+                
+                <div class="input-box">
+                    <span class="label">Password</span>
+                    <div class="flex-r input">
+                        <input type="password" name="password" placeholder="At least 8 characters (e.g., P@ssw0rd!)" required>
+                        <i class="fas fa-lock"></i>
+                    </div>
+                </div>
+
+                <input class="btn" type="submit" value="Sign In" style="margin-bottom: 20px;">
+                <span class="extra-line">
+                    <span>Don't have an account?</span>
+                    <a href="{{ url_for('auth.signup') }}">Sign Up</a>
+                </span>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
