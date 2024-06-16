@@ -1,5 +1,7 @@
 #src/views.py
 from flask import Blueprint, redirect, url_for, render_template, session
+from .models import Transaction
+from bson.objectid import ObjectId
 
 # Create a Blueprint for user-related routes
 views = Blueprint('user', __name__, template_folder='templates')
@@ -19,4 +21,7 @@ def dashboard():
 def transactions():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-    return render_template('transactions.html')
+    user_id = session['user_id']
+    transactions = Transaction.get_all_transactions_by_user(ObjectId(user_id))
+    print(f"Retrieved transactions for user {user_id}: {transactions}")  # Debug statement
+    return render_template('transactions.html', transactions=transactions)

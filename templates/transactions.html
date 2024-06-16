@@ -1,3 +1,4 @@
+<!-- transactions.html -->
 {% extends "base.html" %}
 
 {% block title %}
@@ -22,20 +23,27 @@ Transactions - Net Plus
                     </tr>
                 </thead>
                 <tbody>
-                    {% for transaction in transactions %}
-                    <tr>
-                        <td>{{ transaction.type }}</td>
-                        <td>{{ transaction.category }}</td>
-                        <td>{{ transaction.amount }}</td>
-                        <td>{{ transaction.date.strftime('%Y-%m-%d') }}</td>
-                        <td>{{ transaction.description }}</td>
-                        <td>
-                            <form action="{{ url_for('transactions.delete_transaction', transaction_id=transaction._id) }}" method="POST" style="display:inline;">
-                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
+                    {% if transactions %}
+                        {% for transaction in transactions %}
+                        <tr>
+                            <td>{{ transaction.type }}</td>
+                            <td>{{ transaction.category }}</td>
+                            <td>{{ "%.2f"|format(transaction.amount) }}</td>
+                            <td>{{ transaction.date.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ transaction.description }}</td>
+                            <td>
+                                <form action="{{ url_for('transactions.delete_transaction', transaction_id=transaction._id) }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm" title="Delete"><i class="fa fa-trash"></i></button>
+                                </form>
+                                <a href="{{ url_for('transactions.edit_transaction', transaction_id=transaction._id) }}" class="btn btn-primary btn-sm" title="Edit"><i class="fa fa-edit"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6">No transactions found.</td>
+                        </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
@@ -57,11 +65,7 @@ Transactions - Net Plus
             <div class="form-group">
                 <label for="category">Category</label>
                 <select name="category" id="category" class="form-control" onchange="checkOtherCategory()">
-                    <option value="Salary">Salary</option>
-                    <option value="Business">Business</option>
-                    <option value="Food">Food</option>
-                    <option value="Shopping">Shopping</option>
-                    <option value="Other">Other</option>
+                    <!-- Category options will be populated by JavaScript -->
                 </select>
                 <input type="text" name="other_category" id="other_category" class="form-control" placeholder="Enter other category" style="display:none;">
             </div>
@@ -132,7 +136,44 @@ Transactions - Net Plus
         form.classList.remove('open');
         mainContent.style.marginRight = "0";
     });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCategoryOptions();
+        checkOtherCategory();
+    });
+
+    function updateCategoryOptions() {
+        var type = document.getElementById('type').value;
+        var categorySelect = document.getElementById('category');
+        var categories = [];
+
+        if (type === 'Income') {
+            categories = ['Salary', 'Business', 'Other'];
+        } else if (type === 'Expense') {
+            categories = ['Food', 'Shopping', 'Other'];
+        }
+
+        categorySelect.innerHTML = '';
+
+        categories.forEach(function(category) {
+            var option = document.createElement('option');
+            option.value = category;
+            option.text = category;
+            categorySelect.appendChild(option);
+        });
+
+        checkOtherCategory();
+    }
+
+    function checkOtherCategory() {
+        var category = document.getElementById('category').value;
+        var otherCategoryInput = document.getElementById('other_category');
+        if (category === 'Other') {
+            otherCategoryInput.style.display = 'block';
+        } else {
+            otherCategoryInput.style.display = 'none';
+        }
+    }
 </script>
 
 {% endblock %}
-

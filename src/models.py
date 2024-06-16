@@ -48,3 +48,4 @@ class Transaction:
     def delete_transaction(transaction_id):
         print(f"delete_transaction - Deleting transaction with ID: {transaction_id}")  # Debug statement
         current_app.mongo.db.transactions.delete_one({'_id': ObjectId(transaction_id)})
+
