@@ -1,0 +1,22 @@
+#toggleFormBtn {
+    padding: 5px 10px;  /* Adjust padding if necessary */
+}
+
+#transactionTable {
+    border: 1px solid #ddd;
+    width: 100%;
+    background-color: #f9f9f9;
+}
+
+#transactionTable th, #transactionTable td {
+    padding: 10px;
+    text-align: left;
+}
+
+#transactionTable th {
+    background-color: #f1f1f1;
+}
+
+#transactionTable tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
