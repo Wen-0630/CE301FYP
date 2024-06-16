@@ -2,6 +2,7 @@
 from flask import Blueprint, redirect, url_for, render_template, session
 from .models import Transaction
 from bson.objectid import ObjectId
+from .transactions import calculate_total_income, calculate_total_expense
 
 # Create a Blueprint for user-related routes
 views = Blueprint('user', __name__, template_folder='templates')
@@ -13,9 +14,13 @@ def home():
 @views.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
-        print("User not authenticated")  # Debug statement
         return redirect(url_for('auth.login'))
-    return render_template('dashboard.html')
+    
+    user_id = session['user_id']
+    total_income = calculate_total_income(user_id)
+    total_expense = calculate_total_expense(user_id)
+    
+    return render_template('dashboard.html', total_income=total_income, total_expense=total_expense)
 
 @views.route('/transactions')
 def transactions():

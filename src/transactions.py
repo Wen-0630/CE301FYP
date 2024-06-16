@@ -68,3 +68,24 @@ def edit_transaction(transaction_id):
         return redirect(url_for('transactions.list_transactions'))
     
     return render_template('edit_transaction.html', transaction=transaction)
+
+def calculate_total_income(user_id):
+    total_income = current_app.mongo.db.transactions.aggregate([
+        {"$match": {"userId": ObjectId(user_id), "type": "Income"}},
+        {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+    ])
+    result = list(total_income)
+    if result:
+        return int(result[0]['total'])  # Convert the total to an integer
+    return 0
+
+def calculate_total_expense(user_id):
+    total_expense = current_app.mongo.db.transactions.aggregate([
+        {"$match": {"userId": ObjectId(user_id), "type": "Expense"}},
+        {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+    ])
+    result = list(total_expense)
+    if result:
+        return int(result[0]['total'])  # Convert the total to an integer
+    return 0
+
