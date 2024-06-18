@@ -24,12 +24,14 @@ def add_transaction():
     if data.get('category') == 'Other':
         data['category'] = data.get('other_category')
     
-    # Remove 'other_category' from data as it is not needed anymore
     data.pop('other_category', None)
     
-    data['userId'] = ObjectId(session['user_id'])  # Convert to ObjectId
+    data['userId'] = ObjectId(session['user_id'])
     data['amount'] = float(data['amount'])
     data['date'] = datetime.datetime.strptime(data['date'], '%Y-%m-%d')
+
+    if 'payment_method' not in data:
+        data['payment_method'] = None
     
     transaction = Transaction(**data)
     transaction.save()

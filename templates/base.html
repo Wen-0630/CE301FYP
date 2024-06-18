@@ -26,6 +26,15 @@
     <link href="{{ url_for('static', filename='vendors/bootstrap-daterangepicker/daterangepicker.css') }}" rel="stylesheet">
     <!-- Custom Theme Style -->
     <link href="{{ url_for('static', filename='build/css/custom.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- <style>
+      .nav.side-menu > li > a .fa {
+        font-size: 1.5em; 
+        margin-right: 10px; 
+      }
+    </style> -->
+
   </head>
 
   <body class="nav-md">
@@ -58,7 +67,8 @@
                 <h3>General</h3>
                 <ul class="nav side-menu">
                   <li><a href="{{ url_for('user.dashboard') }}"><i class="fa fa-home"></i> Dashboard</a></li>
-                  <li><a href="{{ url_for('user.transactions') }}"><i class="fa fa-money"></i> Transactions</a></li>
+                  <li><a href="{{ url_for('user.transactions') }}"><i class="fa fa-arrows-alt"></i> Transactions</a></li>
+                  <li><a href="{{ url_for('credit_card.list_credit_cards') }}"><i class="fa fa-credit-card"></i> Credit Cards</a></li>
                   <!-- Add more menu items here -->
                 </ul>
               </div>
