@@ -81,3 +81,63 @@ class Transaction:
 #     def get_all_credit_cards_by_user(userId):
 #         userId = ObjectId(userId)
 #         return list(current_app.mongo.db.credit_cards.find({'userId': userId}))  
+
+
+# src/models.py
+class Loan:
+    def __init__(self, userId, name, loan_type, original_amount, loan_term, repayment_term, interest_rate, outstanding_balance, interest_payable, interest_expense, interest_balance, loan_expense, issue_date, maturity_date, description=None):
+        self.userId = ObjectId(userId) if isinstance(userId, str) else userId
+        self.name = name
+        self.loan_type = loan_type
+        self.original_amount = original_amount
+        self.loan_term = loan_term
+        self.repayment_term = repayment_term
+        self.interest_rate = interest_rate
+        self.outstanding_balance = outstanding_balance
+        self.interest_payable = interest_payable
+        self.interest_expense = interest_expense
+        self.interest_balance = interest_balance
+        self.loan_expense = loan_expense
+        self.issue_date = issue_date
+        self.maturity_date = maturity_date
+        self.description = description
+
+    def save(self):
+        loan = {
+            'userId': self.userId,
+            'name': self.name,
+            'loan_type': self.loan_type,
+            'original_amount': self.original_amount,
+            'loan_term': self.loan_term,
+            'repayment_term': self.repayment_term,
+            'interest_rate': self.interest_rate,
+            'outstanding_balance': self.outstanding_balance,
+            'interest_payable': self.interest_payable,
+            'interest_expense': self.interest_expense,
+            'interest_balance': self.interest_balance,
+            'loan_expense': self.loan_expense,
+            'issue_date': self.issue_date,
+            'maturity_date': self.maturity_date,
+            'description': self.description
+        }
+        result = current_app.mongo.db.loans.insert_one(loan)
+        return result
+
+    @staticmethod
+    def get_all_loans_by_user(userId):
+        userId = ObjectId(userId) if isinstance(userId, str) else userId
+        loans = list(current_app.mongo.db.loans.find({'userId': userId}))
+        return loans
+
+    @staticmethod
+    def get_loan(loan_id):
+        loan = current_app.mongo.db.loans.find_one({'_id': ObjectId(loan_id)})
+        return loan
+
+    @staticmethod
+    def update_loan(loan_id, data):
+        current_app.mongo.db.loans.update_one({'_id': ObjectId(loan_id)}, {"$set": data})
+
+    @staticmethod
+    def delete_loan(loan_id):
+        current_app.mongo.db.loans.delete_one({'_id': ObjectId(loan_id)})

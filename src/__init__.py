@@ -7,6 +7,7 @@ from src.auth import auth
 from src.views import views
 from src.transactions import transactions
 from src.creditCard import credit_card
+from .loan import loan
 import certifi
 import logging
 
@@ -32,6 +33,7 @@ def create_app():
     app.register_blueprint(views, url_prefix='/')
     app.register_blueprint(transactions, url_prefix='/transactions')
     app.register_blueprint(credit_card, url_prefix='/')
+    app.register_blueprint(loan, url_prefix='/')
 
     app.jinja_env.filters['format_currency'] = format_currency
 

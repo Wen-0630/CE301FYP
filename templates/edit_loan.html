@@ -1,0 +1,87 @@
+<!-- templates/edit_loan.html -->
+{% extends "base.html" %}
+
+{% block title %}
+Edit Loan - Net Plus
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Edit Loan</h2>
+            <form action="{{ url_for('loan.edit_loan', loan_id=loan._id) }}" method="POST">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" name="name" id="name" class="form-control" value="{{ loan.name }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="loan_type">Loan Type</label>
+                    <select name="loan_type" id="loan_type" class="form-control" required>
+                        <option value="Personal Loan" {% if loan.loan_type == "Personal Loan" %}selected{% endif %}>Personal Loan</option>
+                        <option value="Home Loan" {% if loan.loan_type == "Home Loan" %}selected{% endif %}>Home Loan</option>
+                        <option value="Mortgage Loan" {% if loan.loan_type == "Mortgage Loan" %}selected{% endif %}>Mortgage Loan</option>
+                        <option value="Car Loan" {% if loan.loan_type == "Car Loan" %}selected{% endif %}>Car Loan</option>
+                        <option value="Education Loan" {% if loan.loan_type == "Education Loan" %}selected{% endif %}>Education Loan</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="original_amount">Original Amount</label>
+                    <input type="number" name="original_amount" id="original_amount" class="form-control" step="0.01" value="{{ loan.original_amount }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="loan_term">Loan Term (term in months)</label>
+                    <input type="text" name="loan_term" id="loan_term" class="form-control" value="{{ loan.loan_term }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="repayment_term">Repayment Term</label>
+                    <select name="repayment_term" id="repayment_term" class="form-control" required>
+                        <option value="Weekly" {% if loan.repayment_term == "Weekly" %}selected{% endif %}>Weekly</option>
+                        <option value="Monthly" {% if loan.repayment_term == "Monthly" %}selected{% endif %}>Monthly</option>
+                        <option value="Quarterly" {% if loan.repayment_term == "Quarterly" %}selected{% endif %}>Quarterly</option>
+                        <option value="Annually" {% if loan.repayment_term == "Annually" %}selected{% endif %}>Annually</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="interest_rate">Interest Rate (% p.a.)</label>
+                    <input type="number" name="interest_rate" id="interest_rate" class="form-control" step="0.01" value="{{ loan.interest_rate }}" required>
+                </div>
+                <!-- <div class="form-group">
+                    <label for="outstanding_balance">Outstanding Balance</label>
+                    <input type="number" name="outstanding_balance" id="outstanding_balance" class="form-control" step="0.01" value="{{ loan.outstanding_balance }}" required>
+                </div> -->
+                <div class="form-group">
+                    <label for="interest_payable">Total Interest Payable</label>
+                    <input type="number" name="interest_payable" id="interest_payable" class="form-control" step="0.01" value="{{ loan.interest_payable }}" required>
+                </div>
+                <!-- <div class="form-group">
+                    <label for="interest_expense">Interest Expense</label>
+                    <input type="number" name="interest_expense" id="interest_expense" class="form-control" step="0.01" value="{{ loan.interest_expense }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="interest_balance">Interest Balance</label>
+                    <input type="number" name="interest_balance" id="interest_balance" class="form-control" step="0.01" value="{{ loan.interest_balance }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="loan_expense">Loan Expense</label>
+                    <input type="number" name="loan_expense" id="loan_expense" class="form-control" step="0.01" value="{{ loan.loan_expense }}" required>
+                </div> -->
+                <div class="form-group">
+                    <label for="issue_date">Issue Date</label>
+                    <input type="date" name="issue_date" id="issue_date" class="form-control" value="{{ loan.issue_date.strftime('%Y-%m-%d') }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="maturity_date">Maturity Date</label>
+                    <input type="date" name="maturity_date" id="maturity_date" class="form-control" value="{{ loan.maturity_date.strftime('%Y-%m-%d') }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea name="description" id="description" class="form-control" rows="3">{{ loan.description }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Loan</button>
+                <a href="{{ url_for('loan.list_loans') }}" class="btn btn-secondary">Back to Loans</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

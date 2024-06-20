@@ -1,6 +1,6 @@
 #src/views.py
 from flask import Blueprint, redirect, url_for, render_template, session
-from .models import Transaction
+from .models import Transaction, Loan
 from bson.objectid import ObjectId
 from .transactions import calculate_total_income, calculate_total_expense
 from .creditCard import get_total_outstanding
@@ -40,3 +40,12 @@ def credit_card():
     user_id = session['user_id']
     credit_card_transactions = Transaction.get_credit_card_transactions_by_user(ObjectId(user_id))
     return render_template('creditCard.html', credit_card_transactions=credit_card_transactions)
+
+
+@views.route('/loan')
+def loan():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+    user_id = session['user_id']
+    loans = Loan.get_all_loans_by_user(ObjectId(user_id))
+    return render_template('loan.html', loans=loans)

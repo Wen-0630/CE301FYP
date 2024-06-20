@@ -1,0 +1,193 @@
+<!-- templates/loan.html -->
+{% extends "base.html" %}
+
+{% block title %}
+Loans - Net Plus
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Loans</h2>
+            <button class="btn btn-secondary" id="toggleFormBtn">Add Loan</button>
+            <table class="table table-striped mt-3">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Original Amount</th>
+                        <th>Loan Term</th>
+                        <th>Repayment Term</th>
+                        <th>Interest Rate</th>
+                        <th>Outstanding Balance</th>
+                        <th>Interest Payable</th>
+                        <th>Interest Expense</th>
+                        <th>Interest Balance</th>
+                        <th>Loan Expense</th>
+                        <th>Issue Date</th>
+                        <th>Maturity Date</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for loan in loans %}
+                    <tr>
+                        <td>{{ loan.name }}</td>
+                        <td>{{ loan.loan_type }}</td>
+                        <td>{{ "%.2f"|format(loan.original_amount) }}</td>
+                        <td>{{ loan.loan_term }}</td>
+                        <td>{{ loan.repayment_term }}</td>
+                        <td>{{ "%.2f"|format(loan.interest_rate) }}%</td>
+                        <td>{{ "%.2f"|format(loan.outstanding_balance) }}</td>
+                        <td>{{ "%.2f"|format(loan.interest_payable) }}</td>
+                        <td>{{ "%.2f"|format(loan.interest_expense) }}</td>
+                        <td>{{ "%.2f"|format(loan.interest_balance) }}</td>
+                        <td>{{ "%.2f"|format(loan.loan_expense) }}</td>
+                        <td>{{ loan.issue_date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ loan.maturity_date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ loan.description }}</td>
+                        <td>
+                            <form action="{{ url_for('loan.delete_loan', loan_id=loan._id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm" title="Delete"><i class="fa fa-trash"></i></button>
+                            </form>
+                            <a href="{{ url_for('loan.edit_loan', loan_id=loan._id) }}" class="btn btn-primary btn-sm" title="Edit"><i class="fa fa-edit"></i></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="loanForm" class="sidebar">
+    <div class="sidebar-content">
+        <button class="btn btn-secondary close-btn" id="closeFormBtn">&times;</button>
+        <h2>Add Loan</h2>
+        <form action="{{ url_for('loan.add_loan') }}" method="POST">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" name="name" id="name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="loan_type">Loan Type</label>
+                <select name="loan_type" id="loan_type" class="form-control" required>
+                    <option value="Personal Loan">Personal Loan</option>
+                    <option value="Home Loan">Home Loan</option>
+                    <option value="Mortgage Loan">Mortgage Loan</option>
+                    <option value="Car Loan">Car Loan</option>
+                    <option value="Education Loan">Education Loan</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="original_amount">Original Amount</label>
+                <input type="number" name="original_amount" id="original_amount" class="form-control" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="loan_term">Loan Term (term in months)</label>
+                <input type="text" name="loan_term" id="loan_term" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="repayment_term">Repayment Term</label>
+                <select name="repayment_term" id="repayment_term" class="form-control" required>
+                    <option value="Weekly">Weekly</option>
+                    <option value="Monthly">Monthly</option>
+                    <option value="Quarterly">Quarterly</option>
+                    <option value="Annually">Annually</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="interest_rate">Interest Rate (% p.a.)</label>
+                <input type="number" name="interest_rate" id="interest_rate" class="form-control" step="0.01" required>
+            </div>
+            <!-- <div class="form-group">
+                <label for="outstanding_balance">Outstanding Balance</label>
+                <input type="number" name="outstanding_balance" id="outstanding_balance" class="form-control" step="0.01" required>
+            </div> -->
+            <div class="form-group">
+                <label for="interest_payable">Total Interest Payable</label>
+                <input type="number" name="interest_payable" id="interest_payable" class="form-control" step="0.01" required>
+            </div>
+            <!-- <div class="form-group">
+                <label for="interest_expense">Interest Expense</label>
+                <input type="number" name="interest_expense" id="interest_expense" class="form-control" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="interest_balance">Interest Balance</label>
+                <input type="number" name="interest_balance" id="interest_balance" class="form-control" step="0.01" required>
+            </div> -->
+            <!-- <div class="form-group">
+                <label for="loan_expense">Loan Expense</label>
+                <input type="number" name="loan_expense" id="loan_expense" class="form-control" step="0.01" required>
+            </div> -->
+            <div class="form-group">
+                <label for="issue_date">Issue Date</label>
+                <input type="date" name="issue_date" id="issue_date" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="maturity_date">Maturity Date</label>
+                <input type="date" name="maturity_date" id="maturity_date" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea name="description" id="description" class="form-control" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Loan</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        height: 100%;
+        width: 0;
+        position: fixed;
+        z-index: 1;
+        top: 0;
+        right: 0;
+        background-color: #f8f9fa;
+        overflow-x: hidden;
+        transition: width 0.5s;
+        padding-top: 60px;
+    }
+
+    .sidebar-content {
+        padding: 15px;
+    }
+
+    .sidebar.open {
+        width: 400px; /* Width of the sidebar */
+    }
+
+    #mainContent {
+        transition: margin-right 0.5s;
+    }
+
+    .container-fluid {
+        padding-right: 0;
+    }
+</style>
+
+<script>
+    document.getElementById('toggleFormBtn').addEventListener('click', function() {
+        var form = document.getElementById('loanForm');
+        var mainContent = document.getElementById('mainContent');
+        if (form.classList.contains('open')) {
+            form.classList.remove('open');
+            mainContent.style.marginRight = "0"; // Reset the margin when the form is closed
+        } else {
+            form.classList.add('open');
+            mainContent.style.marginRight = "400px"; // Adjust the margin to make room for the sidebar
+        }
+    });
+
+    document.getElementById('closeFormBtn').addEventListener('click', function() {
+        var form = document.getElementById('loanForm');
+        var mainContent = document.getElementById('mainContent');
+        form.classList.remove('open');
+        mainContent.style.marginRight = "0";
+    });
+</script>
+{% endblock %}
