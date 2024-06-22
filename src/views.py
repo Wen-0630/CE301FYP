@@ -20,7 +20,12 @@ def dashboard():
     user_id = session['user_id']
     total_income = calculate_total_income(user_id)
     total_expense = calculate_total_expense(user_id)
-    total_outstanding = get_total_outstanding(user_id)
+    total_credit_card_outstanding = get_total_outstanding(user_id)
+
+    loans = Loan.get_all_loans_by_user(ObjectId(user_id))
+    total_loan_outstanding = sum(loan['outstanding_balance'] + loan['interest_payable'] for loan in loans)
+    
+    total_outstanding = total_credit_card_outstanding + total_loan_outstanding
     
     return render_template('dashboard.html', total_income=total_income, total_expense=total_expense, total_outstanding=total_outstanding)
 

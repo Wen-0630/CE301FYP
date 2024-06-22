@@ -21,6 +21,12 @@ def list_loans():
         loan['loan_expense'] = loan_expenses.get(loan['name'], 0)
         loan['interest_balance'] = loan['interest_payable'] - loan['interest_expense']
         loan['outstanding_balance'] = loan['original_amount'] - loan['loan_expense']
+
+        update_data = {
+            'interest_balance': loan['interest_balance'],
+            'outstanding_balance': loan['outstanding_balance']
+        }
+        Loan.update_loan(loan['_id'], update_data)
     
     return render_template('loan.html', loans=loans)
 
@@ -36,7 +42,7 @@ def add_loan():
     loan_term = int(request.form['loan_term'])
     repayment_term = request.form['repayment_term']
     interest_rate = float(request.form['interest_rate'])
-    outstanding_balance = float(request.form['outstanding_balance'])
+    # outstanding_balance = float(request.form['outstanding_balance'])
     interest_payable = float(request.form['interest_payable'])
     # interest_expense = float(request.form['interest_expense'])
     # interest_balance = float(request.form['interest_balance'])
@@ -53,7 +59,7 @@ def add_loan():
         loan_term=loan_term, 
         repayment_term=repayment_term, 
         interest_rate=interest_rate, 
-        outstanding_balance=outstanding_balance, 
+        # outstanding_balance=outstanding_balance, 
         interest_payable=interest_payable, 
         # interest_expense=interest_expense, 
         # interest_balance=interest_balance, 
@@ -78,7 +84,7 @@ def edit_loan(loan_id):
         loan_term = int(request.form['loan_term'])
         repayment_term = request.form['repayment_term']
         interest_rate = float(request.form['interest_rate'])
-        outstanding_balance = float(request.form['outstanding_balance'])
+        # outstanding_balance = float(request.form['outstanding_balance'])
         interest_payable = float(request.form['interest_payable'])
         # interest_expense = float(request.form['interest_expense'])
         # interest_balance = float(request.form['interest_balance'])
@@ -94,7 +100,7 @@ def edit_loan(loan_id):
             'loan_term': loan_term,
             'repayment_term': repayment_term,
             'interest_rate': interest_rate,
-            'outstanding_balance': outstanding_balance,
+            # 'outstanding_balance': outstanding_balance,
             'interest_payable': interest_payable,
             # 'interest_expense': interest_expense,
             # 'interest_balance': interest_balance,

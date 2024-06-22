@@ -152,6 +152,7 @@ class Loan:
             data['outstanding_balance'] = data['original_amount'] - data['loan_expense']
         current_app.mongo.db.loans.update_one({'_id': ObjectId(loan_id)}, {"$set": data})
 
+
     @staticmethod
     def delete_loan(loan_id):
         current_app.mongo.db.loans.delete_one({'_id': ObjectId(loan_id)})
