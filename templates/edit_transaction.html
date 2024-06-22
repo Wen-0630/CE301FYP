@@ -1,4 +1,4 @@
-<!-- edit_transaction.html -->
+<!-- templates/edit_transaction.html -->
 {% extends "base.html" %}
 
 {% block title %}
@@ -7,6 +7,19 @@ Edit Transaction - Net Plus
 
 {% block content %}
 <div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="flash-messages alert alert-danger" role="alert">
+                        {% for message in messages %}
+                            <span>{{ message }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-12">
             <h2>Edit Transaction</h2>
@@ -24,6 +37,20 @@ Edit Transaction - Net Plus
                         <!-- Category options will be populated by JavaScript -->
                     </select>
                     <input type="text" name="other_category" id="other_category" class="form-control" placeholder="Enter other category" style="display:none;">
+                </div>
+                <div class="form-group" id="loanNameGroup" style="display:none;">
+                    <label for="loan_name">Loan Name</label>
+                    <select name="loan_name" id="loan_name" class="form-control" onchange="updateLoanDetails()">
+                        {% for loan in loans %}
+                        <option value="{{ loan.name }}" data-interest="{{ loan.interest_payable }}" data-outstanding="{{ loan.outstanding_balance }}" {% if transaction.loan_name == loan.name %}selected{% endif %}>{{ loan.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <small id="interestPayableInfo" class="form-text text-muted" style="display:none;">
+                        Interest Payable: <span id="interestPayableAmount"></span>
+                    </small>
+                    <small id="outstandingBalanceInfo" class="form-text text-muted" style="display:none;">
+                        Outstanding Balance: <span id="outstandingBalanceAmount"></span>
+                    </small>
                 </div>
                 <div class="form-group">
                     <label for="date">Date</label>
@@ -54,10 +81,36 @@ Edit Transaction - Net Plus
     </div>
 </div>
 
+<style>
+    .flash-messages {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 600px;
+        z-index: 1000;
+        opacity: 1;
+        transition: opacity 0.5s ease-out;
+        padding: 15px;  /* Adjust padding for better height control */
+        font-size: 16px;  /* Adjust font size if needed */
+    }
+</style>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         updateCategoryOptions();
         checkOtherCategory();
+        setTimeout(function() {
+            var flashMessages = document.querySelector('.flash-messages');
+            if (flashMessages) {
+                flashMessages.style.transition = 'opacity 0.5s ease-out';
+                flashMessages.style.opacity = '0';
+                setTimeout(function() {
+                    flashMessages.remove();
+                }, 500);
+            }
+        }, 5000); // The message will disappear after 3 seconds
     });
 
     function updateCategoryOptions() {
@@ -68,7 +121,7 @@ Edit Transaction - Net Plus
         if (type === 'Income') {
             categories = ['Salary', 'Business', 'Other'];
         } else if (type === 'Expense') {
-            categories = ['Food', 'Shopping', 'Other'];
+            categories = ['Food', 'Shopping', 'Interest Expense', 'Loan Expense', 'Other'];
         }
 
         categorySelect.innerHTML = '';
@@ -89,10 +142,44 @@ Edit Transaction - Net Plus
     function checkOtherCategory() {
         var category = document.getElementById('category').value;
         var otherCategoryInput = document.getElementById('other_category');
+        var loanNameGroup = document.getElementById('loanNameGroup');
+
         if (category === 'Other') {
             otherCategoryInput.style.display = 'block';
         } else {
             otherCategoryInput.style.display = 'none';
+        }
+
+        if (category === 'Interest Expense' || category === 'Loan Expense') {
+            loanNameGroup.style.display = 'block';
+            updateLoanDetails();  // Update the interest payable or outstanding balance info when the category is 'Interest Expense' or 'Loan Expense'
+        } else {
+            loanNameGroup.style.display = 'none';
+        }
+    }
+
+    function updateLoanDetails() {
+        var loanSelect = document.getElementById('loan_name');
+        var selectedOption = loanSelect.options[loanSelect.selectedIndex];
+        var interestPayable = selectedOption.getAttribute('data-interest');
+        var outstandingBalance = selectedOption.getAttribute('data-outstanding');
+        
+        var interestPayableInfo = document.getElementById('interestPayableInfo');
+        var interestPayableAmount = document.getElementById('interestPayableAmount');
+        var outstandingBalanceInfo = document.getElementById('outstandingBalanceInfo');
+        var outstandingBalanceAmount = document.getElementById('outstandingBalanceAmount');
+        
+        if (document.getElementById('category').value === 'Interest Expense') {
+            interestPayableAmount.innerText = parseFloat(interestPayable).toFixed(2);
+            interestPayableInfo.style.display = 'block';
+            outstandingBalanceInfo.style.display = 'none';
+        } else if (document.getElementById('category').value === 'Loan Expense') {
+            outstandingBalanceAmount.innerText = parseFloat(outstandingBalance).toFixed(2);
+            outstandingBalanceInfo.style.display = 'block';
+            interestPayableInfo.style.display = 'none';
+        } else {
+            interestPayableInfo.style.display = 'none';
+            outstandingBalanceInfo.style.display = 'none';
         }
     }
 </script>

@@ -30,8 +30,9 @@ def transactions():
         return redirect(url_for('auth.login'))
     user_id = session['user_id']
     transactions = Transaction.get_all_transactions_by_user(ObjectId(user_id))
+    loans = Loan.get_all_loans_by_user(ObjectId(user_id))
     print(f"Retrieved transactions for user {user_id}: {transactions}")  # Debug statement
-    return render_template('transactions.html', transactions=transactions)
+    return render_template('transactions.html', transactions=transactions, loans=loans)
 
 @views.route('/credit_card')
 def credit_card():
@@ -48,4 +49,13 @@ def loan():
         return redirect(url_for('auth.login'))
     user_id = session['user_id']
     loans = Loan.get_all_loans_by_user(ObjectId(user_id))
+    interest_expenses = Loan.get_total_interest_expense_by_loan(ObjectId(user_id))
+    loan_expenses = Loan.get_total_loan_expense_by_loan(ObjectId(user_id))
+
+    # Update interest_expense and loan_expense in loans based on calculated values
+    for loan in loans:
+        loan['interest_expense'] = interest_expenses.get(loan['name'], 0)
+        loan['loan_expense'] = loan_expenses.get(loan['name'], 0)
+        loan['interest_balance'] = loan['interest_payable'] - loan['interest_expense']
+        loan['outstanding_balance'] = loan['original_amount'] - loan['loan_expense']
     return render_template('loan.html', loans=loans)

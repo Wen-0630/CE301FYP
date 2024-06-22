@@ -1,6 +1,6 @@
 # src/loan.py
 from flask import Blueprint, request, render_template, redirect, url_for, session, current_app
-from .models import Loan
+from .models import Loan, Transaction
 import datetime
 from bson.objectid import ObjectId
 
@@ -12,6 +12,16 @@ def list_loans():
         return redirect(url_for('auth.login'))
     user_id = session['user_id']
     loans = Loan.get_all_loans_by_user(ObjectId(user_id))
+    interest_expenses = Loan.get_total_interest_expense_by_loan(ObjectId(user_id))
+    loan_expenses = Loan.get_total_loan_expense_by_loan(ObjectId(user_id))
+    
+    # Update interest_expense in loans based on calculated values
+    for loan in loans:
+        loan['interest_expense'] = interest_expenses.get(loan['name'], 0)
+        loan['loan_expense'] = loan_expenses.get(loan['name'], 0)
+        loan['interest_balance'] = loan['interest_payable'] - loan['interest_expense']
+        loan['outstanding_balance'] = loan['original_amount'] - loan['loan_expense']
+    
     return render_template('loan.html', loans=loans)
 
 @loan.route('/loans/add', methods=['POST'])
@@ -28,9 +38,9 @@ def add_loan():
     interest_rate = float(request.form['interest_rate'])
     outstanding_balance = float(request.form['outstanding_balance'])
     interest_payable = float(request.form['interest_payable'])
-    interest_expense = float(request.form['interest_expense'])
-    interest_balance = float(request.form['interest_balance'])
-    loan_expense = float(request.form['loan_expense'])
+    # interest_expense = float(request.form['interest_expense'])
+    # interest_balance = float(request.form['interest_balance'])
+    # loan_expense = float(request.form['loan_expense'])
     issue_date = datetime.datetime.strptime(request.form['issue_date'], '%Y-%m-%d')
     maturity_date = datetime.datetime.strptime(request.form['maturity_date'], '%Y-%m-%d')
     description = request.form.get('description', None)
@@ -45,9 +55,9 @@ def add_loan():
         interest_rate=interest_rate, 
         outstanding_balance=outstanding_balance, 
         interest_payable=interest_payable, 
-        interest_expense=interest_expense, 
-        interest_balance=interest_balance, 
-        loan_expense=loan_expense, 
+        # interest_expense=interest_expense, 
+        # interest_balance=interest_balance, 
+        # loan_expense=loan_expense, 
         issue_date=issue_date, 
         maturity_date=maturity_date, 
         description=description
@@ -70,9 +80,9 @@ def edit_loan(loan_id):
         interest_rate = float(request.form['interest_rate'])
         outstanding_balance = float(request.form['outstanding_balance'])
         interest_payable = float(request.form['interest_payable'])
-        interest_expense = float(request.form['interest_expense'])
-        interest_balance = float(request.form['interest_balance'])
-        loan_expense = float(request.form['loan_expense'])
+        # interest_expense = float(request.form['interest_expense'])
+        # interest_balance = float(request.form['interest_balance'])
+        # loan_expense = float(request.form['loan_expense'])
         issue_date = datetime.datetime.strptime(request.form['issue_date'], '%Y-%m-%d')
         maturity_date = datetime.datetime.strptime(request.form['maturity_date'], '%Y-%m-%d')
         description = request.form.get('description', None)
@@ -86,9 +96,9 @@ def edit_loan(loan_id):
             'interest_rate': interest_rate,
             'outstanding_balance': outstanding_balance,
             'interest_payable': interest_payable,
-            'interest_expense': interest_expense,
-            'interest_balance': interest_balance,
-            'loan_expense': loan_expense,
+            # 'interest_expense': interest_expense,
+            # 'interest_balance': interest_balance,
+            # 'loan_expense': loan_expense,
             'issue_date': issue_date,
             'maturity_date': maturity_date,
             'description': description

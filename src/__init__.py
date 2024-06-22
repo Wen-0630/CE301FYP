@@ -29,9 +29,9 @@ def create_app():
     app.bcrypt = bcrypt
 
     # Register Blueprints
-    app.register_blueprint(auth, url_prefix='/auth')
+    app.register_blueprint(auth, url_prefix='/')
     app.register_blueprint(views, url_prefix='/')
-    app.register_blueprint(transactions, url_prefix='/transactions')
+    app.register_blueprint(transactions, url_prefix='/')
     app.register_blueprint(credit_card, url_prefix='/')
     app.register_blueprint(loan, url_prefix='/')
 
