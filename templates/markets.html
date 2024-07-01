@@ -1,0 +1,119 @@
+<!-- markets.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="x_panel">
+      <div class="x_title">
+        <h2>Markets Overview</h2>
+        <div class="clearfix"></div>
+      </div>
+      <div class="x_content">
+        <!-- Market Overview Tabs -->
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#overview">Overview</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#stocks">Stocks</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#crypto">Crypto</a>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+          <div id="overview" class="container tab-pane active"><br>
+            <h3>Overview</h3>
+            <!-- Overview data goes here -->
+          </div>
+          <div id="stocks" class="container tab-pane fade"><br>
+            <h3>Stocks</h3>
+            <!-- Stock data goes here -->
+            <input class="form-control" id="stockSearch" type="text" placeholder="Search for stocks..">
+            <br>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Symbol</th>
+                  <th>Date</th>
+                  <th>Open</th>
+                  <th>High</th>
+                  <th>Low</th>
+                  <th>Close</th>
+                  <th>Volume</th>
+                </tr>
+              </thead>
+              <tbody id="stockTable">
+                {% for symbol, stock in stocks.items() %}
+                  {% for date, data in stock['data']['Time Series (Daily)'].items() %}
+                    <tr>
+                      <td>{{ stock['name'] }}</td>
+                      <td>{{ symbol }}</td>
+                      <td>{{ date }}</td>
+                      <td>{{ data['1. open'] }}</td>
+                      <td>{{ data['2. high'] }}</td>
+                      <td>{{ data['3. low'] }}</td>
+                      <td>{{ data['4. close'] }}</td>
+                      <td>{{ data['5. volume'] }}</td>
+                    </tr>
+                  {% endfor %}
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div id="crypto" class="container tab-pane fade"><br>
+            <h3>Crypto</h3>
+            <!-- Crypto data goes here -->
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Current Price</th>
+                  <th>Market Cap</th>
+                  <th>Volume</th>
+                  <th>24h Change</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for coin in crypto_data %}
+                <tr>
+                  <td>{{ coin['name'] }}</td>
+                  <td>{{ coin['current_price'] }}</td>
+                  <td>{{ coin['market_cap'] }}</td>
+                  <td>{{ coin['total_volume'] }}</td>
+                  <td>{{ coin['price_change_percentage_24h'] }}%</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById("stockSearch").addEventListener("keyup", function() {
+    var filter = this.value.toUpperCase();
+    var rows = document.getElementById("stockTable").getElementsByTagName("tr");
+
+    for (var i = 0; i < rows.length; i++) {
+      var nameCell = rows[i].getElementsByTagName("td")[0];
+      var symbolCell = rows[i].getElementsByTagName("td")[1];
+      if (nameCell || symbolCell) {
+        var nameText = nameCell.textContent || nameCell.innerText;
+        var symbolText = symbolCell.textContent || symbolCell.innerText;
+        if (nameText.toUpperCase().indexOf(filter) > -1 || symbolText.toUpperCase().indexOf(filter) > -1) {
+          rows[i].style.display = "";
+        } else {
+          rows[i].style.display = "none";
+        }
+      }       
+    }
+  });
+</script>
+{% endblock %}

@@ -64,3 +64,4 @@ def loan():
         loan['interest_balance'] = loan['interest_payable'] - loan['interest_expense']
         loan['outstanding_balance'] = loan['original_amount'] - loan['loan_expense']
     return render_template('loan.html', loans=loans)
+

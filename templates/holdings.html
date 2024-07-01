@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="x_panel">
+      <div class="x_title">
+        <h2>Holdings</h2>
+        <div class="clearfix"></div>
+      </div>
+      <div class="x_content">
+        <!-- Holdings data and table go here -->
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Quantity</th>
+              <th>Buying Price</th>
+              <th>Current Price</th>
+              <th>Value</th>
+              <th>Profit/Loss</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for holding in holdings['holdings'] %}
+            <tr>
+              <td>{{ holding['name'] }}</td>
+              <td>{{ holding['quantity'] }}</td>
+              <td>{{ holding['buying_price'] }}</td>
+              <td>{{ holding['current_price'] }}</td>
+              <td>{{ holding['value'] }}</td>
+              <td>{{ holding['profit_loss'] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

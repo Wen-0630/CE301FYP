@@ -11,8 +11,9 @@ def list_transactions():
         return redirect(url_for('auth.login'))
     user_id = session['user_id']
     transactions = Transaction.get_all_transactions_by_user(ObjectId(user_id))
+    loans = Loan.get_all_loans_by_user(ObjectId(user_id))
     print(f"Retrieved transactions for user {user_id}: {transactions}")  # Debug statement
-    return render_template('transactions.html', transactions=transactions)
+    return render_template('transactions.html', transactions=transactions, loans=loans)
 
 @transactions.route('/transactions/add', methods=['GET', 'POST'])
 def add_transaction():
