@@ -34,8 +34,106 @@
             {% endfor %}
           </tbody>
         </table>
+        <button class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Add Transaction</button>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Add Transaction Modal -->
+<div class="modal fade" id="addTransactionModal" tabindex="-1" role="dialog" aria-labelledby="addTransactionModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addTransactionModalLabel">Add Transaction</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="addTransactionForm">
+          <div class="form-group">
+            <label for="cryptoSelect">Select Crypto</label>
+            <select id="cryptoSelect" class="form-control" required>
+              <option value="" disabled selected>Select a crypto</option>
+              {% for crypto in crypto_data %}
+              <option value="{{ crypto['id'] }}">{{ crypto['name'] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="transactionDate">Date</label>
+            <input type="date" id="transactionDate" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="transactionTime">Time</label>
+            <input type="time" id="transactionTime" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="buyPrice">Buy Price per Unit</label>
+            <input type="number" id="buyPrice" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="amountBought">Amount Bought</label>
+            <input type="number" id="amountBought" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="transactionFee">Transaction Fee (Optional)</label>
+            <input type="number" id="transactionFee" class="form-control">
+          </div>
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="deductCash">
+            <label class="form-check-label" for="deductCash">Deduct from available cash</label>
+          </div>
+          <button type="submit" class="btn btn-primary">Add Transaction</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.getElementById('addTransactionForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        const cryptoSelect = document.getElementById('cryptoSelect').value;
+        const transactionDate = document.getElementById('transactionDate').value;
+        const transactionTime = document.getElementById('transactionTime').value;
+        const buyPrice = document.getElementById('buyPrice').value;
+        const amountBought = document.getElementById('amountBought').value;
+        const transactionFee = document.getElementById('transactionFee').value;
+        const deductCash = document.getElementById('deductCash').checked;
+        
+        const transactionData = {
+            crypto: cryptoSelect,
+            date: transactionDate,
+            time: transactionTime,
+            buyPrice: buyPrice,
+            amountBought: amountBought,
+            transactionFee: transactionFee,
+            deductCash: deductCash
+        };
+        
+        fetch('/add_transaction', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(transactionData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                alert('Transaction added successfully');
+                location.reload();
+            } else {
+                alert('Error adding transaction: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+    </script>    
+
 {% endblock %}

@@ -1,4 +1,4 @@
-<!-- markets.html -->
+<!-- templates/markets.html -->
 {% extends "base.html" %}
 
 {% block content %}
@@ -10,7 +10,6 @@
         <div class="clearfix"></div>
       </div>
       <div class="x_content">
-        <!-- Market Overview Tabs -->
         <ul class="nav nav-tabs">
           <li class="nav-item">
             <a class="nav-link active" data-toggle="tab" href="#overview">Overview</a>
@@ -26,11 +25,9 @@
         <div class="tab-content">
           <div id="overview" class="container tab-pane active"><br>
             <h3>Overview</h3>
-            <!-- Overview data goes here -->
           </div>
           <div id="stocks" class="container tab-pane fade"><br>
             <h3>Stocks</h3>
-            <!-- Stock data goes here -->
             <input class="form-control" id="stockSearch" type="text" placeholder="Search for stocks..">
             <br>
             <table class="table">
@@ -38,35 +35,54 @@
                 <tr>
                   <th>Name</th>
                   <th>Symbol</th>
-                  <th>Date</th>
-                  <th>Open</th>
-                  <th>High</th>
-                  <th>Low</th>
-                  <th>Close</th>
-                  <th>Volume</th>
+                  <th>Latest Date</th>
+                  <th>Latest Close</th>
+                  <th>Details</th>
                 </tr>
               </thead>
               <tbody id="stockTable">
                 {% for symbol, stock in stocks.items() %}
-                  {% for date, data in stock['data']['Time Series (Daily)'].items() %}
-                    <tr>
-                      <td>{{ stock['name'] }}</td>
-                      <td>{{ symbol }}</td>
-                      <td>{{ date }}</td>
-                      <td>{{ data['1. open'] }}</td>
-                      <td>{{ data['2. high'] }}</td>
-                      <td>{{ data['3. low'] }}</td>
-                      <td>{{ data['4. close'] }}</td>
-                      <td>{{ data['5. volume'] }}</td>
-                    </tr>
-                  {% endfor %}
+                <tr>
+                  <td>{{ stock['name'] }}</td>
+                  <td>{{ symbol }}</td>
+                  <td>{{ stock['latest_date'] }}</td>
+                  <td>{{ stock['latest_close'] }}</td>
+                  <td><button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#details-{{ symbol }}" aria-expanded="false" aria-controls="details-{{ symbol }}">View History</button></td>
+                </tr>
+                <tr id="details-{{ symbol }}" class="collapse">
+                  <td colspan="5">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Open</th>
+                          <th>High</th>
+                          <th>Low</th>
+                          <th>Close</th>
+                          <th>Volume</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for date, data in stock['data'].items() %}
+                        <tr>
+                          <td>{{ date }}</td>
+                          <td>{{ data['1. open'] }}</td>
+                          <td>{{ data['2. high'] }}</td>
+                          <td>{{ data['3. low'] }}</td>
+                          <td>{{ data['4. close'] }}</td>
+                          <td>{{ data['5. volume'] }}</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
                 {% endfor %}
               </tbody>
             </table>
           </div>
           <div id="crypto" class="container tab-pane fade"><br>
             <h3>Crypto</h3>
-            <!-- Crypto data goes here -->
             <table class="table">
               <thead>
                 <tr>
@@ -97,23 +113,23 @@
 </div>
 
 <script>
-  document.getElementById("stockSearch").addEventListener("keyup", function() {
-    var filter = this.value.toUpperCase();
-    var rows = document.getElementById("stockTable").getElementsByTagName("tr");
-
-    for (var i = 0; i < rows.length; i++) {
-      var nameCell = rows[i].getElementsByTagName("td")[0];
-      var symbolCell = rows[i].getElementsByTagName("td")[1];
-      if (nameCell || symbolCell) {
-        var nameText = nameCell.textContent || nameCell.innerText;
-        var symbolText = symbolCell.textContent || symbolCell.innerText;
-        if (nameText.toUpperCase().indexOf(filter) > -1 || symbolText.toUpperCase().indexOf(filter) > -1) {
-          rows[i].style.display = "";
-        } else {
-          rows[i].style.display = "none";
-        }
-      }       
-    }
-  });
-</script>
+    document.getElementById("stockSearch").addEventListener("keyup", function() {
+      var filter = this.value.toUpperCase();
+      var rows = document.getElementById("stockTable").getElementsByTagName("tr");
+  
+      for (var i = 0; i < rows.length; i++) {
+        var nameCell = rows[i].getElementsByTagName("td")[0];
+        var symbolCell = rows[i].getElementsByTagName("td")[1];
+        if (nameCell || symbolCell) {
+          var nameText = nameCell.textContent || nameCell.innerText;
+          var symbolText = symbolCell.textContent || symbolCell.innerText;
+          if (nameText.toUpperCase().indexOf(filter) > -1 || symbolText.toUpperCase().indexOf(filter) > -1) {
+            rows[i].style.display = "";
+          } else {
+            rows[i].style.display = "none";
+          }
+        }       
+      }
+    });
+  </script>
 {% endblock %}
