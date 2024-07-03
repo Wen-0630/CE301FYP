@@ -42,9 +42,14 @@ def create_app():
     print("Connected to MongoDB Atlas successfully")
     # Set logging level to DEBUG
     logging.basicConfig(level=logging.DEBUG)
+
+    def format_currency_with_decimals(value):
+        return "{:,.2f}".format(value)
     
-    
+    app.jinja_env.filters['currency_with_decimals'] = format_currency_with_decimals
+
     return app
 
 def format_currency(value):
     return "{:,.0f}".format(value)
+

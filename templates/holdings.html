@@ -39,7 +39,8 @@
                   <th>Quantity</th>
                   <th>Total Amount Brought</th>
                   <th>Transaction Fee</th>
-                  <th>Deduct Cash</th>
+                  <th>Deduct Current Cash</th>
+                  <th>Current Profit/Loss</th>
                 </tr>
               </thead>
               <tbody>
@@ -48,16 +49,16 @@
                 <tr>
                   <td>{{ holding['asset'] | capitalize }}</td>
                   <td>{{ holding['datetime'] }}</td>
-                  <td>{{ '%.2f' | format (holding['buy_price']) }}</td>
-                  <td>{{ '%.2f' | format(holding['quantity']) }}</td>
-                  <td>{{ '%.2f' | format (holding['amount_bought']) }}</td>
-                  <td>{{ '%.2f' | format (holding['transaction_fee']) }}</td>
+                  <td>{{ holding['buy_price'] | currency_with_decimals }}</td>
+                  <td>{{ holding['quantity'] | currency_with_decimals }}</td>
+                  <td>{{ holding['amount_bought'] | currency_with_decimals }}</td>
+                  <td>{{ holding['transaction_fee'] | currency_with_decimals }}</td>
                   <td>{{ holding['deduct_cash'] }}</td>
                 </tr>
                 {% endfor %}
                 {% else %}
                 <tr>
-                  <td colspan="7">No stock holdings found.</td>
+                  <td colspan="8">No stock holdings found.</td>
                 </tr>
                 {% endif %}
               </tbody>
@@ -75,7 +76,8 @@
                   <th>Quantity</th>
                   <th>Total Amount Brought</th>
                   <th>Transaction Fee</th>
-                  <th>Deduct Cash</th>
+                  <th>Deduct Current Cash</th>
+                  <th>Current Profit/Loss</th> <!-- New Column for Profit/Loss -->
                 </tr>
               </thead>
               <tbody>
@@ -84,22 +86,23 @@
                 <tr>
                   <td>{{ holding['asset'] | capitalize }}</td>
                   <td>{{ holding['datetime'] }}</td>
-                  <td>{{ '%.2f' | format(holding['buy_price']) }}</td>
-                  <td>{{ '%.2f' | format(holding['quantity']) }}</td>
-                  <td>{{ '%.2f' | format(holding['amount_bought']) }}</td>
-                  <td>{{ '%.2f' | format(holding['transaction_fee']) }}</td>
+                  <td>{{ holding['buy_price'] | currency_with_decimals }}</td>
+                  <td>{{ holding['quantity'] | currency_with_decimals }}</td>
+                  <td>{{ holding['amount_bought'] | currency_with_decimals }}</td>
+                  <td>{{ holding['transaction_fee'] | currency_with_decimals }}</td>
                   <td>{{ holding['deduct_cash'] }}</td>
+                  <td>{{ holding['profit_loss'] | currency_with_decimals }}</td> <!-- Display Profit/Loss -->
                 </tr>
                 {% endfor %}
                 {% else %}
                 <tr>
-                  <td colspan="7">No crypto holdings found.</td>
+                  <td colspan="8">No crypto holdings found.</td>
                 </tr>
                 {% endif %}
               </tbody>
             </table>
             <button class="btn btn-primary" data-toggle="modal" data-target="#addCryptoTransactionModal">Add Crypto Transaction</button>
-          </div>
+          </div>          
         </div>
       </div>
     </div>

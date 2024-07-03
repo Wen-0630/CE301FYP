@@ -87,15 +87,26 @@ def holdings():
     # Fetch and format crypto data
     crypto_list = ['bitcoin', 'ethereum', 'litecoin']
     crypto_data = get_formatted_crypto_data(crypto_list)
-
-    # Add this line to check crypto_data
-    print(crypto_data)
+    
+    # Create a dictionary to map crypto IDs to current prices
+    current_prices = {crypto['id']: crypto['current_price'] for crypto in crypto_data}
 
     # Separate stock and crypto holdings
     stock_holdings = [holding for holding in holdings_doc.get('holdings', []) if holding.get('type') == 'stock']
     crypto_holdings = [holding for holding in holdings_doc.get('holdings', []) if holding.get('type') == 'crypto']
 
+    # Calculate profit/loss for crypto holdings and update in MongoDB
+    for holding in crypto_holdings:
+        current_price = current_prices.get(holding['asset'].lower())
+        if current_price:
+            holding['profit_loss'] = (current_price - holding['buy_price']) * holding['quantity']
+            current_app.mongo.db.holdings.update_one(
+                {'userId': ObjectId(user_id), 'holdings.asset': holding['asset']},
+                {'$set': {'holdings.$.profit_loss': holding['profit_loss']}}
+            )
+
     return render_template('holdings.html', holdings={'stock_holdings': stock_holdings, 'crypto_holdings': crypto_holdings}, crypto_data=crypto_data)
+
 
 
 @investment.route('/add_transaction', methods=['POST'])
@@ -141,3 +152,16 @@ def add_transaction():
     )
     
     return jsonify({'success': True})
+
+def calculate_total_crypto_profit_loss(user_id):
+    holdings_doc = current_app.mongo.db.holdings.find_one({'userId': ObjectId(user_id)})
+
+    if not holdings_doc:
+        return 0
+
+    # Separate crypto holdings
+    crypto_holdings = [holding for holding in holdings_doc.get('holdings', []) if holding.get('type') == 'crypto']
+
+    total_profit_loss = sum(holding.get('profit_loss', 0) for holding in crypto_holdings)
+
+    return total_profit_loss
