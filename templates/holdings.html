@@ -9,81 +9,144 @@
         <div class="clearfix"></div>
       </div>
       <div class="x_content">
-        <!-- Holdings data and table go here -->
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Quantity</th>
-              <th>Buying Price</th>
-              <th>Current Price</th>
-              <th>Value</th>
-              <th>Profit/Loss</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for holding in holdings['holdings'] %}
-            <tr>
-              <td>{{ holding['name'] }}</td>
-              <td>{{ holding['quantity'] }}</td>
-              <td>{{ holding['buying_price'] }}</td>
-              <td>{{ holding['current_price'] }}</td>
-              <td>{{ holding['value'] }}</td>
-              <td>{{ holding['profit_loss'] }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-        <button class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Add Transaction</button>
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#overview" role="tab">Holdings Overview</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#stock" role="tab">Stock Holdings</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#crypto" role="tab">Crypto Holdings</a>
+          </li>
+        </ul>
+
+        <!-- Tab panes -->
+        <div class="tab-content">
+          <div class="tab-pane active" id="overview" role="tabpanel">
+            <h3>Holdings Overview</h3>
+            <!-- Display general holdings information here -->
+          </div>
+          <div class="tab-pane" id="stock" role="tabpanel">
+            <h3>Stock Holdings</h3>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Asset</th>
+                  <th>Date & Time</th>
+                  <th>Buy Price Per Unit</th>
+                  <th>Quantity</th>
+                  <th>Total Amount Brought</th>
+                  <th>Transaction Fee</th>
+                  <th>Deduct Cash</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if holdings['stock_holdings'] %}
+                {% for holding in holdings['stock_holdings'] %}
+                <tr>
+                  <td>{{ holding['asset'] | capitalize }}</td>
+                  <td>{{ holding['datetime'] }}</td>
+                  <td>{{ '%.2f' | format (holding['buy_price']) }}</td>
+                  <td>{{ '%.2f' | format(holding['quantity']) }}</td>
+                  <td>{{ '%.2f' | format (holding['amount_bought']) }}</td>
+                  <td>{{ '%.2f' | format (holding['transaction_fee']) }}</td>
+                  <td>{{ holding['deduct_cash'] }}</td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                  <td colspan="7">No stock holdings found.</td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+            <button class="btn btn-primary" data-toggle="modal" data-target="#addStockTransactionModal">Add Stock Transaction</button>
+          </div>
+          <div class="tab-pane" id="crypto" role="tabpanel">
+            <h3>Crypto Holdings</h3>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Asset</th>
+                  <th>Date & Time</th>
+                  <th>Buy Price Per Unit</th>
+                  <th>Quantity</th>
+                  <th>Total Amount Brought</th>
+                  <th>Transaction Fee</th>
+                  <th>Deduct Cash</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if holdings['crypto_holdings'] %}
+                {% for holding in holdings['crypto_holdings'] %}
+                <tr>
+                  <td>{{ holding['asset'] | capitalize }}</td>
+                  <td>{{ holding['datetime'] }}</td>
+                  <td>{{ '%.2f' | format(holding['buy_price']) }}</td>
+                  <td>{{ '%.2f' | format(holding['quantity']) }}</td>
+                  <td>{{ '%.2f' | format(holding['amount_bought']) }}</td>
+                  <td>{{ '%.2f' | format(holding['transaction_fee']) }}</td>
+                  <td>{{ holding['deduct_cash'] }}</td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                  <td colspan="7">No crypto holdings found.</td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+            <button class="btn btn-primary" data-toggle="modal" data-target="#addCryptoTransactionModal">Add Crypto Transaction</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Add Transaction Modal -->
-<div class="modal fade" id="addTransactionModal" tabindex="-1" role="dialog" aria-labelledby="addTransactionModalLabel" aria-hidden="true">
+<!-- Add Stock Transaction Modal -->
+<div class="modal fade" id="addStockTransactionModal" tabindex="-1" role="dialog" aria-labelledby="addStockTransactionModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="addTransactionModalLabel">Add Transaction</h5>
+        <h5 class="modal-title" id="addStockTransactionModalLabel">Add Stock Transaction</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <form id="addTransactionForm">
+        <form id="addStockTransactionForm">
           <div class="form-group">
-            <label for="cryptoSelect">Select Crypto</label>
-            <select id="cryptoSelect" class="form-control" required>
-              <option value="" disabled selected>Select a crypto</option>
-              {% for crypto in crypto_data %}
-              <option value="{{ crypto['id'] }}">{{ crypto['name'] }}</option>
-              {% endfor %}
+            <label for="stockSelect">Select Stock</label>
+            <select id="stockSelect" class="form-control" required>
+              <!-- Populate stock options dynamically if needed -->
             </select>
           </div>
           <div class="form-group">
-            <label for="transactionDate">Date</label>
-            <input type="date" id="transactionDate" class="form-control" required>
+            <label for="stockTransactionDate">Date</label>
+            <input type="date" id="stockTransactionDate" class="form-control" required>
           </div>
           <div class="form-group">
-            <label for="transactionTime">Time</label>
-            <input type="time" id="transactionTime" class="form-control" required>
+            <label for="stockTransactionTime">Time</label>
+            <input type="time" id="stockTransactionTime" class="form-control" required>
           </div>
           <div class="form-group">
-            <label for="buyPrice">Buy Price per Unit</label>
-            <input type="number" id="buyPrice" class="form-control" required>
+            <label for="stockBuyPrice">Buy Price per Unit</label>
+            <input type="number" id="stockBuyPrice" class="form-control" required>
           </div>
           <div class="form-group">
-            <label for="amountBought">Amount Bought</label>
-            <input type="number" id="amountBought" class="form-control" required>
+            <label for="stockAmountBought">Total Amount Bought</label>
+            <input type="number" id="stockAmountBought" class="form-control" required>
           </div>
           <div class="form-group">
-            <label for="transactionFee">Transaction Fee (Optional)</label>
-            <input type="number" id="transactionFee" class="form-control">
+            <label for="stockTransactionFee">Transaction Fee (Optional)</label>
+            <input type="number" id="stockTransactionFee" class="form-control">
           </div>
           <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="deductCash">
-            <label class="form-check-label" for="deductCash">Deduct from available cash</label>
+            <input type="checkbox" class="form-check-input" id="stockDeductCash">
+            <label class="form-check-label" for="stockDeductCash">Deduct from available cash</label>
           </div>
           <button type="submit" class="btn btn-primary">Add Transaction</button>
         </form>
@@ -92,20 +155,74 @@
   </div>
 </div>
 
+<!-- Add Crypto Transaction Modal -->
+<div class="modal fade" id="addCryptoTransactionModal" tabindex="-1" role="dialog" aria-labelledby="addCryptoTransactionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addCryptoTransactionModalLabel">Add Crypto Transaction</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="addCryptoTransactionForm">
+            <div class="form-group">
+              <label for="cryptoSelect">Select Crypto</label>
+              <select id="cryptoSelect" class="form-control" required>
+                <option value="" disabled selected>Select a crypto</option>
+                {% for crypto in crypto_data %}
+                <option value="{{ crypto['id'] }}">{{ crypto['name'] }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="cryptoTransactionDate">Date</label>
+              <input type="date" id="cryptoTransactionDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="cryptoTransactionTime">Time</label>
+              <input type="time" id="cryptoTransactionTime" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="cryptoBuyPrice">Buy Price per Unit</label>
+              <input type="number" id="cryptoBuyPrice" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="cryptoAmountBought">Total Amount Bought</label>
+              <input type="number" id="cryptoAmountBought" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="cryptoTransactionFee">Transaction Fee (Optional)</label>
+              <input type="number" id="cryptoTransactionFee" class="form-control">
+            </div>
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="cryptoDeductCash">
+              <label class="form-check-label" for="cryptoDeductCash">Deduct from available cash</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Transaction</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
 <script>
-    document.getElementById('addTransactionForm').addEventListener('submit', function(event) {
+    document.getElementById('addStockTransactionForm').addEventListener('submit', function(event) {
         event.preventDefault();
         
-        const cryptoSelect = document.getElementById('cryptoSelect').value;
-        const transactionDate = document.getElementById('transactionDate').value;
-        const transactionTime = document.getElementById('transactionTime').value;
-        const buyPrice = document.getElementById('buyPrice').value;
-        const amountBought = document.getElementById('amountBought').value;
-        const transactionFee = document.getElementById('transactionFee').value;
-        const deductCash = document.getElementById('deductCash').checked;
+        const stockSelect = document.getElementById('stockSelect').value;
+        const transactionDate = document.getElementById('stockTransactionDate').value;
+        const transactionTime = document.getElementById('stockTransactionTime').value;
+        const buyPrice = document.getElementById('stockBuyPrice').value;
+        const amountBought = document.getElementById('stockAmountBought').value;
+        const transactionFee = document.getElementById('stockTransactionFee').value;
+        const deductCash = document.getElementById('stockDeductCash').checked;
         
         const transactionData = {
-            crypto: cryptoSelect,
+            type: 'stock',
+            asset: stockSelect,
             date: transactionDate,
             time: transactionTime,
             buyPrice: buyPrice,
@@ -134,6 +251,49 @@
             console.error('Error:', error);
         });
     });
-    </script>    
+
+    document.getElementById('addCryptoTransactionForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        const cryptoSelect = document.getElementById('cryptoSelect').value;
+        const transactionDate = document.getElementById('cryptoTransactionDate').value;
+        const transactionTime = document.getElementById('cryptoTransactionTime').value;
+        const buyPrice = document.getElementById('cryptoBuyPrice').value;
+        const amountBought = document.getElementById('cryptoAmountBought').value;
+        const transactionFee = document.getElementById('cryptoTransactionFee').value;
+        const deductCash = document.getElementById('cryptoDeductCash').checked;
+        
+        const transactionData = {
+            type: 'crypto',
+            asset: cryptoSelect,
+            date: transactionDate,
+            time: transactionTime,
+            buyPrice: buyPrice,
+            amountBought: amountBought,
+            transactionFee: transactionFee,
+            deductCash: deductCash
+        };
+        
+        fetch('/add_transaction', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(transactionData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                alert('Transaction added successfully');
+                location.reload();
+            } else {
+                alert('Error adding transaction: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+</script>
 
 {% endblock %}

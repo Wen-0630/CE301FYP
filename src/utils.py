@@ -1,6 +1,12 @@
 import requests
 import os
 from datetime import datetime
+import time
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+
 
 def get_stock_data(symbol):
     api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
@@ -11,9 +17,22 @@ def get_stock_data(symbol):
 
 def get_crypto_data(crypto_list):
     url = f'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids={",".join(crypto_list)}'
-    response = requests.get(url)
-    data = response.json()
-    return data
+    
+    while True:
+        response = requests.get(url)
+        
+        if response.status_code == 200:
+            data = response.json()
+            return data
+        elif response.status_code == 429:
+            retry_after = int(response.headers.get('Retry-After', 60))  # Default to 60 seconds if header is not present
+            print(f"Rate limit exceeded. Retrying after {retry_after} seconds...")
+            time.sleep(retry_after)
+        else:
+            response.raise_for_status()
+
+    return None
+
 
 def format_stock_data(data):
     if 'Time Series (60min)' not in data:

@@ -68,20 +68,34 @@ def markets():
 
     return render_template('markets.html', stocks=stocks, crypto_data=crypto_data)
 
-
 @investment.route('/holdings')
 def holdings():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
 
     user_id = session['user_id']
-    holdings = current_app.mongo.db.holdings.find_one({'userId': ObjectId(user_id)})
+    holdings_doc = current_app.mongo.db.holdings.find_one({'userId': ObjectId(user_id)})
+
+    # Ensure holdings document is initialized
+    if holdings_doc is None:
+        holdings_doc = {
+            'userId': ObjectId(user_id),
+            'holdings': []
+        }
+        current_app.mongo.db.holdings.insert_one(holdings_doc)
 
     # Fetch and format crypto data
     crypto_list = ['bitcoin', 'ethereum', 'litecoin']
     crypto_data = get_formatted_crypto_data(crypto_list)
 
-    return render_template('holdings.html', holdings=holdings, crypto_data=crypto_data)
+    # Add this line to check crypto_data
+    print(crypto_data)
+
+    # Separate stock and crypto holdings
+    stock_holdings = [holding for holding in holdings_doc.get('holdings', []) if holding.get('type') == 'stock']
+    crypto_holdings = [holding for holding in holdings_doc.get('holdings', []) if holding.get('type') == 'crypto']
+
+    return render_template('holdings.html', holdings={'stock_holdings': stock_holdings, 'crypto_holdings': crypto_holdings}, crypto_data=crypto_data)
 
 
 @investment.route('/add_transaction', methods=['POST'])
@@ -90,13 +104,14 @@ def add_transaction():
         return jsonify({'success': False, 'error': 'User not logged in'}), 401
     
     data = request.get_json()
-    crypto = data['crypto']
+    transaction_type = data['type']
+    asset = data['asset']
     date = data['date']
     time = data['time']
-    buy_price = data['buyPrice']
-    amount_bought = data['amountBought']
-    transaction_fee = data.get('transactionFee', 0)
-    deduct_cash = data['deductCash']
+    buy_price = float(data['buyPrice'])
+    amount_bought = float(data['amountBought'])
+    transaction_fee = float(data.get('transactionFee', 0))
+    deduct_cash = "Yes" if data['deductCash'] else "No"
     
     user_id = session['user_id']
     
@@ -104,15 +119,21 @@ def add_transaction():
     datetime_str = f"{date} {time}"
     transaction_datetime = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M')
     
+    # Calculate quantity
+    quantity = amount_bought / buy_price
+    
     holding = {
-        'crypto': crypto,
+        'type': transaction_type,
+        'asset': asset,
         'datetime': transaction_datetime,
         'buy_price': buy_price,
         'amount_bought': amount_bought,
+        'quantity': quantity,
         'transaction_fee': transaction_fee,
         'deduct_cash': deduct_cash
     }
-    
+
+    # Ensure the holdings collection is initialized for the user
     current_app.mongo.db.holdings.update_one(
         {'userId': ObjectId(user_id)},
         {'$push': {'holdings': holding}},
