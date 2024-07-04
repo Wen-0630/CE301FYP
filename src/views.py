@@ -4,7 +4,7 @@ from .models import Transaction, Loan
 from bson.objectid import ObjectId
 from .transactions import calculate_total_income, calculate_total_expense
 from .creditCard import get_total_outstanding
-from .investment import calculate_total_crypto_profit_loss
+from .investment import calculate_total_investment_profit_loss
 
 # Create a Blueprint for user-related routes
 views = Blueprint('user', __name__, template_folder='templates')
@@ -28,7 +28,7 @@ def dashboard():
     
     total_outstanding = total_credit_card_outstanding + total_loan_outstanding
 
-    total_investment = calculate_total_crypto_profit_loss(user_id)
+    total_investment = calculate_total_investment_profit_loss(user_id)
     
     return render_template('dashboard.html', total_income=total_income, total_expense=total_expense, total_outstanding=total_outstanding, total_investment=total_investment)
 

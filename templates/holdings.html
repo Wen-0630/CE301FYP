@@ -54,6 +54,7 @@
                   <td>{{ holding['amount_bought'] | currency_with_decimals }}</td>
                   <td>{{ holding['transaction_fee'] | currency_with_decimals }}</td>
                   <td>{{ holding['deduct_cash'] }}</td>
+                  <td>{{ holding['profit_loss'] | default(0) | currency_with_decimals }}</td> <!-- Handle missing values -->
                 </tr>
                 {% endfor %}
                 {% else %}
@@ -91,7 +92,7 @@
                   <td>{{ holding['amount_bought'] | currency_with_decimals }}</td>
                   <td>{{ holding['transaction_fee'] | currency_with_decimals }}</td>
                   <td>{{ holding['deduct_cash'] }}</td>
-                  <td>{{ holding['profit_loss'] | currency_with_decimals }}</td> <!-- Display Profit/Loss -->
+                  <td>{{ holding['profit_loss'] | default(0) | currency_with_decimals }}</td> <!-- Handle missing values -->
                 </tr>
                 {% endfor %}
                 {% else %}
@@ -121,6 +122,7 @@
       </div>
       <div class="modal-body">
         <form id="addStockTransactionForm">
+          <input type="hidden" id="transactionTypeStock" name="transactionType" value="stock">
           <div class="form-group">
             <label for="stockSelect">Select Stock</label>
             <select id="stockSelect" class="form-control" required>
@@ -160,61 +162,61 @@
 
 <!-- Add Crypto Transaction Modal -->
 <div class="modal fade" id="addCryptoTransactionModal" tabindex="-1" role="dialog" aria-labelledby="addCryptoTransactionModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addCryptoTransactionModalLabel">Add Crypto Transaction</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <form id="addCryptoTransactionForm">
-            <div class="form-group">
-              <label for="cryptoSelect">Select Crypto</label>
-              <select id="cryptoSelect" class="form-control" required>
-                <option value="" disabled selected>Select a crypto</option>
-                {% for crypto in crypto_data %}
-                <option value="{{ crypto['id'] }}">{{ crypto['name'] }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="cryptoTransactionDate">Date</label>
-              <input type="date" id="cryptoTransactionDate" class="form-control" required>
-            </div>
-            <div class="form-group">
-              <label for="cryptoTransactionTime">Time</label>
-              <input type="time" id="cryptoTransactionTime" class="form-control" required>
-            </div>
-            <div class="form-group">
-              <label for="cryptoBuyPrice">Buy Price per Unit</label>
-              <input type="number" id="cryptoBuyPrice" class="form-control" required>
-            </div>
-            <div class="form-group">
-              <label for="cryptoAmountBought">Total Amount Bought</label>
-              <input type="number" id="cryptoAmountBought" class="form-control" required>
-            </div>
-            <div class="form-group">
-              <label for="cryptoTransactionFee">Transaction Fee (Optional)</label>
-              <input type="number" id="cryptoTransactionFee" class="form-control">
-            </div>
-            <div class="form-check">
-              <input type="checkbox" class="form-check-input" id="cryptoDeductCash">
-              <label class="form-check-label" for="cryptoDeductCash">Deduct from available cash</label>
-            </div>
-            <button type="submit" class="btn btn-primary">Add Transaction</button>
-          </form>
-        </div>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addCryptoTransactionModalLabel">Add Crypto Transaction</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="addCryptoTransactionForm">
+          <input type="hidden" id="transactionTypeCrypto" name="transactionType" value="crypto">
+          <div class="form-group">
+            <label for="cryptoSelect">Select Crypto</label>
+            <select id="cryptoSelect" class="form-control" required>
+              <option value="" disabled selected>Select a crypto</option>
+              {% for crypto in crypto_data %}
+              <option value="{{ crypto['id'] }}">{{ crypto['name'] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="cryptoTransactionDate">Date</label>
+            <input type="date" id="cryptoTransactionDate" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="cryptoTransactionTime">Time</label>
+            <input type="time" id="cryptoTransactionTime" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="cryptoBuyPrice">Buy Price per Unit</label>
+            <input type="number" id="cryptoBuyPrice" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="cryptoAmountBought">Total Amount Bought</label>
+            <input type="number" id="cryptoAmountBought" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="cryptoTransactionFee">Transaction Fee (Optional)</label>
+            <input type="number" id="cryptoTransactionFee" class="form-control">
+          </div>
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="cryptoDeductCash">
+            <label class="form-check-label" for="cryptoDeductCash">Deduct from available cash</label>
+          </div>
+          <button type="submit" class="btn btn-primary">Add Transaction</button>
+        </form>
       </div>
     </div>
   </div>
-  
+</div>
 
 <script>
     document.getElementById('addStockTransactionForm').addEventListener('submit', function(event) {
         event.preventDefault();
-        
+
         const stockSelect = document.getElementById('stockSelect').value;
         const transactionDate = document.getElementById('stockTransactionDate').value;
         const transactionTime = document.getElementById('stockTransactionTime').value;
@@ -222,9 +224,10 @@
         const amountBought = document.getElementById('stockAmountBought').value;
         const transactionFee = document.getElementById('stockTransactionFee').value;
         const deductCash = document.getElementById('stockDeductCash').checked;
-        
+        const transactionType = document.getElementById('transactionTypeStock').value;
+
         const transactionData = {
-            type: 'stock',
+            type: transactionType,
             asset: stockSelect,
             date: transactionDate,
             time: transactionTime,
@@ -233,7 +236,7 @@
             transactionFee: transactionFee,
             deductCash: deductCash
         };
-        
+
         fetch('/add_transaction', {
             method: 'POST',
             headers: {
@@ -257,7 +260,7 @@
 
     document.getElementById('addCryptoTransactionForm').addEventListener('submit', function(event) {
         event.preventDefault();
-        
+
         const cryptoSelect = document.getElementById('cryptoSelect').value;
         const transactionDate = document.getElementById('cryptoTransactionDate').value;
         const transactionTime = document.getElementById('cryptoTransactionTime').value;
@@ -265,9 +268,10 @@
         const amountBought = document.getElementById('cryptoAmountBought').value;
         const transactionFee = document.getElementById('cryptoTransactionFee').value;
         const deductCash = document.getElementById('cryptoDeductCash').checked;
-        
+        const transactionType = document.getElementById('transactionTypeCrypto').value;
+
         const transactionData = {
-            type: 'crypto',
+            type: transactionType,
             asset: cryptoSelect,
             date: transactionDate,
             time: transactionTime,
@@ -276,7 +280,7 @@
             transactionFee: transactionFee,
             deductCash: deductCash
         };
-        
+
         fetch('/add_transaction', {
             method: 'POST',
             headers: {
