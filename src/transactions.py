@@ -135,3 +135,8 @@ def calculate_total_expense(user_id):
     if result:
         return int(result[0]['total'])  # Convert the total to an integer
     return 0
+
+def calculate_total_transaction(user_id):
+    total_income = calculate_total_income(user_id)
+    total_expense = calculate_total_expense(user_id)
+    return total_income - total_expense
