@@ -17,7 +17,7 @@ Credit Card - Net Plus
                         <th>Category</th>
                         <th>Date</th>
                         <th>Description</th>
-                        <th>Outstanding Amount</th>
+                        <th>Total Outstanding Amount</th>
                         <th>Remaining Outstanding</th>
                         <th>Repayment Status</th>
                         <th>Actions</th>
@@ -37,6 +37,39 @@ Credit Card - Net Plus
                             <button class="btn btn-warning btn-sm repayment-btn" title="Repayment" data-transaction-id="{{ transaction._id }}" data-remaining-amount="{{ transaction.remaining_amount if transaction.remaining_amount is not none else transaction.amount }}" {% if transaction.repayment_status == 'Paid' %}disabled{% endif %}>
                                 <i class="fa fa-hand-holding-usd"></i>
                             </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="8">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Repayment Date</th>
+                                        <th>Repayment Amount</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if transaction.repayments|length == 0 %}
+                                    <tr>
+                                        <td colspan="3" class="text-center">No repayment found</td>
+                                    </tr>
+                                    {% else %}
+                                    {% for repayment in transaction.repayments %}
+                                    <tr>
+                                        <td>{{ repayment.repayment_date.strftime('%Y-%m-%d') }}</td>
+                                        <td>{{ "%.2f"|format(repayment.repayment_amount) }}</td>
+                                        <td>
+                                            <form action="{{ url_for('credit_card.delete_repayment') }}" method="post" style="display:inline;">
+                                                <input type="hidden" name="repayment_id" value="{{ repayment._id }}">
+                                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% endif %}
+                                </tbody>                                
+                            </table>
                         </td>
                     </tr>
                     {% endfor %}
@@ -61,9 +94,9 @@ Credit Card - Net Plus
                 <input type="text" id="remaining_amount" class="form-control" readonly>
             </div>
             <div class="form-group">
-                <label for="due_date">Payment Due Date</label>
-                <input type="date" id="due_date" class="form-control" name="due_date" required>
-            </div>
+                <label for="repayment_date">Repayment Date</label>
+                <input type="date" id="repayment_date" class="form-control" name="repayment_date" required>
+            </div>            
             <div class="form-group">
                 <label for="repayment_amount">Repayment Amount</label>
                 <input type="number" id="repayment_amount" class="form-control" name="repayment_amount" step="0.01" required>

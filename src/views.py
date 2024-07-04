@@ -5,6 +5,7 @@ from bson.objectid import ObjectId
 from .transactions import calculate_total_income, calculate_total_expense
 from .creditCard import get_total_outstanding
 from .investment import calculate_total_investment_profit_loss
+from .cashFlow import get_net_cash_flow
 
 # Create a Blueprint for user-related routes
 views = Blueprint('user', __name__, template_folder='templates')
@@ -24,13 +25,23 @@ def dashboard():
     total_credit_card_outstanding = get_total_outstanding(user_id)
 
     loans = Loan.get_all_loans_by_user(ObjectId(user_id))
-    total_loan_outstanding = sum(loan['outstanding_balance'] + loan['interest_payable'] for loan in loans)
+    total_loan_outstanding = sum(loan['outstanding_balance'] + loan['interest_balance'] for loan in loans)
     
     total_outstanding = total_credit_card_outstanding + total_loan_outstanding
 
     total_investment = calculate_total_investment_profit_loss(user_id)
+
+    net_cash_flow = get_net_cash_flow(user_id)
+
+    net_worth = net_cash_flow + total_investment - total_outstanding
     
-    return render_template('dashboard.html', total_income=total_income, total_expense=total_expense, total_outstanding=total_outstanding, total_investment=total_investment)
+    return render_template('dashboard.html', 
+                           total_income=total_income, 
+                           total_expense=total_expense, 
+                           total_outstanding=total_outstanding, 
+                           total_investment=total_investment, 
+                           net_cash_flow=net_cash_flow,
+                           net_worth=net_worth)
 
 @views.route('/transactions')
 def transactions():

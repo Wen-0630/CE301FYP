@@ -13,7 +13,7 @@
           <div class="form-group row">
             <label for="initial_cash" class="col-sm-3 col-form-label">Initial Cash Amount:</label>
             <div class="col-sm-9">
-              <input type="number" step="0.01" class="form-control" id="initial_cash" name="initial_cash" value="{{ initial_cash}}" required>
+              <input type="number" step="0.01" class="form-control" id="initial_cash" name="initial_cash" value="{{ initial_cash }}" required>
             </div>
           </div>
           <div class="form-group row">
@@ -23,11 +23,23 @@
           </div>
         </form>
         <div class="form-group row">
-            <label class="col-sm-3 col-form-label">Total Transaction:</label>
-            <div class="col-sm-9">
-              <input type="text" class="form-control" value="{{ total_transaction }}" readonly>
-            </div>
+          <label class="col-sm-3 col-form-label">Total Transaction:</label>
+          <div class="col-sm-9">
+            <input type="text" class="form-control" value="{{ total_transaction }}" readonly>
           </div>
+        </div>
+        <div class="form-group row">
+          <label class="col-sm-3 col-form-label">Total Repayment Amount (Credit Card):</label>
+          <div class="col-sm-9">
+            <input type="text" class="form-control" value="{{ total_repayment_amount }}" readonly>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label class="col-sm-3 col-form-label">Net Cash Flow:</label>
+          <div class="col-sm-9">
+            <input type="text" class="form-control" value="{{ net_cash_flow }}" readonly>
+          </div>
+        </div>
       </div>
     </div>
   </div>

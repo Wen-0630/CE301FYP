@@ -61,28 +61,39 @@ class Transaction:
         return list(current_app.mongo.db.transactions.find({'userId': userId, 'payment_method': 'Credit Card'}))
 
 # models.py
-# class CreditCard:
-#     def __init__(self, userId, type, name, value, date):
-#         self.userId = ObjectId(userId)
-#         self.type = type
-#         self.name = name
-#         self.value = value
-#         self.date = date
+class Repayment:
+    @staticmethod
+    def add_repayment(transaction_id, repayment_amount, repayment_date):
+        repayment = {
+            'transaction_id': ObjectId(transaction_id),
+            'repayment_amount': repayment_amount,
+            'repayment_date': repayment_date
+        }
+        result = current_app.mongo.db.repayments.insert_one(repayment)
+        return result
 
-#     def save(self):
-#         credit_card = {
-#             'userId': self.userId,
-#             'type': self.type,
-#             'name': self.name,
-#             'value': self.value,
-#             'date': self.date,
-#         }
-#         return current_app.mongo.db.credit_cards.insert_one(credit_card) 
+    @staticmethod
+    def get_repayments_by_transaction(transaction_id):
+        return list(current_app.mongo.db.repayments.find({'transaction_id': ObjectId(transaction_id)}))
+    
+    @staticmethod
+    def get_repayment(repayment_id):
+        return current_app.mongo.db.repayments.find_one({'_id': ObjectId(repayment_id)})
 
-#     @staticmethod
-#     def get_all_credit_cards_by_user(userId):
-#         userId = ObjectId(userId)
-#         return list(current_app.mongo.db.credit_cards.find({'userId': userId}))  
+    @staticmethod
+    def delete_repayment(repayment_id):
+        current_app.mongo.db.repayments.delete_one({'_id': ObjectId(repayment_id)})
+
+    @staticmethod
+    def get_total_repayment_amount(transaction_id):
+        total_repayment = current_app.mongo.db.repayments.aggregate([
+            {"$match": {"transaction_id": ObjectId(transaction_id)}},
+            {"$group": {"_id": None, "total": {"$sum": "$repayment_amount"}}}
+        ])
+        result = list(total_repayment)
+        if result:
+            return result[0]['total']
+        return 0
 
 
 # src/models.py
