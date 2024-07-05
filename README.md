@@ -1,5 +1,5 @@
 
-# NeuroPlanner Project - Detailed Setup Guide
+# Net Plus Project - Detailed Setup Guide
 
 Welcome to the Net Plus project. This guide will walk you through the detailed steps required to set up and run the project using Visual Studio Code (VS Code). Please follow the steps carefully to ensure a successful setup. If you encounter any issues, feel free to call me at +65 81912109.
 
