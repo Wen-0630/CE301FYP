@@ -4,8 +4,24 @@ from bson.objectid import ObjectId
 from .utils import get_stock_data, get_crypto_data, get_formatted_crypto_data, get_formatted_stock_data
 from datetime import datetime
 import pytz
+import time
 
 investment = Blueprint('investment', __name__, template_folder='templates')
+
+CACHE = {}
+CACHE_TIMEOUT = 300  # 5 minutes in seconds
+
+def get_cached_data(key):
+    current_time = time.time()
+    if key in CACHE and current_time - CACHE[key]['timestamp'] < CACHE_TIMEOUT:
+        return CACHE[key]['data']
+    return None
+
+def set_cached_data(key, data):
+    CACHE[key] = {
+        'timestamp': time.time(),
+        'data': data
+    }
 
 def convert_to_singapore_time(timestamp):
     # Convert timestamp to Singapore time
@@ -18,6 +34,11 @@ def convert_to_singapore_time(timestamp):
 def update_data():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
+    
+    cache_key = 'market_data'
+    cached_data = get_cached_data(cache_key)
+    if cached_data:
+        return jsonify({'success': True, 'message': 'Data loaded from cache'})
 
     stock_symbols = {
         'AAPL': 'Apple Inc.',
@@ -48,6 +69,8 @@ def update_data():
         {"$set": {'stocks': stocks, 'crypto': crypto_data}},
         upsert=True
     )
+
+    set_cached_data(cache_key, {'stocks': stocks, 'crypto': crypto_data})
 
     return "Data updated successfully"
 
@@ -168,3 +191,32 @@ def calculate_total_investment_profit_loss(user_id):
         total_profit_loss += holding['profit_loss']
 
     return total_profit_loss
+
+@investment.route('/delete_stock_holding', methods=['POST'])
+def delete_stock_holding():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'error': 'User not logged in'}), 401
+
+    data = request.get_json()
+    holding_id = data['holdingId']
+
+    result = current_app.mongo.db.stock_holdings.delete_one({'_id': ObjectId(holding_id)})
+    if result.deleted_count == 1:
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False, 'error': 'Failed to delete stock holding'})
+
+
+@investment.route('/delete_crypto_holding', methods=['POST'])
+def delete_crypto_holding():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'error': 'User not logged in'}), 401
+
+    data = request.get_json()
+    holding_id = data['holdingId']
+
+    result = current_app.mongo.db.crypto_holdings.delete_one({'_id': ObjectId(holding_id)})
+    if result.deleted_count == 1:
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False, 'error': 'Failed to delete crypto holding'})

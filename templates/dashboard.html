@@ -44,7 +44,7 @@
 
       <div class="row x_title">
         <div class="col-md-6">
-          <h3>Network Activities <small>Graph title sub-title</small></h3>
+          <h3>Investment Activities <small>Graph title sub-title</small></h3>
         </div>
         <div class="col-md-6">
           <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc">
@@ -59,13 +59,13 @@
       </div>
       <div class="col-md-3 col-sm-3  bg-white">
         <div class="x_title">
-          <h2>Top Campaign Performance</h2>
+          <h2>Top Performance</h2>
           <div class="clearfix"></div>
         </div>
 
         <div class="col-md-12 col-sm-12 ">
           <div>
-            <p>Facebook Campaign</p>
+            <p>Etherium</p>
             <div class="">
               <div class="progress progress_sm" style="width: 76%;">
                 <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="80"></div>
@@ -73,7 +73,7 @@
             </div>
           </div>
           <div>
-            <p>Twitter Campaign</p>
+            <p>Bitcoin</p>
             <div class="">
               <div class="progress progress_sm" style="width: 76%;">
                 <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="60"></div>
@@ -83,7 +83,7 @@
         </div>
         <div class="col-md-12 col-sm-12 ">
           <div>
-            <p>Conventional Media</p>
+            <p>Litecoin</p>
             <div class="">
               <div class="progress progress_sm" style="width: 76%;">
                 <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="40"></div>
@@ -91,7 +91,7 @@
             </div>
           </div>
           <div>
-            <p>Bill boards</p>
+            <p>Render</p>
             <div class="">
               <div class="progress progress_sm" style="width: 76%;">
                 <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="50"></div>
@@ -296,18 +296,17 @@
     </div>
   </div>
 
-  <div class="col-md-4 col-sm-4 ">
+  <!-- <div class="col-md-4 col-sm-4 ">
     <div class="x_panel tile fixed_height_320">
       <div class="x_title">
-        <h2>Quick Settings</h2>
+        <h2>Saving Goals</h2>
         <ul class="nav navbar-right panel_toolbox">
           <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
           </li>
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <a class="dropdown-item" href="#">Settings 1</a>
-                <a class="dropdown-item" href="#">Settings 2</a>
+                <a class="dropdown-item" href="#">Edit</a>
               </div>
           </li>
           <li><a class="close-link"><i class="fa fa-close"></i></a>
@@ -333,22 +332,93 @@
           </ul>
 
           <div class="sidebar-widget">
-              <h4>Profile Completion</h4>
+              <h4>Goal</h4>
               <canvas width="150" height="80" id="chart_gauge_01" class="" style="width: 160px; height: 100px;"></canvas>
               <div class="goal-wrapper">
-                <span id="gauge-text" class="gauge-value pull-left">0</span>
-                <span class="gauge-value pull-left">%</span>
-                <span id="goal-text" class="goal-value pull-right">100%</span>
+                <span class="gauge-value pull-left">$</span>
+                <span id="gauge-text2" class="gauge-value pull-left">10</span>
+                <span id="goal-text" class="goal-value pull-right">$100</span>
               </div>
           </div>
         </div>
       </div>
     </div>
+  </div> -->
+
+  <div class="col-md-4 col-sm-4 ">
+      <div class="x_panel tile fixed_height_320">
+          <div class="x_title">
+              <h2>Saving Goals</h2>
+              <ul class="nav navbar-right panel_toolbox">
+                  <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                  <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
+                      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                          <a class="dropdown-item" href="#" data-toggle="modal" data-target="#editSavingGoalModal">Edit Goal</a>
+                      </div>
+                  </li>
+                  <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+              </ul>
+              <div class="clearfix"></div>
+          </div>
+          <div class="x_content">
+              <div class="dashboard-widget-content">
+                  {% for goal in saving_goals %}
+                  <div style="display: flex; align-items: center;">
+                      <div class="goal-info" style="flex: 1; padding-right: 10px;">
+                          <p><i class="fa fa-calendar-alt"></i> <strong>Target Date:</strong><br> {{ goal.target_date.strftime('%B %d, %Y') }}</p>
+                          <p><i class="fa fa-check-circle"></i> <strong>Completed:</strong><br> {{ ((goal.current_amount / goal.target_amount) * 100) | format_currency }}%</p>
+                          <p><i class="fa fa-hourglass-half"></i> <strong>Time Left:</strong><br> {{ (goal.target_date - datetime.datetime.utcnow()).days | max(0) }} days</p>
+                      </div>
+
+                      <div class="sidebar-widget" style="flex: 1;">
+                          <h4>{{ goal.name }}</h4>
+                          <canvas width="150" height="100" id="chart_gauge_01" class="gauge-chart" data-max-value="{{ goal.target_amount }}" data-current-value="{{ goal.current_amount }}"></canvas>
+                          <div class="goal-wrapper">
+                              <span id="gauge-text2" class="gauge-value pull-left">${{ goal.current_amount | format_currency}}</span>
+                              <span id="goal-text" class="goal-value pull-right">${{ goal.target_amount | format_currency}}</span>
+                          </div>
+                      </div>
+                  </div>
+                  {% endfor %}
+              </div>
+          </div>
+      </div>
   </div>
+
+
+
+  <!-- Edit Saving Goal Modal -->
+  <div id="editSavingGoalModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Edit Saving Goal</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <form action="{{ url_for('saving_goals.edit_saving_goal') }}" method="POST">
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="target-amount">Target Amount:</label>
+              <input type="number" class="form-control" id="target-amount" name="target_amount" required>
+            </div>
+            <div class="form-group">
+              <label for="target-date">Target Date:</label>
+              <input type="date" class="form-control" id="target-date" name="target_date" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
 
 </div>
 
-<div class="row">
+<!-- <div class="row">
   <div class="col-md-4 col-sm-4 ">
     <div class="x_panel">
       <div class="x_title">
@@ -495,7 +565,7 @@
     </div>
     <div class="row">
 
-      <!-- Start to do list -->
+      Start to do list
       <div class="col-md-6 col-sm-6 ">
         <div class="x_panel">
           <div class="x_title">
@@ -560,9 +630,9 @@
           </div>
         </div>
       </div>
-      <!-- End to do list -->
+      End to do list
 
-      <!-- start of weather widget -->
+      start of weather widget
       <div class="col-md-6 col-sm-6 ">
         <div class="x_panel">
           <div class="x_title">
@@ -666,8 +736,8 @@
         </div>
 
       </div>
-      <!-- end of weather widget -->
+      end of weather widget
     </div>
   </div>
-</div>
+</div> -->
 {% endblock %}

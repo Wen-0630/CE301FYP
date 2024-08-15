@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, session, current_app, flash
-from .models import Transaction, Loan
+from .models import Transaction, Loan, SavingGoal
 import datetime
 from bson.objectid import ObjectId
 
@@ -62,6 +62,11 @@ def add_transaction():
             Loan.update_interest_expense(loan['name'], user_id)
         if data.get('category') == 'Loan Expense' and loan:
             Loan.update_loan_expense(loan['name'], user_id)
+
+        # Recalculate current amount for each active saving goal
+        saving_goals = SavingGoal.get_goals_by_user(session['user_id'])
+        for goal in saving_goals:
+            SavingGoal.calculate_current_amount(goal['_id'], session['user_id'])
 
         return redirect(url_for('transactions.list_transactions'))
 
@@ -138,14 +143,5 @@ def calculate_total_expense(user_id):
 
 def calculate_total_transaction(user_id):
     total_income = calculate_total_income(user_id)
-    
-    # Calculate total expense excluding credit card payments
-    total_expense_excluding_credit_card = current_app.mongo.db.transactions.aggregate([
-        {"$match": {"userId": ObjectId(user_id), "type": "Expense", "payment_method": {"$ne": "Credit Card"}}},
-        {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
-    ])
-    
-    result = list(total_expense_excluding_credit_card)
-    total_expense = result[0]['total'] if result else 0
-    
+    total_expense = calculate_total_expense(user_id)
     return total_income - total_expense

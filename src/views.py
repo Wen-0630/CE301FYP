@@ -1,11 +1,12 @@
 #src/views.py
 from flask import Blueprint, redirect, url_for, render_template, session, current_app
-from .models import Transaction, Loan
+from .models import Transaction, Loan, SavingGoal
 from bson.objectid import ObjectId
 from .transactions import calculate_total_income, calculate_total_expense
 from .creditCard import get_total_outstanding
 from .investment import calculate_total_investment_profit_loss
 from .cashFlow import get_net_cash_flow
+import datetime 
 
 # Create a Blueprint for user-related routes
 views = Blueprint('user', __name__, template_folder='templates')
@@ -18,7 +19,7 @@ def home():
 def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-    
+
     user_id = session['user_id']
     total_income = calculate_total_income(user_id)
     total_expense = calculate_total_expense(user_id)
@@ -34,6 +35,11 @@ def dashboard():
     net_cash_flow = get_net_cash_flow(user_id)
 
     net_worth = net_cash_flow + total_investment - total_outstanding
+
+    saving_goals = SavingGoal.get_goals_by_user(user_id)
+    for goal in saving_goals:
+        # Update the current amount before rendering the dashboard
+        SavingGoal.calculate_current_amount(goal['_id'], user_id)
     
     return render_template('dashboard.html', 
                            total_income=total_income, 
@@ -41,7 +47,9 @@ def dashboard():
                            total_outstanding=total_outstanding, 
                            total_investment=total_investment, 
                            net_cash_flow=net_cash_flow,
-                           net_worth=net_worth)
+                           net_worth=net_worth,
+                           saving_goals=saving_goals,
+                           datetime=datetime)
 
 @views.route('/transactions')
 def transactions():
@@ -78,3 +86,4 @@ def loan():
         loan['interest_balance'] = loan['interest_payable'] - loan['interest_expense']
         loan['outstanding_balance'] = loan['original_amount'] - loan['loan_expense']
     return render_template('loan.html', loans=loans)
+

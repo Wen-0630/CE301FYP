@@ -17,6 +17,9 @@ def login():
         if authenticate_user(current_app.mongo, email, password):
             print("Authentication successful")  # Debug statement
             flash('Login successful!', category='success')
+            user_data = current_app.mongo.cx['CE-301'].users.find_one({'email': email})
+            session['user_id'] = str(user_data['_id'])  # Store user ID in session
+            session['username'] = user_data['username']
             return redirect(url_for('user.dashboard'))
         else:
             print("Authentication failed")  # Debug statement

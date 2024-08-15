@@ -42,14 +42,15 @@ def add_loan():
     loan_term = int(request.form['loan_term'])
     repayment_term = request.form['repayment_term']
     interest_rate = float(request.form['interest_rate'])
-    # outstanding_balance = float(request.form['outstanding_balance'])
     interest_payable = float(request.form['interest_payable'])
-    # interest_expense = float(request.form['interest_expense'])
-    # interest_balance = float(request.form['interest_balance'])
-    # loan_expense = float(request.form['loan_expense'])
     issue_date = datetime.datetime.strptime(request.form['issue_date'], '%Y-%m-%d')
     maturity_date = datetime.datetime.strptime(request.form['maturity_date'], '%Y-%m-%d')
     description = request.form.get('description', None)
+
+    # Calculate the missing fields
+    outstanding_balance = original_amount  # Initial outstanding balance is the loan amount
+    interest_expense = 0  # Initially, there are no interest expenses
+    loan_expense = 0  # Initially, there are no loan expenses
 
     loan = Loan(
         userId=user_id, 
@@ -59,11 +60,10 @@ def add_loan():
         loan_term=loan_term, 
         repayment_term=repayment_term, 
         interest_rate=interest_rate, 
-        # outstanding_balance=outstanding_balance, 
+        outstanding_balance=outstanding_balance, 
         interest_payable=interest_payable, 
-        # interest_expense=interest_expense, 
-        # interest_balance=interest_balance, 
-        # loan_expense=loan_expense, 
+        interest_expense=interest_expense, 
+        loan_expense=loan_expense, 
         issue_date=issue_date, 
         maturity_date=maturity_date, 
         description=description
@@ -71,6 +71,7 @@ def add_loan():
     loan.save()
     
     return redirect(url_for('loan.list_loans'))
+
 
 @loan.route('/loans/edit/<loan_id>', methods=['GET', 'POST'])
 def edit_loan(loan_id):

@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, g, session, current_app
 from flask_pymongo import PyMongo
 import os
 from dotenv import load_dotenv
@@ -7,11 +7,14 @@ from src.auth import auth
 from src.views import views
 from src.transactions import transactions
 from src.creditCard import credit_card
-from .loan import loan
-from .investment import investment
+from src.loan import loan
+from src.investment import investment
 from src.cashFlow import cashflow_bp
 import certifi
 import logging
+from bson.objectid import ObjectId
+from src.savingGoals import savingGoals_bp
+
 
 load_dotenv()
 
@@ -38,6 +41,7 @@ def create_app():
     app.register_blueprint(loan, url_prefix='/')
     app.register_blueprint(investment, url_prefix='/')
     app.register_blueprint(cashflow_bp, url_prefix='/')
+    app.register_blueprint(savingGoals_bp, url_prefix='/')
 
     app.jinja_env.filters['format_currency'] = format_currency
 
@@ -50,8 +54,29 @@ def create_app():
     
     app.jinja_env.filters['currency_with_decimals'] = format_currency_with_decimals
 
+    @app.before_request
+    def before_request():
+        g.user = None
+        if 'user_id' in session:
+            user_data = current_app.mongo.cx['CE-301'].users.find_one({"_id": ObjectId(session['user_id'])})
+            if user_data:
+                g.user = user_data
+
+    @app.context_processor
+    def inject_user():
+        return dict(user=g.user)
+    
+    # In your main application setup file (e.g., app.py)
+
+    def max_filter(value, default=0):
+        return max(value, default)
+
+    app.jinja_env.filters['max'] = max_filter
+
+
     return app
 
 def format_currency(value):
     return "{:,.0f}".format(value)
+
 

@@ -109,9 +109,9 @@ class Loan:
         self.outstanding_balance = outstanding_balance
         self.interest_payable = interest_payable
         self.interest_expense = interest_expense
+        self.loan_expense = loan_expense
         self.interest_balance = self.calculate_interest_balance()
         self.outstanding_balance = self.calculate_outstanding_balance()
-        self.loan_expense = loan_expense
         self.issue_date = issue_date
         self.maturity_date = maturity_date
         self.description = description
@@ -163,7 +163,6 @@ class Loan:
             data['outstanding_balance'] = data['original_amount'] - data['loan_expense']
         current_app.mongo.db.loans.update_one({'_id': ObjectId(loan_id)}, {"$set": data})
 
-
     @staticmethod
     def delete_loan(loan_id):
         current_app.mongo.db.loans.delete_one({'_id': ObjectId(loan_id)})
@@ -180,7 +179,6 @@ class Loan:
         total_interest_expense = sum(transaction['amount'] for transaction in transactions)
         current_app.mongo.db.loans.update_one({'name': loan_name, 'userId': ObjectId(user_id)}, {"$set": {'interest_expense': total_interest_expense}})
 
-
     @staticmethod
     def get_total_interest_expense_by_loan(user_id):
         pipeline = [
@@ -189,7 +187,7 @@ class Loan:
         ]
         result = list(current_app.mongo.db.transactions.aggregate(pipeline))
         return {item['_id']: item['total_interest_expense'] for item in result}
-    
+
     @staticmethod
     def update_loan_expense(loan_name, user_id):
         transactions = current_app.mongo.db.transactions.find({'loan_name': loan_name, 'userId': ObjectId(user_id), 'category': 'Loan Expense'})
@@ -204,3 +202,107 @@ class Loan:
         ]
         result = list(current_app.mongo.db.transactions.aggregate(pipeline))
         return {item['_id']: item['total_loan_expense'] for item in result}
+
+class SavingGoal:
+    def __init__(self, user_id, name, target_amount, target_date, current_amount=0, is_active=True):
+        self.user_id = ObjectId(user_id) if isinstance(user_id, str) else user_id
+        self.name = name
+        self.target_amount = target_amount
+        self.current_amount = current_amount
+        self.creation_date = datetime.datetime.utcnow()
+        self.target_date = target_date
+        self.is_active = is_active
+
+    def save(self):
+        goal = {
+            'user_id': self.user_id,
+            'name': self.name,
+            'target_amount': self.target_amount,
+            'current_amount': self.current_amount,
+            'creation_date': self.creation_date,
+            'target_date': self.target_date,
+            'is_active': self.is_active
+        }
+        result = current_app.mongo.db.saving_goals.insert_one(goal)
+        return result.inserted_id
+    
+    @staticmethod
+    def deactivate_current_goal(user_id):
+        current_app.mongo.db.saving_goals.update_many(
+            {'user_id': ObjectId(user_id), 'is_active': True},
+            {'$set': {'is_active': False}}
+        )
+    
+    @staticmethod
+    def get_active_goal(user_id):
+        user_id = ObjectId(user_id) if isinstance(user_id, str) else user_id
+        return current_app.mongo.db.saving_goals.find_one({'user_id': user_id, 'is_active': True})
+    
+    @staticmethod
+    def get_goal_history(user_id):
+        user_id = ObjectId(user_id) if isinstance(user_id, str) else user_id
+        return list(current_app.mongo.db.saving_goals.find({'user_id': user_id}).sort('creation_date', -1))
+
+    
+    @staticmethod
+    def get_goal(goal_id):
+        return current_app.mongo.db.saving_goals.find_one({'_id': ObjectId(goal_id)})
+
+    @staticmethod
+    def get_goals_by_user(user_id):
+        user_id = ObjectId(user_id) if isinstance(user_id, str) else user_id
+        return list(current_app.mongo.db.saving_goals.find({'user_id': user_id, 'is_active': True}))
+    
+    @staticmethod
+    def update_goal(goal_id, data):
+        current_app.mongo.db.saving_goals.update_one({'_id': ObjectId(goal_id)}, {"$set": data})
+    
+    @staticmethod
+    def delete_goal(goal_id):
+        current_app.mongo.db.saving_goals.delete_one({'_id': ObjectId(goal_id)})
+
+    @staticmethod
+    def calculate_current_amount(goal_id, user_id):
+        goal = SavingGoal.get_goal(goal_id)
+        if not goal:
+            return 0
+        
+        # Calculate net income (Income - Expenses) since the creation of the goal until the target date
+        user_id = ObjectId(user_id) if isinstance(user_id, str) else user_id
+        creation_date = goal['creation_date']
+        target_date = goal['target_date']
+
+        # Aggregate income
+        income_pipeline = [
+            {"$match": {
+                "userId": user_id,
+                "date": {"$gte": creation_date, "$lte": target_date},
+                "type": "Income"
+            }},
+            {"$group": {"_id": None, "total_income": {"$sum": "$amount"}}}
+        ]
+        income_result = list(current_app.mongo.db.transactions.aggregate(income_pipeline))
+        total_income = income_result[0]['total_income'] if income_result else 0
+
+        # Aggregate expenses
+        expense_pipeline = [
+            {"$match": {
+                "userId": user_id,
+                "date": {"$gte": creation_date, "$lte": target_date},
+                "type": "Expense"
+            }},
+            {"$group": {"_id": None, "total_expense": {"$sum": "$amount"}}}
+        ]
+        expense_result = list(current_app.mongo.db.transactions.aggregate(expense_pipeline))
+        total_expense = expense_result[0]['total_expense'] if expense_result else 0
+
+        # Calculate net income
+        net_income = total_income - total_expense
+
+        # Ensure the current amount is not negative
+        current_amount = max(0, net_income)
+
+        # Update the current amount in the saving goal
+        SavingGoal.update_goal(goal_id, {"current_amount": current_amount})
+
+        return current_amount

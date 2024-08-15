@@ -28,6 +28,67 @@
     <link href="{{ url_for('static', filename='build/css/custom.min.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" 
+          integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+
+    
+
+    <style>
+      /* Flash Messages Styling */
+      .flash-messages {
+          position: absolute;
+          top: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 100%;
+          max-width: 600px;
+          text-align: center; /* Center-align the text */
+          z-index: 1000;
+      }
+
+      /* General Alert Styling */
+      .alert {
+          padding: 10px 15px;
+          border-radius: 5px;
+          font-size: 14px;
+          line-height: 1.5;
+          display: inline-flex; /* Use inline-flex to center the alerts */
+          align-items: center;
+          justify-content: center; /* Center the content within the alert */
+          animation: fadeIn 0.5s ease-in-out, fadeOut 0.5s 3s ease-in-out forwards; /* Fade in and out */
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          text-align: left; /* Text alignment within the alert box */
+      }
+
+      /* Add some margin between icon and text */
+      .alert i {
+          margin-right: 10px;
+      }
+
+      /* Success Alert Styling */
+      .alert-success {
+          color: #155724;
+          background-color: #d4edda;
+          border-color: #c3e6cb;
+      }
+
+      /* Error Alert Styling */
+      .alert-error {
+          color: #721c24;
+          background-color: #f8d7da;
+          border-color: #f5c6cb;
+      }
+
+      /* Info Alert Styling */
+      .alert-info {
+          color: #0c5460;
+          background-color: #d1ecf1;
+          border-color: #bee5eb;
+      }
+    </style>
+
     <!-- <style>
       .nav.side-menu > li > a .fa {
         font-size: 1.5em; 
@@ -54,7 +115,7 @@
               </div>
               <div class="profile_info">
                 <span>Welcome,</span>
-                <h2>John Doe</h2>
+                <h2>{{ user['username'] if user else 'User' }}</h2>
               </div>
             </div>
             <!-- /menu profile quick info -->
@@ -111,7 +172,7 @@
                 <ul class=" navbar-right">
                   <li class="nav-item dropdown open" style="padding-left: 15px;">
                     <a href="javascript:;" class="user-profile dropdown-toggle" aria-haspopup="true" id="navbarDropdown" data-toggle="dropdown" aria-expanded="false">
-                      <img src="images/img.jpg" alt="">John Doe
+                      <img src="images/img.jpg" alt="">{{ user['username'] if user else 'User' }}
                     </a>
                     <div class="dropdown-menu dropdown-usermenu pull-right" aria-labelledby="navbarDropdown">
                       <a class="dropdown-item"  href="javascript:;"> Profile</a>
@@ -196,6 +257,24 @@
 
         <!-- page content -->
         <div class="right_col" role="main">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                  <div class="flash-messages">
+                      {% for category, message in messages %}
+                          <div class="alert alert-{{ category }}">
+                              {% if category == 'success' %}
+                                  <i class="fas fa-check-circle"></i>
+                              {% elif category == 'error' %}
+                                  <i class="fas fa-exclamation-circle"></i>
+                              {% elif category == 'info' %}
+                                  <i class="fas fa-info-circle"></i>
+                              {% endif %}
+                              {{ message }}
+                          </div>
+                      {% endfor %}
+                  </div>
+              {% endif %}
+          {% endwith %}
           {% block content %}{% endblock %}
         </div>
         <!-- /page content -->
@@ -251,5 +330,9 @@
 
     <!-- Custom Theme Scripts -->
     <script src="{{ url_for('static', filename='build/js/custom.min.js') }}"></script>
+
+    <!-- Custom JS Script -->
+    <script src="{{ url_for('static', filename='js/custom.js') }}"></script>
+
   </body>
 </html>

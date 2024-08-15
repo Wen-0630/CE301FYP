@@ -41,6 +41,7 @@
                   <th>Transaction Fee</th>
                   <th>Deduct Current Cash</th>
                   <th>Current Profit/Loss</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -55,11 +56,12 @@
                   <td>{{ holding['transaction_fee'] | currency_with_decimals }}</td>
                   <td>{{ holding['deduct_cash'] }}</td>
                   <td>{{ holding['profit_loss'] | default(0) | currency_with_decimals }}</td> <!-- Handle missing values -->
+                  <td><button class="btn btn-danger btn-sm" onclick="deleteHolding('{{ holding['_id'] }}', 'stock')">Delete</button></td>
                 </tr>
                 {% endfor %}
                 {% else %}
                 <tr>
-                  <td colspan="8">No stock holdings found.</td>
+                  <td colspan="9">No stock holdings found.</td>
                 </tr>
                 {% endif %}
               </tbody>
@@ -79,6 +81,7 @@
                   <th>Transaction Fee</th>
                   <th>Deduct Current Cash</th>
                   <th>Current Profit/Loss</th> <!-- New Column for Profit/Loss -->
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -93,11 +96,12 @@
                   <td>{{ holding['transaction_fee'] | currency_with_decimals }}</td>
                   <td>{{ holding['deduct_cash'] }}</td>
                   <td>{{ holding['profit_loss'] | default(0) | currency_with_decimals }}</td> <!-- Handle missing values -->
+                  <td><button class="btn btn-danger btn-sm" onclick="deleteHolding('{{ holding['_id'] }}', 'crypto')">Delete</button></td>
                 </tr>
                 {% endfor %}
                 {% else %}
                 <tr>
-                  <td colspan="8">No crypto holdings found.</td>
+                  <td colspan="9">No crypto holdings found.</td>
                 </tr>
                 {% endif %}
               </tbody>
@@ -301,6 +305,30 @@
             console.error('Error:', error);
         });
     });
+
+    function deleteHolding(id, type) {
+        const url = type === 'stock' ? '/delete_stock_holding' : '/delete_crypto_holding';
+        
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ holdingId: id })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Holding deleted successfully');
+                location.reload();
+            } else {
+                alert('Error deleting holding: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
 </script>
 
 {% endblock %}
