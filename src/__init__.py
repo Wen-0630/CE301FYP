@@ -73,6 +73,13 @@ def create_app():
 
     app.jinja_env.filters['max'] = max_filter
 
+    @app.template_filter('min_value')
+    def min_value_filter(a, b):
+        return min(a, b)
+
+    # Register the filter
+    app.jinja_env.filters['min_value'] = min_value_filter
+
 
     return app
 

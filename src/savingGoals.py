@@ -11,24 +11,45 @@ def edit_saving_goal():
 
     user_id = session['user_id']
     data = request.form.to_dict()
-    target_amount = float(data['target_amount'])
-    target_date = datetime.datetime.strptime(data['target_date'], '%Y-%m-%d')
 
-    # Deactivate the current goal
-    SavingGoal.deactivate_current_goal(user_id)
+    is_automatic = 'automatic_saving_goal' in data  # Assuming checkbox is named 'automatic_saving_goal'
 
-    # Create a new goal with the updated values
-    saving_goal = SavingGoal(
-        user_id=user_id,
-        name="My Saving Goal",  # Default name, or allow user to set this
-        target_amount=target_amount,
-        target_date=target_date,
-        current_amount=0,  # This will be calculated and updated
-        is_active=True
-    )
-    goal_id = saving_goal.save()
+    if is_automatic:
+        # Deactivate the current goal
+        SavingGoal.deactivate_current_goal(user_id)
 
-    # Recalculate the current amount for the new goal
-    SavingGoal.calculate_current_amount(goal_id, user_id)
+        # Create a new automatic goal
+        target_amount = SavingGoal.calculate_automatic_target_amount(user_id)
+        current_amount = SavingGoal.calculate_automatic_current_amount(user_id)
+        target_date = SavingGoal.set_automatic_target_date()
+
+        saving_goal = SavingGoal(
+            user_id=user_id,
+            name="Automatic Saving Goal",
+            target_amount=target_amount,
+            target_date=target_date,
+            current_amount=current_amount,
+            is_active=True,
+            is_automatic=True
+        )
+        saving_goal.save()
+
+    else:
+        target_amount = float(data['target_amount'])
+        target_date = datetime.datetime.strptime(data['target_date'], '%Y-%m-%d')
+
+        # Deactivate the current goal
+        SavingGoal.deactivate_current_goal(user_id)
+
+        # Create a new user-set goal
+        saving_goal = SavingGoal(
+            user_id=user_id,
+            name="My Saving Goal",
+            target_amount=target_amount,
+            target_date=target_date,
+            current_amount=0,  # This will be calculated and updated
+            is_active=True
+        )
+        saving_goal.save()
 
     return redirect(url_for('user.dashboard'))

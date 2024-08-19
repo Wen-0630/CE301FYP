@@ -296,56 +296,7 @@
     </div>
   </div>
 
-  <!-- <div class="col-md-4 col-sm-4 ">
-    <div class="x_panel tile fixed_height_320">
-      <div class="x_title">
-        <h2>Saving Goals</h2>
-        <ul class="nav navbar-right panel_toolbox">
-          <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-          </li>
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <a class="dropdown-item" href="#">Edit</a>
-              </div>
-          </li>
-          <li><a class="close-link"><i class="fa fa-close"></i></a>
-          </li>
-        </ul>
-        <div class="clearfix"></div>
-      </div>
-      <div class="x_content">
-        <div class="dashboard-widget-content">
-          <ul class="quick-list">
-            <li><i class="fa fa-calendar-o"></i><a href="#">Settings</a>
-            </li>
-            <li><i class="fa fa-bars"></i><a href="#">Subscription</a>
-            </li>
-            <li><i class="fa fa-bar-chart"></i><a href="#">Auto Renewal</a> </li>
-            <li><i class="fa fa-line-chart"></i><a href="#">Achievements</a>
-            </li>
-            <li><i class="fa fa-bar-chart"></i><a href="#">Auto Renewal</a> </li>
-            <li><i class="fa fa-line-chart"></i><a href="#">Achievements</a>
-            </li>
-            <li><i class="fa fa-area-chart"></i><a href="#">Logout</a>
-            </li>
-          </ul>
-
-          <div class="sidebar-widget">
-              <h4>Goal</h4>
-              <canvas width="150" height="80" id="chart_gauge_01" class="" style="width: 160px; height: 100px;"></canvas>
-              <div class="goal-wrapper">
-                <span class="gauge-value pull-left">$</span>
-                <span id="gauge-text2" class="gauge-value pull-left">10</span>
-                <span id="goal-text" class="goal-value pull-right">$100</span>
-              </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div> -->
-
-  <div class="col-md-4 col-sm-4 ">
+  <div class="col-md-4 col-sm-4">
       <div class="x_panel tile fixed_height_320">
           <div class="x_title">
               <h2>Saving Goals</h2>
@@ -363,24 +314,47 @@
           </div>
           <div class="x_content">
               <div class="dashboard-widget-content">
-                  {% for goal in saving_goals %}
-                  <div style="display: flex; align-items: center;">
-                      <div class="goal-info" style="flex: 1; padding-right: 10px;">
-                          <p><i class="fa fa-calendar-alt"></i> <strong>Target Date:</strong><br> {{ goal.target_date.strftime('%B %d, %Y') }}</p>
-                          <p><i class="fa fa-check-circle"></i> <strong>Completed:</strong><br> {{ ((goal.current_amount / goal.target_amount) * 100) | format_currency }}%</p>
-                          <p><i class="fa fa-hourglass-half"></i> <strong>Time Left:</strong><br> {{ (goal.target_date - datetime.datetime.utcnow()).days | max(0) }} days</p>
-                      </div>
+                  {% if saving_goals %}
+                      {% for goal in saving_goals %}
+                      <div style="display: flex; align-items: center;">
+                          <div class="goal-info" style="flex: 1; padding-right: 10px;">
+                              <p>
+                                  <i class="fa fa-calendar-alt"></i> 
+                                  <strong>Target Date:</strong><br> 
+                                  {{ goal.target_date.strftime('%B %d, %Y') }}
+                              </p>
+                              <p>
+                                  <i class="fa fa-check-circle"></i> 
+                                  <strong>Completed:</strong><br> 
+                                  {% if goal.target_amount > 0 %}
+                                      {{ ((goal.current_amount / goal.target_amount) * 100) | min_value(100) | format_currency }}%
+                                  {% else %}
+                                      0%
+                                  {% endif %}
+                              </p>
+                              <p>
+                                  <i class="fa fa-hourglass-half"></i> 
+                                  <strong>Time Left:</strong><br> 
+                                  {{ (goal.target_date - datetime.datetime.utcnow()).days | max(0) }} days
+                              </p>
+                          </div>
 
-                      <div class="sidebar-widget" style="flex: 1;">
-                          <h4>{{ goal.name }}</h4>
-                          <canvas width="150" height="100" id="chart_gauge_01" class="gauge-chart" data-max-value="{{ goal.target_amount }}" data-current-value="{{ goal.current_amount }}"></canvas>
-                          <div class="goal-wrapper">
-                              <span id="gauge-text2" class="gauge-value pull-left">${{ goal.current_amount | format_currency}}</span>
-                              <span id="goal-text" class="goal-value pull-right">${{ goal.target_amount | format_currency}}</span>
+                          <div class="sidebar-widget" style="flex: 1;">
+                              <h4>{{ goal.name }}</h4>
+                              <canvas width="150" height="100" id="chart_gauge_01" class="gauge-chart" 
+                                  data-max-value="{{ 100 }}" 
+                                  data-current-value="{{ ((goal.current_amount / goal.target_amount) * 100) | min_value(100) }}">
+                              </canvas>
+                              <div class="goal-wrapper">
+                                  <span class="gauge-value pull-left">${{ goal.current_amount | format_currency }}</span>
+                                  <span class="goal-value pull-right">${{ goal.target_amount | format_currency }}</span>
+                              </div>
                           </div>
                       </div>
-                  </div>
-                  {% endfor %}
+                      {% endfor %}
+                  {% else %}
+                      <p>No active saving goals. Please set a saving goal.</p>
+                  {% endif %}
               </div>
           </div>
       </div>
@@ -391,38 +365,98 @@
   <!-- Edit Saving Goal Modal -->
   <div id="editSavingGoalModal" class="modal fade" role="dialog">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title">Edit Saving Goal</h4>
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Edit Saving Goal</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <form action="{{ url_for('saving_goals.edit_saving_goal') }}" method="POST" id="savingGoalForm">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="target-amount">Target Amount:</label>
+                        <input type="number" class="form-control" id="target-amount" name="target_amount">
+                    </div>
+                    <div class="form-group">
+                        <label for="target-date">Target Date:</label>
+                        <input type="date" class="form-control" id="target-date" name="target_date">
+                    </div>
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="automaticSavingGoal" name="automatic_saving_goal">
+                        <label class="form-check-label" for="automaticSavingGoal">Automatic Saving Goal</label>
+                        <small class="form-text text-muted">
+                            If checked, the system will automatically calculate the target amount and target date.
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
         </div>
-        <form action="{{ url_for('saving_goals.edit_saving_goal') }}" method="POST">
-          <div class="modal-body">
-            <div class="form-group">
-              <label for="target-amount">Target Amount:</label>
-              <input type="number" class="form-control" id="target-amount" name="target_amount" required>
-            </div>
-            <div class="form-group">
-              <label for="target-date">Target Date:</label>
-              <input type="date" class="form-control" id="target-date" name="target_date" required>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-primary">Save</button>
-          </div>
-        </form>
-      </div>
     </div>
   </div>
+
+  <script>
+    document.getElementById('automaticSavingGoal').addEventListener('change', function() {
+        const targetAmount = document.getElementById('target-amount');
+        const targetDate = document.getElementById('target-date');
+        
+        if (this.checked) {
+            // Clear and disable the target amount and target date fields
+            targetAmount.value = '';
+            targetAmount.disabled = true;
+            targetAmount.removeAttribute('required');
+            
+            targetDate.value = '';
+            targetDate.disabled = true;
+            targetDate.removeAttribute('required');
+        } else {
+            // Enable the target amount and target date fields
+            targetAmount.disabled = false;
+            targetAmount.setAttribute('required', 'required');
+            
+            targetDate.disabled = false;
+            targetDate.setAttribute('required', 'required');
+        }
+    });
+
+    document.getElementById('target-amount').addEventListener('input', function() {
+        const automaticSavingGoal = document.getElementById('automaticSavingGoal');
+        
+        if (this.value) {
+            // Uncheck and disable the automatic saving goal checkbox if target amount is filled
+            automaticSavingGoal.checked = false;
+            automaticSavingGoal.disabled = true;
+        } else {
+            // Enable the automatic saving goal checkbox if target amount is empty
+            automaticSavingGoal.disabled = false;
+        }
+    });
+
+    document.getElementById('target-date').addEventListener('input', function() {
+        const automaticSavingGoal = document.getElementById('automaticSavingGoal');
+        
+        if (this.value) {
+            // Uncheck and disable the automatic saving goal checkbox if target date is filled
+            automaticSavingGoal.checked = false;
+            automaticSavingGoal.disabled = true;
+        } else {
+            // Enable the automatic saving goal checkbox if target date is empty
+            automaticSavingGoal.disabled = false;
+        }
+    });
+  </script>
+
+
 
 
 </div>
 
-<!-- <div class="row">
+<div class="row">
   <div class="col-md-4 col-sm-4 ">
     <div class="x_panel">
       <div class="x_title">
-        <h2>Recent Activities <small>Sessions</small></h2>
+        <h2>To Do List <small>Sample tasks</small></h2>
         <ul class="nav navbar-right panel_toolbox">
           <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
           </li>
@@ -439,64 +473,44 @@
         <div class="clearfix"></div>
       </div>
       <div class="x_content">
-        <div class="dashboard-widget-content">
 
-          <ul class="list-unstyled timeline widget">
+        <div class="">
+          <ul class="to_do">
             <li>
-              <div class="block">
-                <div class="block_content">
-                  <h2 class="title">
-                    <a>Who Needs Sundance When You’ve Got Crowdfunding?</a>
-                  </h2>
-                  <div class="byline">
-                    <span>13 hours ago</span> by <a>Jane Smith</a>
-                  </div>
-                  <p class="excerpt">Film festivals used to be do-or-die moments for movie makers. They were where you met the producers that could fund your project, and if the buyers liked your flick, they’d pay to Fast-forward and… <a>Read More</a>
-                  </p>
-                </div>
-              </div>
+              <p>
+                <input type="checkbox" class="flat"> Schedule meeting with new client </p>
             </li>
             <li>
-              <div class="block">
-                <div class="block_content">
-                  <h2 class="title">
-                    <a>Who Needs Sundance When You’ve Got Crowdfunding?</a>
-                  </h2>
-                  <div class="byline">
-                    <span>13 hours ago</span> by <a>Jane Smith</a>
-                  </div>
-                  <p class="excerpt">Film festivals used to be do-or-die moments for movie makers. They were where you met the producers that could fund your project, and if the buyers liked your flick, they’d pay to Fast-forward and… <a>Read More</a>
-                  </p>
-                </div>
-              </div>
+              <p>
+                <input type="checkbox" class="flat"> Create email address for new intern</p>
             </li>
             <li>
-              <div class="block">
-                <div class="block_content">
-                  <h2 class="title">
-                    <a>Who Needs Sundance When You’ve Got Crowdfunding?</a>
-                  </h2>
-                  <div class="byline">
-                    <span>13 hours ago</span> by <a>Jane Smith</a>
-                  </div>
-                  <p class="excerpt">Film festivals used to be do-or-die moments for movie makers. They were where you met the producers that could fund your project, and if the buyers liked your flick, they’d pay to Fast-forward and… <a>Read More</a>
-                  </p>
-                </div>
-              </div>
+              <p>
+                <input type="checkbox" class="flat"> Have IT fix the network printer</p>
             </li>
             <li>
-              <div class="block">
-                <div class="block_content">
-                  <h2 class="title">
-                    <a>Who Needs Sundance When You’ve Got Crowdfunding?</a>
-                  </h2>
-                  <div class="byline">
-                    <span>13 hours ago</span> by <a>Jane Smith</a>
-                  </div>
-                  <p class="excerpt">Film festivals used to be do-or-die moments for movie makers. They were where you met the producers that could fund your project, and if the buyers liked your flick, they’d pay to Fast-forward and… <a>Read More</a>
-                  </p>
-                </div>
-              </div>
+              <p>
+                <input type="checkbox" class="flat"> Copy backups to offsite location</p>
+            </li>
+            <li>
+              <p>
+                <input type="checkbox" class="flat"> Food truck fixie locavors mcsweeney</p>
+            </li>
+            <li>
+              <p>
+                <input type="checkbox" class="flat"> Food truck fixie locavors mcsweeney</p>
+            </li>
+            <li>
+              <p>
+                <input type="checkbox" class="flat"> Create email address for new intern</p>
+            </li>
+            <li>
+              <p>
+                <input type="checkbox" class="flat"> Have IT fix the network printer</p>
+            </li>
+            <li>
+              <p>
+                <input type="checkbox" class="flat"> Copy backups to offsite location</p>
             </li>
           </ul>
         </div>
@@ -504,240 +518,57 @@
     </div>
   </div>
 
-  <div class="col-md-8 col-sm-8 ">
-    <div class="row">
-
-      <div class="col-md-12 col-sm-12 ">
-        <div class="x_panel">
-          <div class="x_title">
-            <h2>Visitors location <small>geo-presentation</small></h2>
-            <ul class="nav navbar-right panel_toolbox">
-              <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-              </li>
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item" href="#">Settings 1</a>
-                    <a class="dropdown-item" href="#">Settings 2</a>
-                  </div>
-              </li>
-              <li><a class="close-link"><i class="fa fa-close"></i></a>
-              </li>
-            </ul>
-            <div class="clearfix"></div>
-          </div>
-          <div class="x_content">
-            <div class="dashboard-widget-content">
-              <div class="col-md-4 hidden-small">
-                <h2 class="line_30">125.7k Views from 60 countries</h2>
-
-                <table class="countries_list">
-                  <tbody>
-                    <tr>
-                      <td>United States</td>
-                      <td class="fs15 fw700 text-right">33%</td>
-                    </tr>
-                    <tr>
-                      <td>France</td>
-                      <td class="fs15 fw700 text-right">27%</td>
-                    </tr>
-                    <tr>
-                      <td>Germany</td>
-                      <td class="fs15 fw700 text-right">16%</td>
-                    </tr>
-                    <tr>
-                      <td>Spain</td>
-                      <td class="fs15 fw700 text-right">11%</td>
-                    </tr>
-                    <tr>
-                      <td>Britain</td>
-                      <td class="fs15 fw700 text-right">10%</td>
-                    </tr>
-                  </tbody>
-                </table>
+  <div class="col-md-4 col-sm-4  ">
+    <div class="x_panel">
+      <div class="x_title">
+        <h2>Sonar</h2>
+        <ul class="nav navbar-right panel_toolbox">
+          <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+          </li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" href="#">Settings 1</a>
+                <a class="dropdown-item" href="#">Settings 2</a>
               </div>
-              <div id="world-map-gdp" class="col-md-8 col-sm-12 " style="height:230px;"></div>
-            </div>
-          </div>
-        </div>
+          </li>
+          <li><a class="close-link"><i class="fa fa-close"></i></a>
+          </li>
+        </ul>
+        <div class="clearfix"></div>
       </div>
+      <div class="x_content">
 
-    </div>
-    <div class="row">
-
-      Start to do list
-      <div class="col-md-6 col-sm-6 ">
-        <div class="x_panel">
-          <div class="x_title">
-            <h2>To Do List <small>Sample tasks</small></h2>
-            <ul class="nav navbar-right panel_toolbox">
-              <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-              </li>
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item" href="#">Settings 1</a>
-                    <a class="dropdown-item" href="#">Settings 2</a>
-                  </div>
-              </li>
-              <li><a class="close-link"><i class="fa fa-close"></i></a>
-              </li>
-            </ul>
-            <div class="clearfix"></div>
-          </div>
-          <div class="x_content">
-
-            <div class="">
-              <ul class="to_do">
-                <li>
-                  <p>
-                    <input type="checkbox" class="flat"> Schedule meeting with new client </p>
-                </li>
-                <li>
-                  <p>
-                    <input type="checkbox" class="flat"> Create email address for new intern</p>
-                </li>
-                <li>
-                  <p>
-                    <input type="checkbox" class="flat"> Have IT fix the network printer</p>
-                </li>
-                <li>
-                  <p>
-                    <input type="checkbox" class="flat"> Copy backups to offsite location</p>
-                </li>
-                <li>
-                  <p>
-                    <input type="checkbox" class="flat"> Food truck fixie locavors mcsweeney</p>
-                </li>
-                <li>
-                  <p>
-                    <input type="checkbox" class="flat"> Food truck fixie locavors mcsweeney</p>
-                </li>
-                <li>
-                  <p>
-                    <input type="checkbox" class="flat"> Create email address for new intern</p>
-                </li>
-                <li>
-                  <p>
-                    <input type="checkbox" class="flat"> Have IT fix the network printer</p>
-                </li>
-                <li>
-                  <p>
-                    <input type="checkbox" class="flat"> Copy backups to offsite location</p>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-      End to do list
-
-      start of weather widget
-      <div class="col-md-6 col-sm-6 ">
-        <div class="x_panel">
-          <div class="x_title">
-            <h2>Daily active users <small>Sessions</small></h2>
-            <ul class="nav navbar-right panel_toolbox">
-              <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-              </li>
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item" href="#">Settings 1</a>
-                    <a class="dropdown-item" href="#">Settings 2</a>
-                  </div>
-              </li>
-              <li><a class="close-link"><i class="fa fa-close"></i></a>
-              </li>
-            </ul>
-            <div class="clearfix"></div>
-          </div>
-          <div class="x_content">
-            <div class="row">
-              <div class="col-sm-12">
-                <div class="temperature"><b>Monday</b>, 07:30 AM
-                  <span>F</span>
-                  <span><b>C</b></span>
-                </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-sm-4">
-                <div class="weather-icon">
-                  <canvas height="84" width="84" id="partly-cloudy-day"></canvas>
-                </div>
-              </div>
-              <div class="col-sm-8">
-                <div class="weather-text">
-                  <h2>Texas <br><i>Partly Cloudy Day</i></h2>
-                </div>
-              </div>
-            </div>
-            <div class="col-sm-12">
-              <div class="weather-text pull-right">
-                <h3 class="degrees">23</h3>
-              </div>
-            </div>
-
-            <div class="clearfix"></div>
-
-            <div class="row weather-days">
-              <div class="col-sm-2">
-                <div class="daily-weather">
-                  <h2 class="day">Mon</h2>
-                  <h3 class="degrees">25</h3>
-                  <canvas id="clear-day" width="32" height="32"></canvas>
-                  <h5>15 <i>km/h</i></h5>
-                </div>
-              </div>
-              <div class="col-sm-2">
-                <div class="daily-weather">
-                  <h2 class="day">Tue</h2>
-                  <h3 class="degrees">25</h3>
-                  <canvas height="32" width="32" id="rain"></canvas>
-                  <h5>12 <i>km/h</i></h5>
-                </div>
-              </div>
-              <div class="col-sm-2">
-                <div class="daily-weather">
-                  <h2 class="day">Wed</h2>
-                  <h3 class="degrees">27</h3>
-                  <canvas height="32" width="32" id="snow"></canvas>
-                  <h5>14 <i>km/h</i></h5>
-                </div>
-              </div>
-              <div class="col-sm-2">
-                <div class="daily-weather">
-                  <h2 class="day">Thu</h2>
-                  <h3 class="degrees">28</h3>
-                  <canvas height="32" width="32" id="sleet"></canvas>
-                  <h5>15 <i>km/h</i></h5>
-                </div>
-              </div>
-              <div class="col-sm-2">
-                <div class="daily-weather">
-                  <h2 class="day">Fri</h2>
-                  <h3 class="degrees">28</h3>
-                  <canvas height="32" width="32" id="wind"></canvas>
-                  <h5>11 <i>km/h</i></h5>
-                </div>
-              </div>
-              <div class="col-sm-2">
-                <div class="daily-weather">
-                  <h2 class="day">Sat</h2>
-                  <h3 class="degrees">26</h3>
-                  <canvas height="32" width="32" id="cloudy"></canvas>
-                  <h5>10 <i>km/h</i></h5>
-                </div>
-              </div>
-              <div class="clearfix"></div>
-            </div>
-          </div>
-        </div>
+        <div id="echart_sonar" style="height:370px;"></div>
 
       </div>
-      end of weather widget
     </div>
   </div>
-</div> -->
+
+  <div class="col-md-4 col-sm-4  ">
+    <div class="x_panel">
+      <div class="x_title">
+        <h2>Gauge</h2>
+        <ul class="nav navbar-right panel_toolbox">
+          <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+          </li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" href="#">Settings 1</a>
+                <a class="dropdown-item" href="#">Settings 2</a>
+              </div>
+          </li>
+          <li><a class="close-link"><i class="fa fa-close"></i></a>
+          </li>
+        </ul>
+        <div class="clearfix"></div>
+      </div>
+      <div class="x_content">
+        <div id="echart_gauge" style="height:370px;"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
 {% endblock %}

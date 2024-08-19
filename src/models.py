@@ -1,6 +1,7 @@
 from flask import current_app
 from bson.objectid import ObjectId
-import datetime
+from datetime import datetime, timedelta
+import pytz
 
 class Transaction:
     def __init__(self, userId, type, category, amount, date, description, payment_method=None, repayment_status='Pending',loan_name=None):
@@ -204,14 +205,15 @@ class Loan:
         return {item['_id']: item['total_loan_expense'] for item in result}
 
 class SavingGoal:
-    def __init__(self, user_id, name, target_amount, target_date, current_amount=0, is_active=True):
+    def __init__(self, user_id, name, target_amount=None, target_date=None, current_amount=0, is_active=True, is_automatic=False):
         self.user_id = ObjectId(user_id) if isinstance(user_id, str) else user_id
         self.name = name
         self.target_amount = target_amount
         self.current_amount = current_amount
-        self.creation_date = datetime.datetime.utcnow()
+        self.creation_date = datetime.utcnow()
         self.target_date = target_date
         self.is_active = is_active
+        self.is_automatic = is_automatic
 
     def save(self):
         goal = {
@@ -221,7 +223,8 @@ class SavingGoal:
             'current_amount': self.current_amount,
             'creation_date': self.creation_date,
             'target_date': self.target_date,
-            'is_active': self.is_active
+            'is_active': self.is_active,
+            'is_automatic': self.is_automatic
         }
         result = current_app.mongo.db.saving_goals.insert_one(goal)
         return result.inserted_id
@@ -306,3 +309,82 @@ class SavingGoal:
         SavingGoal.update_goal(goal_id, {"current_amount": current_amount})
 
         return current_amount
+    
+    @staticmethod
+    def calculate_automatic_target_amount(user_id):
+        # Get the current UTC datetime
+        current_date = datetime.utcnow()
+
+        # Get the first and last day of the current month
+        start_date = current_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.UTC)
+        if current_date.month == 12:
+            end_date = current_date.replace(year=current_date.year + 1, month=1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.UTC)
+        else:
+            end_date = current_date.replace(month=current_date.month + 1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.UTC)
+
+        # Ensure userId is an ObjectId
+        user_id = ObjectId(user_id) if isinstance(user_id, str) else user_id
+
+        # Debugging print to check start_date and end_date
+        print(f"Start Date: {start_date.isoformat()}, End Date: {end_date.isoformat()}")
+
+        # MongoDB query to match transactions in the current month
+        income_pipeline = [
+            {"$match": {
+                "userId": user_id,
+                "type": "Income",
+                "date": {"$gte": start_date, "$lt": end_date}
+            }},
+            {"$group": {"_id": None, "total_income": {"$sum": "$amount"}}}
+        ]
+
+        # Execute the pipeline and capture the result
+        income_result = list(current_app.mongo.db.transactions.aggregate(income_pipeline))
+
+        # Debugging output to verify the pipeline result
+        print("Income Pipeline Results:", income_result)
+
+        # Calculate total income and return 20% of it
+        total_income = income_result[0]['total_income'] if income_result else 0
+        return total_income * 0.2
+
+    @staticmethod
+    def calculate_automatic_current_amount(user_id):
+        current_date = datetime.utcnow()
+        current_month = current_date.month
+        year = current_date.year
+
+        # Calculate total income
+        income_pipeline = [
+            {"$match": {
+                "userId": user_id,
+                "type": "Income",
+                "date": {"$gte": datetime(year, current_month, 1), "$lt": datetime(year, current_month + 1, 1)}
+            }},
+            {"$group": {"_id": None, "total_income": {"$sum": "$amount"}}}
+        ]
+        income_result = list(current_app.mongo.db.transactions.aggregate(income_pipeline))
+        total_income = income_result[0]['total_income'] if income_result else 0
+
+        # Calculate total expense
+        expense_pipeline = [
+            {"$match": {
+                "userId": user_id,
+                "type": "Expense",
+                "date": {"$gte": datetime(year, current_month, 1), "$lt": datetime(year, current_month + 1, 1)}
+            }},
+            {"$group": {"_id": None, "total_expense": {"$sum": "$amount"}}}
+        ]
+        expense_result = list(current_app.mongo.db.transactions.aggregate(expense_pipeline))
+        total_expense = expense_result[0]['total_expense'] if expense_result else 0
+
+        # Calculate net income
+        return max(0, total_income - total_expense)
+
+
+    @staticmethod
+    def set_automatic_target_date():
+        now = datetime.utcnow()  # Use datetime.utcnow() directly
+        first_of_next_month = datetime(now.year, now.month + 1, 1) if now.month < 12 else datetime(now.year + 1, 1, 1)
+        last_day_of_current_month = first_of_next_month - timedelta(days=1)
+        return last_day_of_current_month
