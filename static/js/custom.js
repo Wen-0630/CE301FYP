@@ -199,6 +199,8 @@ function init_echarts() {
 
     // echart Gauge
     if ($('#echart_gauge').length) {
+        var incomeExpenseRatio = $('#echart_gauge').data('ratio');
+
         var echartGauge = echarts.init(document.getElementById('echart_gauge'), theme);
 
         echartGauge.setOption({
@@ -219,23 +221,23 @@ function init_echarts() {
                 }
             },
             series: [{
-                name: 'Performance',
+                name: 'Income vs. Expense Ratio',
                 type: 'gauge',
                 center: ['50%', '50%'],
                 startAngle: 140,
                 endAngle: -140,
                 min: 0,
-                max: 100,
+                max: 200,
                 precision: 0,
                 splitNumber: 10,
                 axisLine: {
                     show: true,
                     lineStyle: {
                         color: [
-                            [0.2, 'lightgreen'],
-                            [0.4, 'orange'],
-                            [0.8, 'skyblue'],
-                            [1, '#ff4500']
+                            [0.3, 'lightgreen'], // Green Zone
+                            [0.5, 'orange'],     // Yellow Zone
+                            [0.7, 'skyblue'],    // Blue Zone
+                            [1, '#ff4500']       // Red Zone
                         ],
                         width: 30
                     }
@@ -253,18 +255,12 @@ function init_echarts() {
                 axisLabel: {
                     show: true,
                     formatter: function (v) {
-                        switch (v + '') {
-                            case '10':
-                                return 'a';
-                            case '30':
-                                return 'b';
-                            case '60':
-                                return 'c';
-                            case '90':
-                                return 'd';
-                            default:
-                                return '';
-                        }
+                        if (v === 0) return 'Surplus';
+                        if (v === 80) return 'Catching';
+                        if (v === 100) return 'Break-even';
+                        if (v === 120) return 'Mild Deficit';
+                        if (v === 200) return 'Critical Deficit';
+                        return '';
                     },
                     textStyle: {
                         color: '#333'
@@ -303,12 +299,12 @@ function init_echarts() {
                     formatter: '{value}%',
                     textStyle: {
                         color: 'auto',
-                        fontSize: 30
+                        fontSize: 20
                     }
                 },
                 data: [{
-                    value: 50,
-                    name: 'Performance'
+                    value: incomeExpenseRatio,
+                    name: 'Income vs. Expense'
                 }]
             }]
         });

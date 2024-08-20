@@ -40,6 +40,11 @@ def dashboard():
     for goal in saving_goals:
         # Update the current amount before rendering the dashboard
         SavingGoal.calculate_current_amount(goal['_id'], user_id)
+
+    if total_expense > 0:
+        income_expense_ratio = round((total_expense / total_income) * 100, 2)
+    else:
+        income_expense_ratio = 100.00
     
     return render_template('dashboard.html', 
                            total_income=total_income, 
@@ -49,6 +54,7 @@ def dashboard():
                            net_cash_flow=net_cash_flow,
                            net_worth=net_worth,
                            saving_goals=saving_goals,
+                           income_expense_ratio=income_expense_ratio,
                            datetime=datetime)
 
 @views.route('/transactions')
