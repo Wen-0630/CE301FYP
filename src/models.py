@@ -388,3 +388,51 @@ class SavingGoal:
         first_of_next_month = datetime(now.year, now.month + 1, 1) if now.month < 12 else datetime(now.year + 1, 1, 1)
         last_day_of_current_month = first_of_next_month - timedelta(days=1)
         return last_day_of_current_month
+    
+class Budget:
+    def __init__(self, userId, start_date, end_date, categories, budget_amounts=None):
+        self.userId = ObjectId(userId) if isinstance(userId, str) else userId
+        self.start_date = start_date
+        self.end_date = end_date
+        self.categories = categories
+        self.budget_amounts = budget_amounts or {}
+        self.created_at = datetime.utcnow()
+
+    def to_dict(self):
+        return {
+            'userId': self.userId,
+            'start_date': self.start_date,
+            'end_date': self.end_date,
+            'categories': self.categories,
+            'budget_amounts': self.budget_amounts,
+            'created_at': self.created_at
+        }
+
+    def save(self):
+        budget_data = self.to_dict()
+        result = current_app.mongo.db.budgets.insert_one(budget_data)
+        return result
+
+    @staticmethod
+    def get_latest_budget_by_user(userId):
+        userId = ObjectId(userId) if isinstance(userId, str) else userId
+        budget = current_app.mongo.db.budgets.find({'userId': userId}).sort('created_at', -1).limit(1)
+        return budget[0] if budget else None
+
+    @staticmethod
+    def get_budget_by_user_and_date(userId, start_date, end_date):
+        userId = ObjectId(userId) if isinstance(userId, str) else userId
+        budget = current_app.mongo.db.budgets.find_one({
+            'userId': userId,
+            'start_date': {'$lte': start_date},
+            'end_date': {'$gte': end_date}
+        })
+        return budget
+
+    @staticmethod
+    def update_budget(budget_id, data):
+        current_app.mongo.db.budgets.update_one({'_id': ObjectId(budget_id)}, {"$set": data})
+
+    @staticmethod
+    def delete_budget(budget_id):
+        current_app.mongo.db.budgets.delete_one({'_id': ObjectId(budget_id)})

@@ -359,97 +359,6 @@
           </div>
       </div>
   </div>
-
-
-
-  <!-- Edit Saving Goal Modal -->
-  <div id="editSavingGoalModal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Edit Saving Goal</h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-            </div>
-            <form action="{{ url_for('saving_goals.edit_saving_goal') }}" method="POST" id="savingGoalForm">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="target-amount">Target Amount:</label>
-                        <input type="number" class="form-control" id="target-amount" name="target_amount">
-                    </div>
-                    <div class="form-group">
-                        <label for="target-date">Target Date:</label>
-                        <input type="date" class="form-control" id="target-date" name="target_date">
-                    </div>
-                    <div class="form-group form-check">
-                        <input type="checkbox" class="form-check-input" id="automaticSavingGoal" name="automatic_saving_goal">
-                        <label class="form-check-label" for="automaticSavingGoal">Automatic Saving Goal</label>
-                        <small class="form-text text-muted">
-                            If checked, the system will automatically calculate the target amount and target date.
-                        </small>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </div>
-            </form>
-        </div>
-    </div>
-  </div>
-
-  <script>
-    document.getElementById('automaticSavingGoal').addEventListener('change', function() {
-        const targetAmount = document.getElementById('target-amount');
-        const targetDate = document.getElementById('target-date');
-        
-        if (this.checked) {
-            // Clear and disable the target amount and target date fields
-            targetAmount.value = '';
-            targetAmount.disabled = true;
-            targetAmount.removeAttribute('required');
-            
-            targetDate.value = '';
-            targetDate.disabled = true;
-            targetDate.removeAttribute('required');
-        } else {
-            // Enable the target amount and target date fields
-            targetAmount.disabled = false;
-            targetAmount.setAttribute('required', 'required');
-            
-            targetDate.disabled = false;
-            targetDate.setAttribute('required', 'required');
-        }
-    });
-
-    document.getElementById('target-amount').addEventListener('input', function() {
-        const automaticSavingGoal = document.getElementById('automaticSavingGoal');
-        
-        if (this.value) {
-            // Uncheck and disable the automatic saving goal checkbox if target amount is filled
-            automaticSavingGoal.checked = false;
-            automaticSavingGoal.disabled = true;
-        } else {
-            // Enable the automatic saving goal checkbox if target amount is empty
-            automaticSavingGoal.disabled = false;
-        }
-    });
-
-    document.getElementById('target-date').addEventListener('input', function() {
-        const automaticSavingGoal = document.getElementById('automaticSavingGoal');
-        
-        if (this.value) {
-            // Uncheck and disable the automatic saving goal checkbox if target date is filled
-            automaticSavingGoal.checked = false;
-            automaticSavingGoal.disabled = true;
-        } else {
-            // Enable the automatic saving goal checkbox if target date is empty
-            automaticSavingGoal.disabled = false;
-        }
-    });
-  </script>
-
-
-
-
 </div>
 
 <div class="row">
@@ -521,15 +430,14 @@
   <div class="col-md-4 col-sm-4  ">
     <div class="x_panel">
       <div class="x_title">
-        <h2>Sonar</h2>
+        <h2>Budget vs. Actual Spending</h2>
         <ul class="nav navbar-right panel_toolbox">
           <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
           </li>
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <a class="dropdown-item" href="#">Settings 1</a>
-                <a class="dropdown-item" href="#">Settings 2</a>
+              <a class="dropdown-item" href="#" data-toggle="modal" data-target="#editBudgetModal">Edit Budget</a>
               </div>
           </li>
           <li><a class="close-link"><i class="fa fa-close"></i></a>
@@ -538,9 +446,7 @@
         <div class="clearfix"></div>
       </div>
       <div class="x_content">
-
         <div id="echart_sonar" style="height:370px;"></div>
-
       </div>
     </div>
   </div>
@@ -569,6 +475,151 @@
       </div>
     </div>
   </div>
-
 </div>
+
+<!-- Edit Saving Goal Modal -->
+<div id="editSavingGoalModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h4 class="modal-title">Edit Saving Goal</h4>
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <form action="{{ url_for('saving_goals.edit_saving_goal') }}" method="POST" id="savingGoalForm">
+              <div class="modal-body">
+                  <div class="form-group">
+                      <label for="target-amount">Target Amount:</label>
+                      <input type="number" class="form-control" id="target-amount" name="target_amount">
+                  </div>
+                  <div class="form-group">
+                      <label for="target-date">Target Date:</label>
+                      <input type="date" class="form-control" id="target-date" name="target_date">
+                  </div>
+                  <div class="form-group form-check">
+                      <input type="checkbox" class="form-check-input" id="automaticSavingGoal" name="automatic_saving_goal">
+                      <label class="form-check-label" for="automaticSavingGoal">Automatic Saving Goal</label>
+                      <small class="form-text text-muted">
+                          If checked, the system will automatically calculate the target amount and target date.
+                      </small>
+                  </div>
+              </div>
+              <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary">Save</button>
+              </div>
+          </form>
+      </div>
+  </div>
+</div>
+
+<!-- Budget Edit Modal -->
+<div id="editBudgetModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Edit Budget</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form action="{{ url_for('budget.save_budget') }}" method="POST">
+          <div class="form-group">
+            <label for="start-date">Start Date:</label>
+            <input type="date" class="form-control" id="start-date" name="start_date" required>
+          </div>
+          <div class="form-group">
+            <label for="end-date">End Date:</label>
+            <input type="date" class="form-control" id="end-date" name="end_date" required>
+          </div>
+          <div class="form-group">
+            <label for="categories">Please input budget amounts for at least 3 categories:</label>
+            <div id="categoryList">
+              <!-- Directly include the input fields here -->
+              <div class="form-group">
+                <label for="budget_Food">Food:</label>
+                <input type="number" class="form-control" name="budget_Food" placeholder="Enter budget for Food" min="0">
+              </div>
+              <div class="form-group">
+                <label for="budget_Shopping">Shopping:</label>
+                <input type="number" class="form-control" name="budget_Shopping" placeholder="Enter budget for Shopping" min="0">
+              </div>
+              <div class="form-group">
+                <label for="budget_Transport">Transport:</label>
+                <input type="number" class="form-control" name="budget_Transport" placeholder="Enter budget for Transport" min="0">
+              </div>
+              <div class="form-group">
+                <label for="budget_Interest Expense">Interest Expense:</label>
+                <input type="number" class="form-control" name="budget_Interest Expense" placeholder="Enter budget for Interest Expense" min="0">
+              </div>
+              <div class="form-group">
+                <label for="budget_Loan Expense">Loan Expense:</label>
+                <input type="number" class="form-control" name="budget_Loan Expense" placeholder="Enter budget for Loan Expense" min="0">
+              </div>
+              <div class="form-group">
+                <label for="budget_Other">Other:</label>
+                <input type="number" class="form-control" name="budget_Other" placeholder="Enter budget for Other" min="0">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Save Budget</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById('automaticSavingGoal').addEventListener('change', function() {
+      const targetAmount = document.getElementById('target-amount');
+      const targetDate = document.getElementById('target-date');
+      
+      if (this.checked) {
+          // Clear and disable the target amount and target date fields
+          targetAmount.value = '';
+          targetAmount.disabled = true;
+          targetAmount.removeAttribute('required');
+          
+          targetDate.value = '';
+          targetDate.disabled = true;
+          targetDate.removeAttribute('required');
+      } else {
+          // Enable the target amount and target date fields
+          targetAmount.disabled = false;
+          targetAmount.setAttribute('required', 'required');
+          
+          targetDate.disabled = false;
+          targetDate.setAttribute('required', 'required');
+      }
+  });
+
+  document.getElementById('target-amount').addEventListener('input', function() {
+      const automaticSavingGoal = document.getElementById('automaticSavingGoal');
+      
+      if (this.value) {
+          // Uncheck and disable the automatic saving goal checkbox if target amount is filled
+          automaticSavingGoal.checked = false;
+          automaticSavingGoal.disabled = true;
+      } else {
+          // Enable the automatic saving goal checkbox if target amount is empty
+          automaticSavingGoal.disabled = false;
+      }
+  });
+
+  document.getElementById('target-date').addEventListener('input', function() {
+      const automaticSavingGoal = document.getElementById('automaticSavingGoal');
+      
+      if (this.value) {
+          // Uncheck and disable the automatic saving goal checkbox if target date is filled
+          automaticSavingGoal.checked = false;
+          automaticSavingGoal.disabled = true;
+      } else {
+          // Enable the automatic saving goal checkbox if target date is empty
+          automaticSavingGoal.disabled = false;
+      }
+  });
+
+</script>
 {% endblock %}

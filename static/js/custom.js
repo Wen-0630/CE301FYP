@@ -42,8 +42,20 @@ function init_gauge() {
                 currentValue = maxValue;
             }
 
-            // Set the gauge value
-            chart_gauge_01.set(currentValue); 
+            // Handle the special case where currentValue is 0
+            if (currentValue === 0) {
+                // Set the gauge value to zero and make sure no extra pointers are added
+                chart_gauge_01.set(0);
+                chart_gauge_01.setOptions({
+                    pointer: {
+                        length: 0.75, 
+                        strokeWidth: 0.042, 
+                        color: '#1D212A' 
+                    }
+                });
+            } else {
+                chart_gauge_01.set(currentValue); 
+            }
 
             // If the completion is 100%, change the color to fully green
             if (currentValue === maxValue) {
@@ -58,6 +70,7 @@ function init_gauge() {
         }
     }
 };
+
 
 function init_echarts() {
 
@@ -130,72 +143,96 @@ function init_echarts() {
         }
     };
 
-    // echart Radar
-    if ($('#echart_sonar').length) {
-        var echartRadar = echarts.init(document.getElementById('echart_sonar'), theme);
+    // Manual verification data for radar chart
+    // var radarData = {
+    //     selected_category_names: ["Food", "Shopping", "Transport"],
+    //     budget_categories: [
+    //         { category_name: "Food", budgeted_amount: 6000, actual_spending: 5000 },
+    //         { category_name: "Shopping", budgeted_amount: 16000, actual_spending: 14000 },
+    //         { category_name: "Transport", budgeted_amount: 30000, actual_spending: 28000 }
+    //     ]
+    // };
 
-        echartRadar.setOption({
-            title: {
-                text: 'Budget vs spending',
-                subtext: 'Subtitle'
-            },
-            tooltip: {
-                trigger: 'item'
-            },
-            legend: {
-                orient: 'vertical',
-                x: 'right',
-                y: 'bottom',
-                data: ['Allocated Budget', 'Actual Spending']
-            },
-            toolbox: {
-                show: true,
-                feature: {
-                    restore: {
-                        show: true,
-                        title: "Restore"
-                    },
-                    saveAsImage: {
-                        show: true,
-                        title: "Save Image"
-                    }
+    // echart Radar
+    $(document).ready(function() {
+        $.ajax({
+            url: "/api/radar_data",
+            type: "GET",
+            dataType: "json",
+            success: function(radarData) {
+                // Check if radarData is properly fetched
+                console.log('Fetched radarData:', radarData);
+                
+                // Proceed to render the radar chart using the fetched data
+                if ($('#echart_sonar').length && radarData) {
+                    var selectedCategories = radarData.indicators
+                        .filter(indicator => indicator.max > 0)  // Only include categories with a non-zero budget
+                        .map(indicator => indicator.text);
+                    
+                    console.log('selectedCategories:', selectedCategories); // Debugging statement to check selectedCategories
+
+                    var indicators = radarData.indicators.filter(indicator => indicator.max > 0);
+                    var actualSpendings = radarData.actual_values.slice(0, indicators.length);
+                    var budgetValues = radarData.budget_values.slice(0, indicators.length);
+
+                    // Format the values to two decimal places
+                    var formattedBudgetValues = budgetValues.map(value => parseFloat(value).toFixed(2));
+                    var formattedActualSpendings = actualSpendings.map(value => parseFloat(value).toFixed(2));
+
+                    var echartRadar = echarts.init(document.getElementById('echart_sonar'), theme);
+
+                    echartRadar.setOption({
+                        title: [
+                            {
+                                text: 'Categories as below:',
+                            },
+                            {
+                                subtext: `From ${radarData.start_date} to ${radarData.end_date}`,
+                                left: 'left',     // Align the subtext to the left
+                                bottom: '0%',     // Position the subtext at the bottom
+                                textAlign: 'left',
+                                subtextStyle: {
+                                    fontSize: 12  // Adjust the font size as needed
+                                }
+                            }
+                        ],
+                        tooltip: {
+                            trigger: 'item'
+                        },
+                        legend: {
+                            orient: 'vertical',
+                            x: 'right',
+                            y: 'bottom',
+                            data: ['Budgeted Amount', 'Actual Spending']
+                        },
+                        polar: [{
+                            indicator: indicators
+                        }],
+                        series: [{
+                            name: 'Budget vs Spending',
+                            type: 'radar',
+                            data: [{
+                                value: formattedBudgetValues,
+                                name: 'Budgeted Amount'
+                            }, {
+                                value: formattedActualSpendings,
+                                name: 'Actual Spending'
+                            }]
+                        }]
+                    });
+                } else {
+                    console.log('No radar data available or no radarData defined.');
                 }
             },
-            polar: [{
-                indicator: [{
-                    text: 'Sales',
-                    max: 6000
-                }, {
-                    text: 'Administration',
-                    max: 16000
-                }, {
-                    text: 'Information Techology',
-                    max: 30000
-                }, {
-                    text: 'Customer Support',
-                    max: 38000
-                }, {
-                    text: 'Development',
-                    max: 52000
-                }, {
-                    text: 'Marketing',
-                    max: 25000
-                }]
-            }],
-            calculable: true,
-            series: [{
-                name: 'Budget vs spending',
-                type: 'radar',
-                data: [{
-                    value: [4300, 10000, 28000, 35000, 50000, 19000],
-                    name: 'Allocated Budget'
-                }, {
-                    value: [5000, 14000, 28000, 31000, 42000, 21000],
-                    name: 'Actual Spending'
-                }]
-            }]
+            error: function(xhr, status, error) {
+                console.error('Error fetching radar data:', error);
+            }
         });
-    }
+    });
+
+    
+
+
 
     // echart Gauge
     if ($('#echart_gauge').length) {
@@ -207,19 +244,19 @@ function init_echarts() {
             tooltip: {
                 formatter: "{a} <br/>{b} : {c}%"
             },
-            toolbox: {
-                show: true,
-                feature: {
-                    restore: {
-                        show: true,
-                        title: "Restore"
-                    },
-                    saveAsImage: {
-                        show: true,
-                        title: "Save Image"
-                    }
-                }
-            },
+            // toolbox: {
+            //     show: true,
+            //     feature: {
+            //         restore: {
+            //             show: true,
+            //             title: "Restore"
+            //         },
+            //         saveAsImage: {
+            //             show: true,
+            //             title: "Save Image"
+            //         }
+            //     }
+            // },
             series: [{
                 name: 'Income vs. Expense Ratio',
                 type: 'gauge',
@@ -263,7 +300,7 @@ function init_echarts() {
                         return '';
                     },
                     textStyle: {
-                        color: '#333'
+                        color: '#ccc'
                     }
                 },
                 splitLine: {

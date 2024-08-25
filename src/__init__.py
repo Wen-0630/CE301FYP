@@ -14,6 +14,7 @@ import certifi
 import logging
 from bson.objectid import ObjectId
 from src.savingGoals import savingGoals_bp
+from src.budget import budget_bp
 
 
 load_dotenv()
@@ -42,6 +43,7 @@ def create_app():
     app.register_blueprint(investment, url_prefix='/')
     app.register_blueprint(cashflow_bp, url_prefix='/')
     app.register_blueprint(savingGoals_bp, url_prefix='/')
+    app.register_blueprint(budget_bp, url_prefix='/')
 
     app.jinja_env.filters['format_currency'] = format_currency
 

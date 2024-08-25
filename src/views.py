@@ -1,12 +1,14 @@
 #src/views.py
-from flask import Blueprint, redirect, url_for, render_template, session, current_app
-from .models import Transaction, Loan, SavingGoal
+from flask import Blueprint, redirect, url_for, render_template, session, current_app, jsonify
+from .models import Transaction, Loan, SavingGoal, Budget
 from bson.objectid import ObjectId
 from .transactions import calculate_total_income, calculate_total_expense
 from .creditCard import get_total_outstanding
 from .investment import calculate_total_investment_profit_loss
 from .cashFlow import get_net_cash_flow
+from .budget import BudgetManager 
 import datetime 
+import json
 
 # Create a Blueprint for user-related routes
 views = Blueprint('user', __name__, template_folder='templates')
@@ -45,7 +47,22 @@ def dashboard():
         income_expense_ratio = round((total_expense / total_income) * 100, 2)
     else:
         income_expense_ratio = 100.00
-    
+
+    budget = BudgetManager.get_latest_budget(user_id)
+
+    if budget:
+        radar_data = BudgetManager.prepare_radar_chart_data(
+            user_id, 
+            budget['categories'], 
+            budget['budget_amounts'], 
+            budget['start_date'], 
+            budget['end_date']
+        )
+    else:
+        radar_data = None
+
+    radar_data_json = json.dumps(radar_data)
+
     return render_template('dashboard.html', 
                            total_income=total_income, 
                            total_expense=total_expense, 
@@ -55,7 +72,8 @@ def dashboard():
                            net_worth=net_worth,
                            saving_goals=saving_goals,
                            income_expense_ratio=income_expense_ratio,
-                           datetime=datetime)
+                           datetime=datetime,
+                           radar_data=radar_data_json)
 
 @views.route('/transactions')
 def transactions():
@@ -93,3 +111,22 @@ def loan():
         loan['outstanding_balance'] = loan['original_amount'] - loan['loan_expense']
     return render_template('loan.html', loans=loans)
 
+@views.route('/api/radar_data', methods=['GET'])
+def get_radar_data():
+    user_id = session['user_id']
+    budget = BudgetManager.get_budget(user_id)
+
+    if budget:
+        radar_data = BudgetManager.prepare_radar_chart_data(
+            user_id, 
+            budget['categories'], 
+            budget['budget_amounts'],
+            budget['start_date'], 
+            budget['end_date']
+        )
+        radar_data['start_date'] = budget['start_date']
+        radar_data['end_date'] = budget['end_date']
+    else:
+        radar_data = {}
+
+    return jsonify(radar_data)
