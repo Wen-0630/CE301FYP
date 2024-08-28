@@ -76,3 +76,20 @@ def send_income_expense_ratio_notification(user_id, income_expense_ratio):
         message = "Alert: Your expenses are significantly higher than your income. It's time to take action!"
     
     send_notification(user_id, message)
+
+def send_budget_vs_spending_notification(user_id, radar_data):
+    """Sends a notification based on budget vs actual spending data."""
+    for i, indicator in enumerate(radar_data["indicators"]):
+        budgeted_amount = radar_data["budget_values"][i]
+        actual_spending = radar_data["actual_values"][i]
+        category = indicator["text"]
+
+        if actual_spending < 0.8 * budgeted_amount:
+            message = f"Great job! Your spending on {category} is well below your budget."
+        elif 0.8 <= actual_spending <= budgeted_amount:
+            message = f"You're on track! Your spending on {category} is within your budget."
+        elif actual_spending > budgeted_amount:
+            message = f"Alert: Your spending on {category} has exceeded your budget!"
+
+        send_notification(user_id, message)
+

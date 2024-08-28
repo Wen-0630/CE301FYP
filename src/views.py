@@ -7,7 +7,7 @@ from .creditCard import get_total_outstanding
 from .investment import calculate_total_investment_profit_loss
 from .cashFlow import get_net_cash_flow
 from .budget import BudgetManager 
-from .notifications import Notification, send_income_expense_ratio_notification
+from .notifications import Notification, send_income_expense_ratio_notification, send_budget_vs_spending_notification
 import datetime 
 import json
 
@@ -61,6 +61,7 @@ def dashboard():
             budget['start_date'], 
             budget['end_date']
         )
+        send_budget_vs_spending_notification(user_id, radar_data)
     else:
         radar_data = None
 
