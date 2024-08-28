@@ -44,6 +44,7 @@ def create_app():
     app.register_blueprint(cashflow_bp, url_prefix='/')
     app.register_blueprint(savingGoals_bp, url_prefix='/')
     app.register_blueprint(budget_bp, url_prefix='/')
+    
 
     app.jinja_env.filters['format_currency'] = format_currency
 

@@ -1,12 +1,13 @@
 #src/views.py
-from flask import Blueprint, redirect, url_for, render_template, session, current_app, jsonify
-from .models import Transaction, Loan, SavingGoal, Budget
+from flask import Blueprint, redirect, url_for, render_template, session, current_app, jsonify, request
+from .models import Transaction, Loan, SavingGoal
 from bson.objectid import ObjectId
 from .transactions import calculate_total_income, calculate_total_expense
 from .creditCard import get_total_outstanding
 from .investment import calculate_total_investment_profit_loss
 from .cashFlow import get_net_cash_flow
 from .budget import BudgetManager 
+from .notifications import Notification
 import datetime 
 import json
 
@@ -63,6 +64,8 @@ def dashboard():
 
     radar_data_json = json.dumps(radar_data)
 
+    notifications = Notification.get_active_notifications(user_id)
+
     return render_template('dashboard.html', 
                            total_income=total_income, 
                            total_expense=total_expense, 
@@ -73,7 +76,8 @@ def dashboard():
                            saving_goals=saving_goals,
                            income_expense_ratio=income_expense_ratio,
                            datetime=datetime,
-                           radar_data=radar_data_json)
+                           radar_data=radar_data_json,
+                           notifications=notifications)
 
 @views.route('/transactions')
 def transactions():
@@ -130,3 +134,19 @@ def get_radar_data():
         radar_data = {}
 
     return jsonify(radar_data)
+
+from bson import ObjectId
+
+@views.route('/notifications/dismiss/<notification_id>', methods=['POST'])
+def dismiss_notification(notification_id):
+    # notification_id = ObjectId("66ccdea30743914829c7684d")
+    try:
+        # Convert notification_id to ObjectId
+        Notification.update_notification(ObjectId(notification_id))
+        return jsonify({'success': True, 'message': 'Notification dismissed successfully.'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+
+
+

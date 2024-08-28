@@ -11,3 +11,17 @@
 .goal-info i {
     color: #007bff; /* Icon color, you can customize this */
 }
+
+/* .dropdown-item {
+    cursor: default;
+    text-decoration: none;
+    background-color: transparent !important;
+    pointer-events: none;
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+    background-color: transparent !important;
+    color: inherit !important;
+    text-decoration: none !important;
+} */
+

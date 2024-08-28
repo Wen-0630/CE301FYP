@@ -95,6 +95,7 @@
         margin-right: 10px; 
       }
     </style> -->
+  
 
   </head>
 
@@ -184,70 +185,30 @@
                       <a class="dropdown-item"  href="login.html"><i class="fa fa-sign-out pull-right"></i> Log Out</a>
                     </div>
                   </li>
-  
                   <li role="presentation" class="nav-item dropdown open">
-                    <a href="javascript:;" class="dropdown-toggle info-number" id="navbarDropdown1" data-toggle="dropdown" aria-expanded="false">
-                      <i class="fa fa-envelope-o"></i>
-                      <span class="badge bg-green">6</span>
-                    </a>
-                    <ul class="dropdown-menu list-unstyled msg_list" role="menu" aria-labelledby="navbarDropdown1">
-                      <li class="nav-item">
-                        <a class="dropdown-item">
-                          <span class="image"><img src="images/img.jpg" alt="Profile Image" /></span>
-                          <span>
-                            <span>John Smith</span>
-                            <span class="time">3 mins ago</span>
-                          </span>
-                          <span class="message">
-                            Film festivals used to be do-or-die moments for movie makers. They were where...
-                          </span>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a class="dropdown-item">
-                          <span class="image"><img src="images/img.jpg" alt="Profile Image" /></span>
-                          <span>
-                            <span>John Smith</span>
-                            <span class="time">3 mins ago</span>
-                          </span>
-                          <span class="message">
-                            Film festivals used to be do-or-die moments for movie makers. They were where...
-                          </span>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a class="dropdown-item">
-                          <span class="image"><img src="images/img.jpg" alt="Profile Image" /></span>
-                          <span>
-                            <span>John Smith</span>
-                            <span class="time">3 mins ago</span>
-                          </span>
-                          <span class="message">
-                            Film festivals used to be do-or-die moments for movie makers. They were where...
-                          </span>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a class="dropdown-item">
-                          <span class="image"><img src="images/img.jpg" alt="Profile Image" /></span>
-                          <span>
-                            <span>John Smith</span>
-                            <span class="time">3 mins ago</span>
-                          </span>
-                          <span class="message">
-                            Film festivals used to be do-or-die moments for movie makers. They were where...
-                          </span>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <div class="text-center">
-                          <a class="dropdown-item">
-                            <strong>See All Alerts</strong>
-                            <i class="fa fa-angle-right"></i>
-                          </a>
-                        </div>
-                      </li>
-                    </ul>
+                      <div class="dropdown-toggle info-number" id="navbarDropdown1" data-toggle="dropdown" aria-expanded="false">
+                          <i class="fa fa-envelope-o"></i>
+                          <span class="badge bg-green">{{ notifications | length }}</span>
+                      </div>
+                      <ul class="dropdown-menu list-unstyled msg_list" role="menu" aria-labelledby="navbarDropdown1">
+                          {% if notifications | length > 0 %}
+                              {% for notification in notifications %}
+                              <li class="nav-item" id="notification-{{ notification._id }}">
+                                  <div class="goal-info">
+                                      <p><i class="fas fa-info-circle"></i> {{ notification.message }}</p>
+                                      <p><small>{{ notification.created_at.strftime('%b %d, %Y') }}</small></p>
+                                      <button class="btn btn-danger btn-sm" onclick="dismissNotification('{{ notification._id }}')">Dismiss</button>
+                                  </div>
+                              </li>
+                              {% endfor %}
+                          {% else %}
+                              <li class="nav-item">
+                                  <div class="goal-info">
+                                      <p>No new notifications</p>
+                                  </div>
+                              </li>
+                          {% endif %}
+                      </ul>
                   </li>
                 </ul>
               </nav>
@@ -282,7 +243,7 @@
         <!-- footer content -->
         <footer>
           <div class="pull-right">
-            Net Plus - Bootstrap Admin Template by <a href="https://colorlib.com">Colorlib</a>
+            Net Plus
           </div>
           <div class="clearfix"></div>
         </footer>
@@ -337,5 +298,57 @@
     <!-- Custom JS Script -->
     <script src="{{ url_for('static', filename='js/custom.js') }}"></script>
 
+
+    <script>
+        // Define the function globally
+        function dismissNotification(notificationId) {
+            fetch(`/notifications/dismiss/${notificationId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      // Remove the notification element from the DOM
+                      const notificationElement = document.getElementById(`notification-${notificationId}`);
+                      if (notificationElement) {
+                          notificationElement.remove();
+                      }
+    
+                      // Recalculate the badge count
+                      const badgeElement = document.querySelector('.info-number .badge.bg-green');
+                      if (badgeElement) {
+                          let currentCount = parseInt(badgeElement.textContent);
+                          currentCount = isNaN(currentCount) ? 0 : currentCount;
+                          if (currentCount > 1) {
+                              badgeElement.textContent = currentCount - 1;
+                          } else {
+                              badgeElement.remove(); // Remove badge if no notifications are left
+                          }
+                      }
+    
+                      // Check if there are any notifications left
+                      const remainingNotifications = document.querySelectorAll('.msg_list li.nav-item').length;
+                      if (remainingNotifications === 0) {
+                          // If no notifications are left, show the "No new notifications" message
+                          const notificationList = document.querySelector('.msg_list');
+                          if (notificationList) {
+                              notificationList.innerHTML = `
+                                  <li class="nav-item">
+                                      <div class="goal-info">
+                                          <p>No new notifications</p>
+                                      </div>
+                                  </li>`;
+                          }
+                      }
+                  } else {
+                      console.error('Error dismissing notification:', data.message);
+                  }
+              }).catch(error => {
+                  console.error('Error dismissing notification:', error);
+              });
+        }
+    </script>
   </body>
 </html>

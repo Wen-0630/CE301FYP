@@ -188,11 +188,11 @@ function init_echarts() {
                             },
                             {
                                 subtext: `From ${radarData.start_date} to ${radarData.end_date}`,
-                                left: 'left',     // Align the subtext to the left
-                                bottom: '0%',     // Position the subtext at the bottom
+                                left: 'left',    
+                                bottom: '0%',     
                                 textAlign: 'left',
                                 subtextStyle: {
-                                    fontSize: 12  // Adjust the font size as needed
+                                    fontSize: 12  
                                 }
                             }
                         ],

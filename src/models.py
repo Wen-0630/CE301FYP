@@ -2,6 +2,7 @@ from flask import current_app
 from bson.objectid import ObjectId
 from datetime import datetime, timedelta
 import pytz
+from .notifications import send_saving_goal_notification
 
 class Transaction:
     def __init__(self, userId, type, category, amount, date, description, payment_method=None, repayment_status='Pending',loan_name=None):
@@ -228,7 +229,7 @@ class SavingGoal:
         }
         result = current_app.mongo.db.saving_goals.insert_one(goal)
         return result.inserted_id
-    
+
     @staticmethod
     def deactivate_current_goal(user_id):
         current_app.mongo.db.saving_goals.update_many(
@@ -259,6 +260,7 @@ class SavingGoal:
     @staticmethod
     def update_goal(goal_id, data):
         current_app.mongo.db.saving_goals.update_one({'_id': ObjectId(goal_id)}, {"$set": data})
+
     
     @staticmethod
     def delete_goal(goal_id):
@@ -305,10 +307,27 @@ class SavingGoal:
         # Ensure the current amount is not negative
         current_amount = max(0, net_income)
 
+        # Check if the current amount meets or exceeds the target amount before updating
+        if current_amount >= goal.get('target_amount', float('inf')):
+        # Trigger the goal achieved notification
+            send_saving_goal_notification(goal['user_id'], goal['name'])
+
         # Update the current amount in the saving goal
         SavingGoal.update_goal(goal_id, {"current_amount": current_amount})
 
         return current_amount
+    
+    # @staticmethod
+    # def update_current_amount_in_db(goal_id, user_id):
+    #     """Calculates the current amount and updates it in the database."""
+    #     # Ensure goal_id and user_id are ObjectIds
+    #     goal_id = ObjectId(goal_id) if not isinstance(goal_id, ObjectId) else goal_id
+    #     user_id = ObjectId(user_id) if not isinstance(user_id, ObjectId) else user_id
+        
+    #     current_amount = SavingGoal.calculate_current_amount('_id', user_id)
+    #     SavingGoal.update_goal(goal_id, {"current_amount": current_amount})
+    #     return current_amount
+
     
     @staticmethod
     def calculate_automatic_target_amount(user_id):
@@ -436,3 +455,4 @@ class Budget:
     @staticmethod
     def delete_budget(budget_id):
         current_app.mongo.db.budgets.delete_one({'_id': ObjectId(budget_id)})
+
