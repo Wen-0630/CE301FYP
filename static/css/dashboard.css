@@ -12,6 +12,39 @@
     color: #007bff; /* Icon color, you can customize this */
 }
 
+.notification-message {
+    padding-right: 30px; /* Add some padding to the right to accommodate the close icon */
+}
+
+.close-icon {
+    font-size: 16px;
+    color: #888;
+    cursor: pointer;
+    position: absolute;
+    top: 5px;
+    right: 10px;
+}
+
+.close-icon:hover {
+    color: #f44336;
+}
+
+.icon-alert {
+    color: #f44336; /* Red color for alert */
+}
+
+.icon-great-job {
+    color: #28a745; /* Green color for great job */
+}
+
+.icon-breaking-even {
+    color: #ffc107; /* Yellow color for breaking even */
+}
+
+.icon-info {
+    color: #007bff; /* Blue color for info */
+}
+
 /* .dropdown-item {
     cursor: default;
     text-decoration: none;

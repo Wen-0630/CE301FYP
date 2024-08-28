@@ -194,10 +194,21 @@
                           {% if notifications | length > 0 %}
                               {% for notification in notifications %}
                               <li class="nav-item" id="notification-{{ notification._id }}">
-                                  <div class="goal-info">
-                                      <p><i class="fas fa-info-circle"></i> {{ notification.message }}</p>
-                                      <p><small>{{ notification.created_at.strftime('%b %d, %Y') }}</small></p>
-                                      <button class="btn btn-danger btn-sm" onclick="dismissNotification('{{ notification._id }}')">Dismiss</button>
+                                  <div class="notification-message" style="position: relative;">
+                                      <i class="fas fa-times close-icon" onclick="dismissNotification('{{ notification._id }}')"></i>
+                                      
+                                      {% if "Alert" in notification.message %}
+                                          <i class="fas fa-exclamation-triangle icon-alert"></i> 
+                                      {% elif "Great job" in notification.message %}
+                                          <i class="fas fa-thumbs-up icon-great-job"></i> 
+                                      {% elif "breaking even" in notification.message %}
+                                          <i class="fas fa-balance-scale icon-breaking-even"></i> 
+                                      {% else %}
+                                          <i class="fas fa-info-circle icon-info"></i> 
+                                      {% endif %}
+                                      
+                                      {{ notification.message }}
+                                      <small>{{ notification.created_at.strftime('%b %d, %Y') }}</small>
                                   </div>
                               </li>
                               {% endfor %}

@@ -7,7 +7,7 @@ from .creditCard import get_total_outstanding
 from .investment import calculate_total_investment_profit_loss
 from .cashFlow import get_net_cash_flow
 from .budget import BudgetManager 
-from .notifications import Notification
+from .notifications import Notification, send_income_expense_ratio_notification
 import datetime 
 import json
 
@@ -48,6 +48,8 @@ def dashboard():
         income_expense_ratio = round((total_expense / total_income) * 100, 2)
     else:
         income_expense_ratio = 100.00
+
+    send_income_expense_ratio_notification(user_id, income_expense_ratio)
 
     budget = BudgetManager.get_latest_budget(user_id)
 

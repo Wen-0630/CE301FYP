@@ -52,3 +52,27 @@ def send_saving_goal_notification(user_id, goal_name):
         message = f"Your saving goal '{goal_name}' has been achieved!"
         notification = Notification(user_id, message)
         notification.save()
+
+def send_notification(user_id, message):
+    # Check if a similar notification already exists
+    existing_notification = current_app.mongo.db.notifications.find_one({
+        'user_id': ObjectId(user_id),
+        'message': message,
+        'is_dismissed': False
+    })
+    
+    if not existing_notification:
+        # If no such notification exists, create a new one
+        notification = Notification(user_id, message)
+        notification.save()
+
+def send_income_expense_ratio_notification(user_id, income_expense_ratio):
+    """Sends a notification based on the income vs expense ratio."""
+    if income_expense_ratio < 50:
+        message = "Great job! Your income is significantly higher than your expenses."
+    elif 90 <= income_expense_ratio <= 110:
+        message = "You're breaking even. Consider reviewing your budget."
+    elif income_expense_ratio > 120:
+        message = "Alert: Your expenses are significantly higher than your income. It's time to take action!"
+    
+    send_notification(user_id, message)
