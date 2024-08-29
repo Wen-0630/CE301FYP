@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Update Profile</h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('user.update_profile') }}" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" value="{{ user['username'] }}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="profile_pic">Profile Picture</label>
+                            <input type="file" class="form-control" id="profile_pic" name="profile_pic" accept=".jpg, .jpeg, .png, .gif">
+                        </div>
+
+                        {% if user['profile_pic'] %}
+                        <div class="form-group">
+                            <label>Current Profile Picture:</label>
+                            <img src="{{ url_for('static', filename='uploads/' + user['profile_pic']) }}" alt="Profile Picture" class="img-thumbnail">
+                        </div>
+                        {% endif %}
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

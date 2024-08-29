@@ -45,6 +45,29 @@
     color: #007bff; /* Blue color for info */
 }
 
+.profile_img {
+    width: 60px; /* You can adjust the size as needed */
+    height: 55px; /* Ensure this is the same as the width */
+    border-radius: 50%; /* Makes the image a circle */
+    object-fit: cover; /* Ensures the image covers the entire area without stretching */
+    margin-right: 10px;
+}
+
+.profile_img2 {
+    width: 29px; /* You can adjust the size as needed */
+    height: 29px; /* Ensure this is the same as the width */
+    border-radius: 50%; /* Makes the image a circle */
+    object-fit: cover; /* Ensures the image covers the entire area without stretching */
+    margin-right: 10px;
+}
+
+.info-number .fa-envelope {
+    font-size: 20px; /* Adjust the size as needed */
+    color: #555; /* Change the color to blue, or any color you prefer */
+    margin-right: 10px; /* Adjust the spacing to the right of the icon */
+    vertical-align: middle; /* Align the icon vertically with the text if needed */
+}
+
 /* .dropdown-item {
     cursor: default;
     text-decoration: none;

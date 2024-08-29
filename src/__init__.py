@@ -15,7 +15,7 @@ import logging
 from bson.objectid import ObjectId
 from src.savingGoals import savingGoals_bp
 from src.budget import budget_bp
-
+from src.notifications import Notification
 
 load_dotenv()
 
@@ -56,6 +56,14 @@ def create_app():
         return "{:,.2f}".format(value)
     
     app.jinja_env.filters['currency_with_decimals'] = format_currency_with_decimals
+
+    @app.context_processor
+    def inject_notifications():
+        notifications = []
+        if 'user_id' in session:
+            user_id = session['user_id']
+            notifications = Notification.get_active_notifications(user_id)
+        return dict(notifications=notifications)
 
     @app.before_request
     def before_request():

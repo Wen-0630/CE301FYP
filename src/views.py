@@ -1,5 +1,6 @@
 #src/views.py
-from flask import Blueprint, redirect, url_for, render_template, session, current_app, jsonify, request
+from flask import Blueprint, redirect, url_for, render_template, session, current_app, jsonify, request, flash
+from werkzeug.utils import secure_filename
 from .models import Transaction, Loan, SavingGoal
 from bson.objectid import ObjectId
 from .transactions import calculate_total_income, calculate_total_expense
@@ -10,9 +11,11 @@ from .budget import BudgetManager
 from .notifications import Notification, send_income_expense_ratio_notification, send_budget_vs_spending_notification
 import datetime 
 import json
+import os
 
 # Create a Blueprint for user-related routes
 views = Blueprint('user', __name__, template_folder='templates')
+
 
 @views.route('/')
 def home():
@@ -24,6 +27,10 @@ def dashboard():
         return redirect(url_for('auth.login'))
 
     user_id = session['user_id']
+    user = current_app.mongo.cx['CE-301'].users.find_one({"_id": ObjectId(user_id)})
+    if 'profile_pic' not in user:
+        user['profile_pic'] = 'default_profile.png'
+
     total_income = calculate_total_income(user_id)
     total_expense = calculate_total_expense(user_id)
     total_credit_card_outstanding = get_total_outstanding(user_id)
@@ -70,6 +77,7 @@ def dashboard():
     notifications = Notification.get_active_notifications(user_id)
 
     return render_template('dashboard.html', 
+                           user=user,
                            total_income=total_income, 
                            total_expense=total_expense, 
                            total_outstanding=total_outstanding, 
@@ -150,6 +158,59 @@ def dismiss_notification(notification_id):
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
 
+@views.route('/profile', methods=['GET', 'POST'])
+def update_profile():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
 
+    user_id = session['user_id']
+    user_data = current_app.mongo.cx['CE-301'].users.find_one({"_id": ObjectId(user_id)})
+
+    if request.method == 'POST':
+        username = request.form['username']
+        profile_pic = request.files.get('profile_pic')
+
+        update_data = {'username': username}
+
+        if profile_pic and profile_pic.filename != '':
+            # Check if the file is allowed
+            ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+            def allowed_file(filename):
+                return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+            if allowed_file(profile_pic.filename):
+                # Generate a safe filename
+                filename = secure_filename(profile_pic.filename)
+
+                # Path to store the file, moving one level up from `src` to the root
+                folder_path = os.path.join(current_app.root_path, '..', 'static/img')
+
+                # Make sure the folder exists
+                if not os.path.exists(folder_path):
+                    os.makedirs(folder_path)
+
+                # Save the file in the 'static/img/' directory
+                filepath = os.path.join(folder_path, filename)
+                profile_pic.save(filepath)
+
+                # Store the filename in the user's document
+                update_data['profile_pic'] = filename
+            else:
+                flash('Allowed image types are - png, jpg, jpeg, gif', 'error')
+                return redirect(request.url)
+
+        # Update the user in the database
+        current_app.mongo.cx['CE-301'].users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": update_data}
+        )
+
+        # Update session with the new username
+        session['username'] = username
+
+        flash('Profile updated successfully!', 'success')
+        return redirect(url_for('user.update_profile'))
+
+    return render_template('profile.html', user=user_data)
 
 
