@@ -171,26 +171,22 @@ def holdings():
 
 
 def calculate_total_investment_profit_loss(user_id):
+    # Fetch stock and crypto holdings from the database
     stock_holdings = current_app.mongo.db.stock_holdings.find({'userId': ObjectId(user_id)})
     crypto_holdings = current_app.mongo.db.crypto_holdings.find({'userId': ObjectId(user_id)})
 
     total_profit_loss = 0
 
-    # Sum profit/loss for stock holdings
+    # Sum the existing profit/loss for stock holdings
     for holding in stock_holdings:
-        current_price = get_stock_data(holding['asset'])['Time Series (60min)'][holding['datetime'].strftime("%Y-%m-%d %H:%M:%S")]['4. close']
-        holding['profit_loss'] = (current_price - holding['buy_price']) * holding['quantity']
-        total_profit_loss += holding['profit_loss']
+        total_profit_loss += holding.get('profit_loss', 0)
 
-    # Sum profit/loss for crypto holdings
+    # Sum the existing profit/loss for crypto holdings
     for holding in crypto_holdings:
-        crypto_list = [holding['asset']]
-        crypto_data = get_formatted_crypto_data(crypto_list)
-        current_price = crypto_data[0]['current_price']
-        holding['profit_loss'] = (current_price - holding['buy_price']) * holding['quantity']
-        total_profit_loss += holding['profit_loss']
+        total_profit_loss += holding.get('profit_loss', 0)
 
     return total_profit_loss
+
 
 @investment.route('/delete_stock_holding', methods=['POST'])
 def delete_stock_holding():

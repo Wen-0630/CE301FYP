@@ -6,58 +6,98 @@ Loans - Net Plus
 {% endblock %}
 
 {% block content %}
-<div class="container">
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+
+<div class="container-fluid">
+    <div class="page-title">
+        <div class="title_left">
+            <h3>Loans <small>Manage your loans</small></h3>
+        </div>
+    </div>
+
+    <div class="clearfix"></div>
+
+    <!-- Add Loan Button outside the panel -->
     <div class="row">
         <div class="col-md-12">
-            <h2>Loans</h2>
-            <button class="btn btn-secondary" id="toggleFormBtn">Add Loan</button>
-            <table class="table table-striped mt-3">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Type</th>
-                        <th>Original Amount</th>
-                        <th>Loan Term</th>
-                        <th>Repayment Term</th>
-                        <th>Interest Rate</th>
-                        <th>Outstanding Balance</th>
-                        <th>Interest Payable</th>
-                        <th>Interest Expense</th>
-                        <th>Interest Balance</th>
-                        <th>Loan Expense</th>
-                        <th>Issue Date</th>
-                        <th>Maturity Date</th>
-                        <th>Description</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for loan in loans %}
-                    <tr>
-                        <td>{{ loan.name }}</td>
-                        <td>{{ loan.loan_type }}</td>
-                        <td>{{ "%.2f"|format(loan.original_amount) }}</td>
-                        <td>{{ loan.loan_term }}</td>
-                        <td>{{ loan.repayment_term }}</td>
-                        <td>{{ "%.2f"|format(loan.interest_rate) }}%</td>
-                        <td>{{ "%.2f"|format(loan.outstanding_balance) }}</td>
-                        <td>{{ "%.2f"|format(loan.interest_payable) }}</td>
-                        <td>{{ "%.2f"|format(loan.interest_expense) }}</td>
-                        <td>{{ "%.2f"|format(loan.interest_balance) }}</td>
-                        <td>{{ "%.2f"|format(loan.loan_expense) }}</td>
-                        <td>{{ loan.issue_date.strftime('%Y-%m-%d') }}</td>
-                        <td>{{ loan.maturity_date.strftime('%Y-%m-%d') }}</td>
-                        <td>{{ loan.description }}</td>
-                        <td>
-                            <form action="{{ url_for('loan.delete_loan', loan_id=loan._id) }}" method="POST" style="display:inline;">
-                                <button type="submit" class="btn btn-danger btn-sm" title="Delete"><i class="fa fa-trash"></i></button>
-                            </form>
-                            <a href="{{ url_for('loan.edit_loan', loan_id=loan._id) }}" class="btn btn-primary btn-sm" title="Edit"><i class="fa fa-edit"></i></a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <button class="btn btn-secondary mb-3" id="toggleFormBtn">Add Loan</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Loan Details<small>Your recent loans</small></h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" href="#">Settings 1</a>
+                                <a class="dropdown-item" href="#">Settings 2</a>
+                            </div>
+                        </li>
+                        <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <div class="card-box table-responsive">
+                        <p class="text-muted font-13 m-b-30">
+                            Use the table below to view, filter, and manage your loans.
+                        </p>
+                        <table id="loanTable" class="table table-striped table-bordered" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Original Amount</th>
+                                    <th>Loan Term</th>
+                                    <th>Repayment Term</th>
+                                    <th>Interest Rate</th>
+                                    <th>Outstanding Balance</th>
+                                    <th>Interest Payable</th>
+                                    <th>Interest Expense</th>
+                                    <th>Interest Balance</th>
+                                    <th>Loan Expense</th>
+                                    <th>Issue Date</th>
+                                    <th>Maturity Date</th>
+                                    <th>Description</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for loan in loans %}
+                                <tr>
+                                    <td>{{ loan.name }}</td>
+                                    <td>{{ loan.loan_type }}</td>
+                                    <td>{{ loan.original_amount | format_with_commas }}</td>
+                                    <td>{{ loan.loan_term }}</td>
+                                    <td>{{ loan.repayment_term }}</td>
+                                    <td>{{ loan.interest_rate | format_with_commas }}%</td>
+                                    <td>{{ loan.outstanding_balance | format_with_commas }}</td>
+                                    <td>{{ loan.interest_payable | format_with_commas }}</td>
+                                    <td>{{ loan.interest_expense | format_with_commas }}</td>
+                                    <td>{{ loan.interest_balance | format_with_commas }}</td>
+                                    <td>{{ loan.loan_expense | format_with_commas }}</td>
+                                    <td>{{ loan.issue_date.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ loan.maturity_date.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ loan.description }}</td>
+                                    <td>
+                                        <form action="{{ url_for('loan.delete_loan', loan_id=loan._id) }}" method="POST" style="display:inline;">
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Delete"><i class="fa fa-trash"></i></button>
+                                        </form>
+                                        <a href="{{ url_for('loan.edit_loan', loan_id=loan._id) }}" class="btn btn-primary btn-sm" title="Edit"><i class="fa fa-edit"></i></a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -139,6 +179,9 @@ Loans - Net Plus
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+
 <style>
     .sidebar {
         height: 100%;
@@ -168,9 +211,32 @@ Loans - Net Plus
     .container-fluid {
         padding-right: 0;
     }
+
+    .dataTables_wrapper .dataTables_filter label::before {
+        content: '\f002'; /* Unicode for Font Awesome search icon */
+        font-family: FontAwesome;
+        padding-right: 5px;
+    }
 </style>
 
 <script>
+    $(document).ready(function() {
+        // Initialize DataTables with additional options
+        $('#loanTable').DataTable({
+            "paging": true,
+            "lengthChange": true,  // This enables the "Show entries" dropdown
+            "lengthMenu": [10, 25, 50, 100],  // Options for "Show entries"
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "columnDefs": [{
+                "targets": -1,  // Disable ordering on the "Actions" column
+                "orderable": false,
+            }]
+        });
+    });
+
     document.getElementById('toggleFormBtn').addEventListener('click', function() {
         var form = document.getElementById('loanForm');
         var mainContent = document.getElementById('mainContent');

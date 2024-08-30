@@ -91,10 +91,13 @@ def create_app():
     # Register the filter
     app.jinja_env.filters['min_value'] = min_value_filter
 
+    app.jinja_env.filters['format_with_commas'] = format_with_commas
 
     return app
 
 def format_currency(value):
     return "{:,.0f}".format(value)
 
+def format_with_commas(value):
+    return "{:,.2f}".format(value)
 

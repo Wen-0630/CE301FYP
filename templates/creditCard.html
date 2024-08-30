@@ -6,75 +6,130 @@ Credit Card - Net Plus
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <h2>Credit Card Transactions</h2>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Type</th>
-                        <th>Category</th>
-                        <th>Date</th>
-                        <th>Description</th>
-                        <th>Total Outstanding Amount</th>
-                        <th>Remaining Outstanding</th>
-                        <th>Repayment Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for transaction in credit_card_transactions %}
-                    <tr>
-                        <td>{{ transaction.type }}</td>
-                        <td>{{ transaction.category }}</td>
-                        <td>{{ transaction.date.strftime('%Y-%m-%d') }}</td>
-                        <td>{{ transaction.description }}</td>
-                        <td>{{ "%.2f"|format(transaction.amount) }}</td>
-                        <td>{{ "%.2f"|format(transaction.remaining_amount) if transaction.remaining_amount is not none else "%.2f"|format(transaction.amount) }}</td>
-                        <td class="{{ 'text-success' if transaction.repayment_status == 'Paid' else 'text-danger' }}">{{ transaction.repayment_status }}</td>
-                        <td>
-                            <button class="btn btn-warning btn-sm repayment-btn" title="Repayment" data-transaction-id="{{ transaction._id }}" data-remaining-amount="{{ transaction.remaining_amount if transaction.remaining_amount is not none else transaction.amount }}" {% if transaction.repayment_status == 'Paid' %}disabled{% endif %}>
-                                <i class="fa fa-hand-holding-usd"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="8">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Repayment Date</th>
-                                        <th>Repayment Amount</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% if transaction.repayments|length == 0 %}
-                                    <tr>
-                                        <td colspan="3" class="text-center">No repayment found</td>
-                                    </tr>
-                                    {% else %}
-                                    {% for repayment in transaction.repayments %}
-                                    <tr>
-                                        <td>{{ repayment.repayment_date.strftime('%Y-%m-%d') }}</td>
-                                        <td>{{ "%.2f"|format(repayment.repayment_amount) }}</td>
-                                        <td>
-                                            <form action="{{ url_for('credit_card.delete_repayment') }}" method="post" style="display:inline;">
-                                                <input type="hidden" name="repayment_id" value="{{ repayment._id }}">
-                                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                    {% endif %}
-                                </tbody>                                
-                            </table>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="dashboard_graph">
+            <div class="row x_title">
+                <div class="col-md-6">
+                    <h3>Credit Card Transactions</h3>
+                </div>
+                <div class="col-md-6">
+                    <div class="btn-group float-right">
+                        <!-- You can add buttons or dropdowns here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transactions Overview Panel -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Transactions Overview<small>Manage your credit card expenses</small></h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="card-box table-responsive">
+                    <p class="text-muted font-13 m-b-30">
+                        Use the table below to view, filter, and manage your credit card expenses.
+                    </p>
+                    <table id="creditCardTransactionsTable" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Category</th>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Total Outstanding Amount</th>
+                                <th>Remaining Outstanding</th>
+                                <th>Repayment Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in credit_card_transactions %}
+                            <tr>
+                                <td>{{ transaction.type }}</td>
+                                <td>{{ transaction.category }}</td>
+                                <td>{{ transaction.date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ transaction.description }}</td>
+                                <td>{{ transaction.amount | format_with_commas }}</td>
+                                <td>{{ transaction.remaining_amount|default(transaction.amount)|format_with_commas }}</td>
+                                <td class="{{ 'text-success' if transaction.repayment_status == 'Paid' else 'text-danger' }}">{{ transaction.repayment_status }}</td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm repayment-btn" title="Repayment" data-transaction-id="{{ transaction._id }}" data-remaining-amount="{{ transaction.remaining_amount if transaction.remaining_amount is not none else transaction.amount }}" {% if transaction.repayment_status == 'Paid' %}disabled{% endif %}>
+                                        <i class="fa fa-hand-holding-usd"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Repayment Overview Panel -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Repayments Overview<small>Track your repayments</small></h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="card-box table-responsive">
+                    <p class="text-muted font-13 m-b-30">
+                        Use the table below to view, filter, and manage your repayments.
+                    </p>
+                    <table id="creditCardRepaymentsTable" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Repayment Date</th>
+                                <th>Repayment Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in credit_card_transactions %}
+                                {% for repayment in transaction.repayments %}
+                                <tr>
+                                    <td>{{ transaction.category }}</td>
+                                    <td>{{ transaction.date.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ transaction.description }}</td>
+                                    <td>{{ repayment.repayment_date.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ repayment.repayment_amount | format_with_commas }}</td>
+                                    <td>
+                                        <form action="{{ url_for('credit_card.delete_repayment') }}" method="post" style="display:inline;">
+                                            <input type="hidden" name="repayment_id" value="{{ repayment._id }}">
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -109,6 +164,9 @@ Credit Card - Net Plus
         </form>
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
 
 <style>
     .sidebar {
@@ -147,9 +205,47 @@ Credit Card - Net Plus
     .text-danger {
         color: red;
     }
+
+    .dataTables_wrapper .dataTables_filter label::before {
+        content: '\f002'; /* Unicode for Font Awesome search icon */
+        font-family: FontAwesome;
+        padding-right: 5px;
+    }
 </style>
 
 <script>
+    $(document).ready(function() {
+        // Initialize DataTables with additional options for the main transactions table
+        $('#creditCardTransactionsTable').DataTable({
+            "paging": true,
+            "lengthChange": true,  // This enables the "Show entries" dropdown
+            "lengthMenu": [10, 25, 50, 100],  // Options for "Show entries"
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "columnDefs": [{
+                "targets": -1,  // Disable ordering on the "Actions" column
+                "orderable": false,
+            }]
+        });
+
+        // Initialize DataTables with additional options for the repayments table
+        $('#creditCardRepaymentsTable').DataTable({
+            "paging": true,
+            "lengthChange": true,
+            "lengthMenu": [10, 25, 50, 100],
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "columnDefs": [{
+                "targets": -1,
+                "orderable": false,
+            }]
+        });
+    });
+
     document.querySelectorAll('.repayment-btn').forEach(button => {
         button.addEventListener('click', function() {
             var transactionId = this.getAttribute('data-transaction-id');
