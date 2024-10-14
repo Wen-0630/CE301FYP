@@ -114,7 +114,7 @@
   <div class="col-md-4 col-sm-4 ">
     <div class="x_panel tile fixed_height_320">
       <div class="x_title">
-        <h2>App Versions</h2>
+        <h2>Liabilties</h2>
         <ul class="nav navbar-right panel_toolbox">
           <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
           </li>
@@ -131,10 +131,10 @@
         <div class="clearfix"></div>
       </div>
       <div class="x_content">
-        <h4>App Usage across versions</h4>
+        <h4>Liability Categories</h4>
         <div class="widget_summary">
           <div class="w_left w_25">
-            <span>0.1.5.2</span>
+            <span>Loan 1</span>
           </div>
           <div class="w_center w_55">
             <div class="progress">
@@ -151,7 +151,7 @@
 
         <div class="widget_summary">
           <div class="w_left w_25">
-            <span>0.1.5.3</span>
+            <span>Loan 2</span>
           </div>
           <div class="w_center w_55">
             <div class="progress">
@@ -167,7 +167,7 @@
         </div>
         <div class="widget_summary">
           <div class="w_left w_25">
-            <span>0.1.5.4</span>
+            <span>Loan 3</span>
           </div>
           <div class="w_center w_55">
             <div class="progress">
@@ -183,7 +183,7 @@
         </div>
         <div class="widget_summary">
           <div class="w_left w_25">
-            <span>0.1.5.5</span>
+            <span>Loan 4</span>
           </div>
           <div class="w_center w_55">
             <div class="progress">
@@ -199,7 +199,7 @@
         </div>
         <div class="widget_summary">
           <div class="w_left w_25">
-            <span>0.1.5.6</span>
+            <span>Loan 5</span>
           </div>
           <div class="w_center w_55">
             <div class="progress">
@@ -221,7 +221,7 @@
   <div class="col-md-4 col-sm-4 ">
     <div class="x_panel tile fixed_height_320 overflow_hidden">
       <div class="x_title">
-        <h2>Device Usage</h2>
+        <h2>Asset Categories</h2>
         <ul class="nav navbar-right panel_toolbox">
           <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
           </li>
@@ -245,10 +245,10 @@
             </th>
             <th>
               <div class="col-lg-7 col-md-7 col-sm-7 ">
-                <p class="">Device</p>
+                <p class="">Name</p>
               </div>
               <div class="col-lg-5 col-md-5 col-sm-5 ">
-                <p class="">Progress</p>
+                <p class="">Total(%)</p>
               </div>
             </th>
           </tr>
@@ -260,25 +260,25 @@
               <table class="tile_info">
                 <tr>
                   <td>
-                    <p><i class="fa fa-square blue"></i>IOS </p>
+                    <p><i class="fa fa-square blue"></i>House </p>
                   </td>
                   <td>30%</td>
                 </tr>
                 <tr>
                   <td>
-                    <p><i class="fa fa-square green"></i>Android </p>
+                    <p><i class="fa fa-square green"></i>Car </p>
                   </td>
                   <td>10%</td>
                 </tr>
                 <tr>
                   <td>
-                    <p><i class="fa fa-square purple"></i>Blackberry </p>
+                    <p><i class="fa fa-square purple"></i>Land </p>
                   </td>
                   <td>20%</td>
                 </tr>
                 <tr>
                   <td>
-                    <p><i class="fa fa-square aero"></i>Symbian </p>
+                    <p><i class="fa fa-square aero"></i>Shoplot </p>
                   </td>
                   <td>15%</td>
                 </tr>
@@ -387,39 +387,39 @@
           <ul class="to_do">
             <li>
               <p>
-                <input type="checkbox" class="flat"> Schedule meeting with new client </p>
+                <input type="checkbox" class="flat"> To do 1 </p>
             </li>
             <li>
               <p>
-                <input type="checkbox" class="flat"> Create email address for new intern</p>
+                <input type="checkbox" class="flat"> To do 2 </p>
             </li>
             <li>
               <p>
-                <input type="checkbox" class="flat"> Have IT fix the network printer</p>
+                <input type="checkbox" class="flat"> To do 3 </p>
             </li>
             <li>
               <p>
-                <input type="checkbox" class="flat"> Copy backups to offsite location</p>
+                <input type="checkbox" class="flat"> To do 4 </p>
             </li>
             <li>
               <p>
-                <input type="checkbox" class="flat"> Food truck fixie locavors mcsweeney</p>
+                <input type="checkbox" class="flat"> To do 5 </p>
             </li>
             <li>
               <p>
-                <input type="checkbox" class="flat"> Food truck fixie locavors mcsweeney</p>
+                <input type="checkbox" class="flat"> To do 6 </p>
             </li>
             <li>
               <p>
-                <input type="checkbox" class="flat"> Create email address for new intern</p>
+                <input type="checkbox" class="flat"> To do 7 </p>
             </li>
             <li>
               <p>
-                <input type="checkbox" class="flat"> Have IT fix the network printer</p>
+                <input type="checkbox" class="flat"> To do 8 </p>
             </li>
             <li>
               <p>
-                <input type="checkbox" class="flat"> Copy backups to offsite location</p>
+                <input type="checkbox" class="flat"> To do 9 </p>
             </li>
           </ul>
         </div>
@@ -445,8 +445,12 @@
         </ul>
         <div class="clearfix"></div>
       </div>
-      <div class="x_content">
-        <div id="echart_sonar" style="height:370px;"></div>
+      <div class="x_content" style="height: 370px;">
+          {% if budget_message %}
+              <p>{{ budget_message }}</p>
+          {% else %}
+            <div id="echart_sonar" style="height:100%; width:100%;"></div>
+          {% endif %}
       </div>
     </div>
   </div>

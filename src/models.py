@@ -435,8 +435,9 @@ class Budget:
     @staticmethod
     def get_latest_budget_by_user(userId):
         userId = ObjectId(userId) if isinstance(userId, str) else userId
-        budget = current_app.mongo.db.budgets.find({'userId': userId}).sort('created_at', -1).limit(1)
-        return budget[0] if budget else None
+        budget_cursor = current_app.mongo.db.budgets.find({'userId': userId}).sort('created_at', -1).limit(1)
+        budget_list = list(budget_cursor)  # Convert cursor to list
+        return budget_list[0] if budget_list else None
 
     @staticmethod
     def get_budget_by_user_and_date(userId, start_date, end_date):

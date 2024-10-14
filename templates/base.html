@@ -394,6 +394,19 @@
                   console.error('Error dismissing notification:', error);
               });
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menu_toggle');
+            const body = document.body;
+
+            if (menuToggle) {
+                menuToggle.addEventListener('click', function() {
+                    body.classList.toggle('nav-md');
+                    body.classList.toggle('nav-sm');
+                });
+            }
+        });
+
     </script>
   </body>
 </html>

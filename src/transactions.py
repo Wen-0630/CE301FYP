@@ -115,6 +115,11 @@ def edit_transaction(transaction_id):
         if data.get('category') == 'Loan Expense' and loan:
             Loan.update_loan_expense(loan['name'], user_id)
 
+        # Recalculate current amount for each active saving goal
+        saving_goals = SavingGoal.get_goals_by_user(session['user_id'])
+        for goal in saving_goals:
+            SavingGoal.calculate_current_amount(goal['_id'], session['user_id'])
+
         return redirect(url_for('transactions.list_transactions'))
 
     user_id = session['user_id']

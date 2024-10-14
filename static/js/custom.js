@@ -222,6 +222,9 @@ function init_echarts() {
                     });
                 } else {
                     console.log('No radar data available or no radarData defined.');
+                    if ($('#echart_sonar').length) {
+                        $('#echart_sonar').text('No active budget. Please set a budget.');
+                    }
                 }
             },
             error: function(xhr, status, error) {

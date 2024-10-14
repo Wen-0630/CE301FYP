@@ -23,7 +23,11 @@
                         {% if user['profile_pic'] %}
                         <div class="form-group">
                             <label>Current Profile Picture:</label>
-                            <img src="{{ url_for('static', filename='uploads/' + user['profile_pic']) }}" alt="Profile Picture" class="img-thumbnail">
+                            {% if 'profile_pic' in user %}
+                                <img src="{{ url_for('static', filename='img/' + user['profile_pic']) }}" alt="Profile Picture" class="img-thumbnail">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='img/default_profile.png') }}" alt="Default Profile Picture" class="img-thumbnail">
+                            {% endif %}
                         </div>
                         {% endif %}
 

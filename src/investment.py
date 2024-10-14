@@ -103,7 +103,7 @@ def add_transaction():
     time = data['time']
     buy_price = float(data['buyPrice'])
     amount_bought = float(data['amountBought'])
-    transaction_fee = float(data.get('transactionFee', 0))
+    transaction_fee = float(data.get('transactionFee' or 0))
     deduct_cash = "Yes" if data['deductCash'] else "No"
 
     user_id = session['user_id']

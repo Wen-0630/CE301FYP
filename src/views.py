@@ -53,6 +53,8 @@ def dashboard():
 
     if total_expense > 0:
         income_expense_ratio = round((total_expense / total_income) * 100, 2)
+    elif total_income > 0:
+        income_expense_ratio = 0.00  # Set the ratio to 0 if income exists but expense is nil
     else:
         income_expense_ratio = 100.00
 
@@ -69,10 +71,13 @@ def dashboard():
             budget['end_date']
         )
         send_budget_vs_spending_notification(user_id, radar_data)
+        radar_data_json = json.dumps(radar_data)
+        budget_message = ""
     else:
-        radar_data = None
+        radar_data = "{}"
+        budget_message = "No active budget. Please set a budget."
 
-    radar_data_json = json.dumps(radar_data)
+    # radar_data_json = json.dumps(radar_data)
 
     notifications = Notification.get_active_notifications(user_id)
 
@@ -87,7 +92,7 @@ def dashboard():
                            saving_goals=saving_goals,
                            income_expense_ratio=income_expense_ratio,
                            datetime=datetime,
-                           radar_data=radar_data_json,
+                           budget_message=budget_message,
                            notifications=notifications)
 
 @views.route('/transactions')

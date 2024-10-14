@@ -74,6 +74,9 @@ def send_income_expense_ratio_notification(user_id, income_expense_ratio):
         message = "You're breaking even. Consider reviewing your budget."
     elif income_expense_ratio > 120:
         message = "Alert: Your expenses are significantly higher than your income. It's time to take action!"
+    else:
+        # Default message if none of the above conditions are met
+        message = "Keep monitoring your expenses and income to maintain financial stability."
     
     send_notification(user_id, message)
 
