@@ -16,6 +16,7 @@ from bson.objectid import ObjectId
 from src.savingGoals import savingGoals_bp
 from src.budget import budget_bp
 from src.notifications import Notification
+from src.other_assets import other_assets
 
 load_dotenv()
 
@@ -44,6 +45,7 @@ def create_app():
     app.register_blueprint(cashflow_bp, url_prefix='/')
     app.register_blueprint(savingGoals_bp, url_prefix='/')
     app.register_blueprint(budget_bp, url_prefix='/')
+    app.register_blueprint(other_assets, url_prefix='/')
     
 
     app.jinja_env.filters['format_currency'] = format_currency

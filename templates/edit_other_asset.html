@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}
+Edit Asset - Net Plus
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Edit Asset</h2>
+
+    <form method="POST" action="{{ url_for('other_assets.edit_other_asset', asset_id=asset._id) }}">
+        <div class="form-group">
+            <label for="name">Asset Name:</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ asset.name }}" required>
+        </div>
+        <div class="form-group">
+            <label for="amount">Asset Amount:</label>
+            <input type="number" class="form-control" id="amount" name="amount" value="{{ asset.amount }}" required>
+        </div>
+        <div class="form-group">
+            <label for="category">Category:</label>
+            <select class="form-control" id="category" name="category">
+                <option value="Real Estate" {% if asset.category == "Real Estate" %} selected {% endif %}>Real Estate</option>
+                <option value="Vehicles" {% if asset.category == "Vehicles" %} selected {% endif %}>Vehicles</option>
+                <option value="Jewelry" {% if asset.category == "Jewelry" %} selected {% endif %}>Jewelry</option>
+                <option value="Furniture" {% if asset.category == "Furniture" %} selected {% endif %}>Furniture</option>
+                <option value="Electronics" {% if asset.category == "Electronics" %} selected {% endif %}>Electronics</option>
+                <option value="Other" {% if asset.category == "Other" %} selected {% endif %}>Others</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="description">Description (optional):</label>
+            <input type="text" class="form-control" id="description" name="description" value="{{ asset.description }}">
+        </div>
+        <button type="submit" class="btn btn-primary">Update Asset</button>
+        <a href="{{ url_for('other_assets.view_other_assets') }}" class="btn btn-secondary">Back to Other Assets</a>
+    </form>
+</div>
+{% endblock %}

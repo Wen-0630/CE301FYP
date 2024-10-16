@@ -9,6 +9,7 @@ from .investment import calculate_total_investment_profit_loss
 from .cashFlow import get_net_cash_flow
 from .budget import BudgetManager 
 from .notifications import Notification, send_income_expense_ratio_notification, send_budget_vs_spending_notification
+from .other_assets import OtherAsset
 import datetime 
 import json
 import os
@@ -43,8 +44,10 @@ def dashboard():
     total_investment = calculate_total_investment_profit_loss(user_id)
 
     net_cash_flow = get_net_cash_flow(user_id)
+    total_other_assets = OtherAsset.get_total_other_assets(user_id)
+    total_assets = net_cash_flow + total_other_assets
 
-    net_worth = net_cash_flow + total_investment - total_outstanding
+    net_worth = total_assets + total_investment - total_outstanding
 
     saving_goals = SavingGoal.get_goals_by_user(user_id)
     for goal in saving_goals:
@@ -87,7 +90,7 @@ def dashboard():
                            total_expense=total_expense, 
                            total_outstanding=total_outstanding, 
                            total_investment=total_investment, 
-                           net_cash_flow=net_cash_flow,
+                           total_assets=total_assets,
                            net_worth=net_worth,
                            saving_goals=saving_goals,
                            income_expense_ratio=income_expense_ratio,
