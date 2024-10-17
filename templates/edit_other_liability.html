@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}
+Edit Liability - Net Plus
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Edit Liability</h2>
+
+    <form method="POST" action="{{ url_for('other_liabilities.edit_other_liability', liability_id=liability._id) }}">
+        <div class="form-group">
+            <label for="name">Liability Name:</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ liability.name }}" required>
+        </div>
+        <div class="form-group">
+            <label for="amount">Liability Amount:</label>
+            <input type="number" class="form-control" id="amount" name="amount" value="{{ liability.amount }}" required>
+        </div>
+        <div class="form-group">
+            <label for="category">Category:</label>
+            <select class="form-control" id="category" name="category">
+                <option value="Loans" {% if liability.category == "Loans" %} selected {% endif %}>Loans</option>
+                <option value="Credit Cards" {% if liability.category == "Credit Cards" %} selected {% endif %}>Credit Cards</option>
+                <option value="Mortgages" {% if liability.category == "Mortgages" %} selected {% endif %}>Mortgages</option>
+                <option value="Other" {% if liability.category == "Other" %} selected {% endif %}>Other</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="description">Description (optional):</label>
+            <input type="text" class="form-control" id="description" name="description" value="{{ liability.description }}">
+        </div>
+        <button type="submit" class="btn btn-primary">Update Liability</button>
+        <a href="{{ url_for('other_liabilities.view_other_liabilities') }}" class="btn btn-secondary">Back to Liabilities</a>
+    </form>
+</div>
+{% endblock %}

@@ -66,21 +66,18 @@ class OtherAsset:
 def add_other_asset():
     if 'user_id' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
+    
+    user_id = session['user_id']
+    name = request.form.get('name')
+    amount = float(request.form.get('amount'))
+    description = request.form.get('description', '')
+    category = request.form.get('category', '')
 
-    if request.method == 'POST':
-        user_id = session['user_id']
-        name = request.form.get('name')
-        amount = float(request.form.get('amount'))
-        description = request.form.get('description', '')
-        category = request.form.get('category', '')
+    asset = OtherAsset(user_id, name, amount, description, category)
+    asset.save()
 
-        asset = OtherAsset(user_id, name, amount, description, category)
-        asset.save()
-
-        flash('Asset added successfully!', 'success')
-        return redirect(url_for('other_assets.view_other_assets'))
-
-    return render_template('add_other_asset.html')
+    flash('Asset added successfully!', 'success')
+    return redirect(url_for('other_assets.view_other_assets'))
 
 
 # Route to get total assets (other + net cash flow)
@@ -120,7 +117,7 @@ def edit_other_asset(asset_id):
         OtherAsset.update_asset(asset_id, user_id, name, amount, description, category)
 
         flash('Asset updated successfully!', 'success')
-        return redirect(url_for('other_assets.other_assets'))
+        return redirect(url_for('other_assets.view_other_assets'))
 
     # If it's a GET request, fetch the asset's current details
     asset = OtherAsset.get_asset_by_id(asset_id, user_id)

@@ -10,6 +10,7 @@ from .cashFlow import get_net_cash_flow
 from .budget import BudgetManager 
 from .notifications import Notification, send_income_expense_ratio_notification, send_budget_vs_spending_notification
 from .other_assets import OtherAsset
+from .other_liabilities import OtherLiability
 import datetime 
 import json
 import os
@@ -39,7 +40,8 @@ def dashboard():
     loans = Loan.get_all_loans_by_user(ObjectId(user_id))
     total_loan_outstanding = sum(loan['outstanding_balance'] + loan['interest_balance'] for loan in loans)
     
-    total_outstanding = total_credit_card_outstanding + total_loan_outstanding
+    total_other_liabilities = OtherLiability.get_total_other_liabilities(user_id)
+    total_outstanding = total_credit_card_outstanding + total_loan_outstanding + total_other_liabilities
 
     total_investment = calculate_total_investment_profit_loss(user_id)
 

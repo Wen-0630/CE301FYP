@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}
+Other Liabilities - Net Plus
+{% endblock %}
+
+{% block content %}
+
+<!-- Include DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+
+<div class="container-fluid">
+    <div class="page-title">
+        <div class="title_left">
+            <h3>Other Liabilities <small>Manage your liabilities</small></h3>
+        </div>
+    </div>
+
+    <div class="clearfix"></div>
+
+    <!-- Add Liability Button outside the panel -->
+    <div class="row">
+        <div class="col-md-12">
+            <button class="btn btn-secondary mb-3" id="toggleFormBtn">Add New Liability</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Liabilities Details <small>Your liabilities list</small></h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                        <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <div class="card-box table-responsive">
+                        <p class="text-muted font-13 m-b-30">
+                            Use the table below to view, filter, and manage your liabilities.
+                        </p>
+                        <table id="liabilitiesTable" class="table table-striped table-bordered" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Liability Name</th>
+                                    <th>Amount</th>
+                                    <th>Category</th>
+                                    <th>Description</th>
+                                    <th>Date Added</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if liabilities %}
+                                    {% for liability in liabilities %}
+                                    <tr>
+                                        <td>{{ liability.name }}</td>
+                                        <td>{{ liability.amount | format_currency }}</td>
+                                        <td>{{ liability.category }}</td>
+                                        <td>{{ liability.description }}</td>
+                                        <td>{{ liability.date_added.strftime('%Y-%m-%d') }}</td>
+                                        <td>
+                                            <form action="{{ url_for('other_liabilities.delete_liability', liability_id=liability._id) }}" method="POST" style="display:inline;">
+                                                <button type="submit" class="btn btn-danger btn-sm" title="Delete"><i class="fa fa-trash"></i></button>
+                                            </form>
+                                            <a href="{{ url_for('other_liabilities.edit_other_liability', liability_id=liability._id) }}" class="btn btn-primary btn-sm" title="Edit"><i class="fa fa-edit"></i></a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6">No liabilities found. Please add some liabilities using the button above.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sidebar to add new liability -->
+<div id="liabilityForm" class="sidebar">
+    <div class="sidebar-content">
+        <button class="btn btn-secondary close-btn" id="closeFormBtn">&times;</button>
+        <h2>Add New Liability</h2>
+        <form action="{{ url_for('other_liabilities.add_other_liability') }}" method="POST">
+            <div class="form-group">
+                <label for="name">Liability Name</label>
+                <input type="text" name="name" id="name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="amount">Liability Amount</label>
+                <input type="number" name="amount" id="amount" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select name="category" id="category" class="form-control" required>
+                    <option value="Mortgage Insurance">Mortgage Insurances</option>
+                    <option value="Vehicle Insurances">Vehicle Insurances</option>
+                    <option value="Personal Debts">Personal Debts</option>
+                    <option value="Tax Owned">Tax Owned</option>
+                    <option value="Vendor Payments">Vendor Payments</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea name="description" id="description" class="form-control" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Liability</button>
+        </form>
+    </div>
+</div>
+
+<!-- Include DataTables JS and jQuery -->
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+
+<style>
+    .sidebar {
+        height: 100%;
+        width: 0;
+        position: fixed;
+        z-index: 1;
+        top: 0;
+        right: 0;
+        background-color: #f8f9fa;
+        overflow-x: hidden;
+        transition: width 0.5s;
+    }
+
+    .sidebar-content {
+        padding: 15px;
+    }
+
+    .sidebar.open {
+        width: 400px;
+    }
+
+    #mainContent {
+        transition: margin-right 0.5s;
+    }
+
+    .container-fluid {
+        padding-right: 0;
+    }
+
+    .dataTables_wrapper .dataTables_filter label::before {
+        content: '\f002'; /* Unicode for Font Awesome search icon */
+        font-family: FontAwesome;
+        padding-right: 5px;
+    }
+</style>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTables with additional options
+        $('#liabilitiesTable').DataTable({
+            "paging": true,
+            "lengthChange": true,
+            "lengthMenu": [10, 25, 50, 100],
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "columnDefs": [{
+                "targets": -1,
+                "orderable": false,
+            }]
+        });
+    });
+
+    document.getElementById('toggleFormBtn').addEventListener('click', function() {
+        var form = document.getElementById('liabilityForm');
+        var mainContent = document.getElementById('mainContent');
+        if (form.classList.contains('open')) {
+            form.classList.remove('open');
+            mainContent.style.marginRight = "0";
+        } else {
+            form.classList.add('open');
+            mainContent.style.marginRight = "400px";
+        }
+    });
+
+    document.getElementById('closeFormBtn').addEventListener('click', function() {
+        var form = document.getElementById('liabilityForm');
+        var mainContent = document.getElementById('mainContent');
+        form.classList.remove('open');
+        mainContent.style.marginRight = "0";
+    });
+</script>
+
+{% endblock %}
