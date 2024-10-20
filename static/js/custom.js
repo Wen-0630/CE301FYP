@@ -351,6 +351,90 @@ function init_echarts() {
     }
 };
 
+function init_chart_doughnut() {
+    console.log('init_chart_doughnut() is being called');
+
+    if (typeof (Chart) === 'undefined') {
+        console.log('Chart.js library not found!');
+        return;
+    }
+
+    if ($('.canvasDoughnut').length) {
+        fetch('/api/top_asset_categories')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Data fetched successfully:', data);
+
+                var topAssetCategories = data.top_asset_categories;
+                var totalAmount = data.total_amount;
+
+                if (!Array.isArray(topAssetCategories) || topAssetCategories.length === 0) {
+                    console.log('topAssetCategories data not found or invalid');
+                    return;
+                }
+
+                var labels = topAssetCategories.map(category => category.category);
+                var values = topAssetCategories.map(category => parseFloat(((category.amount / totalAmount) * 100).toFixed(2)));
+
+                // Define the same color scheme for both the chart and the fa icons
+                var backgroundColors = [
+                    "#BDC3C7", "#9B59B6", "#E74C3C", "#26B99A", "#3498DB"
+                ].slice(0, values.length);
+
+                var chart_doughnut_settings = {
+                    type: 'doughnut',
+                    tooltipFillColor: "rgba(51, 51, 51, 0.55)",
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: backgroundColors,  // Apply the background color array
+                            hoverBackgroundColor: [
+                                "#CFD4D8", "#B370CF", "#E95E4F", "#36CAAB", "#49A9EA"
+                            ].slice(0, values.length)
+                        }]
+                    },
+                    options: {
+                        tooltips: {
+                            callbacks: {
+                                label: function (tooltipItem, data) {
+                                    var dataset = data.datasets[tooltipItem.datasetIndex];
+                                    var currentValue = dataset.data[tooltipItem.index]; // Get percentage
+                                    var label = data.labels[tooltipItem.index]; // Get category label
+                                    return label + ': ' + currentValue + '%';  // Append percentage symbol in tooltip
+                                }
+                            }
+                        },
+                        legend: false,
+                        responsive: true
+                    }
+                };
+
+                // Initialize each doughnut chart
+                $('.canvasDoughnut').each(function () {
+                    var chart_element = $(this);
+                    new Chart(chart_element, chart_doughnut_settings);
+                });
+
+                // Assign colors to the category icons (fa-square)
+                $('.tile_info .fa-square').each(function (index) {
+                    if (backgroundColors[index]) {
+                        $(this).css('color', backgroundColors[index]);
+                    }
+                });
+
+            })
+            .catch(error => {
+                console.error('Error fetching top asset categories:', error);
+            });
+    } else {
+        console.log('No canvasDoughnut elements found on the page');
+    }
+}
+
+
+
+
 $(document).ready(function () {
     $('#menu_toggle').on('click', function () {
         $('body').toggleClass('nav-md nav-sm');

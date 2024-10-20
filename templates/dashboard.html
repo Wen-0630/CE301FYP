@@ -241,11 +241,11 @@
         <table class="" style="width:100%">
           <tr>
             <th style="width:37%;">
-              <p>Top 5</p>
+              <p>Top {{ top_asset_categories|length }} Asset Categories</p>
             </th>
             <th>
               <div class="col-lg-7 col-md-7 col-sm-7 ">
-                <p class="">Name</p>
+                <p class="">Category</p>
               </div>
               <div class="col-lg-5 col-md-5 col-sm-5 ">
                 <p class="">Total(%)</p>
@@ -254,40 +254,20 @@
           </tr>
           <tr>
             <td>
+              <!-- Canvas for doughnut chart -->
               <canvas class="canvasDoughnut" height="140" width="140" style="margin: 15px 10px 10px 0"></canvas>
+            </td>
             </td>
             <td>
               <table class="tile_info">
-                <tr>
-                  <td>
-                    <p><i class="fa fa-square blue"></i>House </p>
-                  </td>
-                  <td>30%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <p><i class="fa fa-square green"></i>Car </p>
-                  </td>
-                  <td>10%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <p><i class="fa fa-square purple"></i>Land </p>
-                  </td>
-                  <td>20%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <p><i class="fa fa-square aero"></i>Shoplot </p>
-                  </td>
-                  <td>15%</td>
-                </tr>
-                <tr>
-                  <td>
-                    <p><i class="fa fa-square red"></i>Others </p>
-                  </td>
-                  <td>30%</td>
-                </tr>
+                {% for asset in top_asset_categories %}
+                    <tr>
+                        <td>
+                            <p><i class="fa fa-square"></i> {{ asset.category }} </p>
+                        </td>
+                        <td>{{ (asset.amount / total_amount * 100) | round(2) }}%</td>
+                    </tr>
+                {% endfor %}
               </table>
             </td>
           </tr>
@@ -575,6 +555,10 @@
 
 {% block scripts %}
 <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    init_chart_doughnut();  // Call without arguments
+  });
+
   document.getElementById('automaticSavingGoal').addEventListener('change', function() {
       const targetAmount = document.getElementById('target-amount');
       const targetDate = document.getElementById('target-date');
@@ -623,6 +607,7 @@
           automaticSavingGoal.disabled = false;
       }
   });
+
 
 </script>
 {% endblock %}

@@ -86,6 +86,9 @@ def dashboard():
 
     notifications = Notification.get_active_notifications(user_id)
 
+    top_asset_categories, total_amount = get_top_asset_categories(user_id)
+    
+
     return render_template('dashboard.html', 
                            user=user,
                            total_income=total_income, 
@@ -98,7 +101,9 @@ def dashboard():
                            income_expense_ratio=income_expense_ratio,
                            datetime=datetime,
                            budget_message=budget_message,
-                           notifications=notifications)
+                           notifications=notifications,
+                           top_asset_categories=top_asset_categories,
+                           total_amount=total_amount)
 
 @views.route('/transactions')
 def transactions():
@@ -223,4 +228,32 @@ def update_profile():
 
     return render_template('profile.html', user=user_data)
 
+def get_top_asset_categories(user_id):
+    net_cash_flow = get_net_cash_flow(user_id)
+    other_assets = OtherAsset.get_all_assets_by_user(user_id)
+
+    categories = [{"name": "Net Cash Flow", "amount": net_cash_flow, "category": "Cash Flow"}]
+    for asset in other_assets:
+        categories.append({"name": asset['name'], "amount": asset['amount'], "category": asset.get('category', 'Other')})
+
+    sorted_categories = sorted(categories, key=lambda x: x['amount'], reverse=True)
+    top_categories = sorted_categories[:5]
+
+    # Calculate total amount for percentage
+    total_amount = sum(item['amount'] for item in top_categories)
+    
+    return top_categories, total_amount
+
+@views.route('/api/top_asset_categories', methods=['GET'])
+def api_top_asset_categories():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"error": "User not logged in"}), 401
+
+    top_asset_categories, total_amount = get_top_asset_categories(user_id)
+    
+    return jsonify({
+        "top_asset_categories": top_asset_categories,
+        "total_amount": total_amount
+    })
 
