@@ -18,6 +18,8 @@ from src.budget import budget_bp
 from src.notifications import Notification
 from src.other_assets import other_assets
 from src.other_liabilities import other_liabilities
+from src.chatbot import chatbot_bp  
+
 
 load_dotenv()
 
@@ -48,6 +50,8 @@ def create_app():
     app.register_blueprint(budget_bp, url_prefix='/')
     app.register_blueprint(other_assets, url_prefix='/')
     app.register_blueprint(other_liabilities, url_prefix='/')
+    app.register_blueprint(chatbot_bp, url_prefix='/')  # Register the chatbot blueprint
+
     
 
     app.jinja_env.filters['format_currency'] = format_currency
