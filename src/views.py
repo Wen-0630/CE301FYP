@@ -87,6 +87,12 @@ def dashboard():
     notifications = Notification.get_active_notifications(user_id)
 
     top_asset_categories, total_amount = get_top_asset_categories(user_id)
+
+    # Sort loans by original amount (highest to lowest)
+    sorted_loans = sorted(loans, key=lambda x: x['original_amount'], reverse=True)
+    
+    # Limit to top 5 largest loans
+    top_5_loans = sorted_loans[:5]
     
 
     return render_template('dashboard.html', 
@@ -103,7 +109,8 @@ def dashboard():
                            budget_message=budget_message,
                            notifications=notifications,
                            top_asset_categories=top_asset_categories,
-                           total_amount=total_amount)
+                           total_amount=total_amount,
+                           top_5_loans=top_5_loans)
 
 @views.route('/transactions')
 def transactions():
@@ -256,4 +263,3 @@ def api_top_asset_categories():
         "top_asset_categories": top_asset_categories,
         "total_amount": total_amount
     })
-

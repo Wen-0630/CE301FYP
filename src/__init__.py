@@ -97,6 +97,8 @@ def create_app():
 
     app.jinja_env.filters['format_with_commas'] = format_with_commas
 
+    app.jinja_env.filters['format_balance'] = format_balance
+
     return app
 
 def format_currency(value):
@@ -105,3 +107,11 @@ def format_currency(value):
 def format_with_commas(value):
     return "{:,.2f}".format(value)
 
+def format_balance(value):
+    """
+    Custom filter to format numbers in 'k' for thousands and display normally for values below 1000.
+    """
+    if value >= 1000:
+        # Format the value to 'k', rounded to 1 decimal place
+        return f"{value / 1000:.1f}k"
+    return f"{value:.0f}"

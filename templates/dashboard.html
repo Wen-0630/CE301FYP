@@ -114,7 +114,7 @@
   <div class="col-md-4 col-sm-4 ">
     <div class="x_panel tile fixed_height_320">
       <div class="x_title">
-        <h2>Liabilties</h2>
+        <h2>Liabilities</h2>
         <ul class="nav navbar-right panel_toolbox">
           <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
           </li>
@@ -131,89 +131,33 @@
         <div class="clearfix"></div>
       </div>
       <div class="x_content">
-        <h4>Liability Categories</h4>
+        <h4>Top Largest Loans</h4>
+        <!-- Loop through the top_5_loans passed from the backend -->
+        {% for loan in top_5_loans %}
         <div class="widget_summary">
           <div class="w_left w_25">
-            <span>Loan 1</span>
+            <span>{{ loan['name'] }}</span>  <!-- Loan name -->
           </div>
           <div class="w_center w_55">
             <div class="progress">
-              <div class="progress-bar bg-green" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 66%;">
-                <span class="sr-only">60% Complete</span>
+              <!-- Safely calculate percentage based on loan expense and original amount -->
+              {% set progress = (loan['loan_expense'] and loan['original_amount']) and ((loan['loan_expense'] / loan['original_amount']) * 100) or 0 %}
+              <div class="progress-bar bg-green" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" data-progress="{{ progress }}">
+                  <span class="sr-only">{{ progress|round(2) }}% Complete</span>
               </div>
             </div>
           </div>
-          <div class="w_right w_20">
-            <span>123k</span>
-          </div>
-          <div class="clearfix"></div>
-        </div>
-
-        <div class="widget_summary">
-          <div class="w_left w_25">
-            <span>Loan 2</span>
-          </div>
-          <div class="w_center w_55">
-            <div class="progress">
-              <div class="progress-bar bg-green" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 45%;">
-                <span class="sr-only">60% Complete</span>
-              </div>
+            <div class="w_right w_20">
+              <!-- Show the outstanding balance -->
+              <span>{{ loan['outstanding_balance']|format_balance }}</span>
             </div>
-          </div>
-          <div class="w_right w_20">
-            <span>53k</span>
-          </div>
           <div class="clearfix"></div>
         </div>
-        <div class="widget_summary">
-          <div class="w_left w_25">
-            <span>Loan 3</span>
-          </div>
-          <div class="w_center w_55">
-            <div class="progress">
-              <div class="progress-bar bg-green" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 25%;">
-                <span class="sr-only">60% Complete</span>
-              </div>
-            </div>
-          </div>
-          <div class="w_right w_20">
-            <span>23k</span>
-          </div>
-          <div class="clearfix"></div>
-        </div>
-        <div class="widget_summary">
-          <div class="w_left w_25">
-            <span>Loan 4</span>
-          </div>
-          <div class="w_center w_55">
-            <div class="progress">
-              <div class="progress-bar bg-green" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 5%;">
-                <span class="sr-only">60% Complete</span>
-              </div>
-            </div>
-          </div>
-          <div class="w_right w_20">
-            <span>3k</span>
-          </div>
-          <div class="clearfix"></div>
-        </div>
-        <div class="widget_summary">
-          <div class="w_left w_25">
-            <span>Loan 5</span>
-          </div>
-          <div class="w_center w_55">
-            <div class="progress">
-              <div class="progress-bar bg-green" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 2%;">
-                <span class="sr-only">60% Complete</span>
-              </div>
-            </div>
-          </div>
-          <div class="w_right w_20">
-            <span>1k</span>
-          </div>
-          <div class="clearfix"></div>
-        </div>
-
+        {% endfor %}
+        <!-- If there are fewer than 5 loans, show a message or placeholder -->
+        {% if top_5_loans|length == 0 %}
+        <p>No loans to display.</p>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -557,6 +501,11 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     init_chart_doughnut();  // Call without arguments
+  });
+
+  document.querySelectorAll('.progress-bar').forEach(function(bar) {
+      const progress = bar.getAttribute('data-progress');
+      bar.style.width = progress + '%';
   });
 
   document.getElementById('automaticSavingGoal').addEventListener('change', function() {
