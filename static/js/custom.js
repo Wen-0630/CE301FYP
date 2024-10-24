@@ -432,8 +432,157 @@ function init_chart_doughnut() {
     }
 }
 
+// function init_charts() {
+//     if ($('#lineChart').length) {
+//         var ctx = document.getElementById("lineChart");
+//         var lineChart = new Chart(ctx, {
+//             type: 'line',
+//             data: {
+//                 labels: ["January", "February", "March", "April", "May", "June", "July"],
+//                 datasets: [{
+//                     label: "My First dataset",
+//                     backgroundColor: "rgba(38, 185, 154, 0.31)",
+//                     borderColor: "rgba(38, 185, 154, 0.7)",
+//                     pointBorderColor: "rgba(38, 185, 154, 0.7)",
+//                     pointBackgroundColor: "rgba(38, 185, 154, 0.7)",
+//                     pointHoverBackgroundColor: "#fff",
+//                     pointHoverBorderColor: "rgba(220,220,220,1)",
+//                     pointBorderWidth: 1,
+//                     data: [31, 74, 6, 39, 20, 85, 7]
+//                 }, {
+//                     label: "My Second dataset",
+//                     backgroundColor: "rgba(3, 88, 106, 0.3)",
+//                     borderColor: "rgba(3, 88, 106, 0.70)",
+//                     pointBorderColor: "rgba(3, 88, 106, 0.70)",
+//                     pointBackgroundColor: "rgba(3, 88, 106, 0.70)",
+//                     pointHoverBackgroundColor: "#fff",
+//                     pointHoverBorderColor: "rgba(151,187,205,1)",
+//                     pointBorderWidth: 1,
+//                     data: [82, 23, 66, 9, 99, 4, 2]
+//                 }]
+//             },
+//         });
+//     }     
+// }
+
+function init_charts() {
+    if ($('#lineChart').length) {
+
+        // Initialize the chart
+        var ctx = document.getElementById("lineChart").getContext('2d');
+        var lineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],  // We will dynamically update these labels (dates)
+                datasets: [{
+                    label: "Profit/Loss Over Time",
+                    backgroundColor: "rgba(38, 185, 154, 0.31)",
+                    borderColor: "rgba(38, 185, 154, 0.7)",
+                    pointBorderColor: "rgba(38, 185, 154, 0.7)",
+                    pointBackgroundColor: "rgba(38, 185, 154, 0.7)",
+                    pointHoverBackgroundColor: "#fff",
+                    pointHoverBorderColor: "rgba(220,220,220,1)",
+                    pointBorderWidth: 1,
+                    data: []  // Data will be dynamically updated
+                }]
+            },
+        });
+
+        // Function to update the chart with new data
+        function updateProfitLossChart(startDate, endDate) {
+            $.ajax({
+                url: '/api/profit_loss_over_time',  // Your API endpoint
+                method: 'GET',
+                data: { 
+                    start_date: startDate.format('YYYY-MM-DD'),  // Send start date
+                    end_date: endDate.format('YYYY-MM-DD')       // Send end date
+                },
+                success: function(response) {
+                    if (response.error) {
+                        alert(response.error);
+                        return;
+                    }
+
+                    // Extract the dates and profit/loss values
+                    const dates = response.map(item => item.date);
+                    const profitLossValues = response.map(item => item.profit_loss);
+
+                    // Update chart labels and data
+                    lineChart.data.labels = dates;  // Update x-axis with the dates
+                    lineChart.data.datasets[0].data = profitLossValues;  // Update y-axis with profit/loss values
+                    lineChart.update();
+                },
+                error: function(err) {
+                    console.error('Error fetching data', err);
+                }
+            });
+        }
+
+        // Initial chart update for the 'Last 7 Days' (default range)
+        const start = moment().subtract(6, 'days');  // 7 days ago
+        const end = moment();  // Today
+        updateProfitLossChart(start, end);
+    }
+}
 
 
+function init_daterangepicker() {
+    if (typeof ($.fn.daterangepicker) === 'undefined') { return; }
+    console.log('init_daterangepicker');
+
+    var cb = function (start, end, label) {
+        console.log(start.toISOString(), end.toISOString(), label);
+        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+    };
+
+    var optionSet1 = {
+        startDate: moment().subtract(29, 'days'),
+        endDate: moment(),
+        minDate: '01/01/2012',
+        maxDate: '12/31/2015',
+        dateLimit: {
+            days: 60
+        },
+        showDropdowns: true,
+        showWeekNumbers: true,
+        timePicker: false,
+        timePickerIncrement: 1,
+        timePicker12Hour: true,
+        ranges: {
+            'Today': [moment(), moment()],
+            'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+            'This Month': [moment().startOf('month'), moment().endOf('month')],
+            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+        },
+        opens: 'left',
+        buttonClasses: ['btn btn-default'],
+        applyClass: 'btn-small btn-primary',
+        cancelClass: 'btn-small',
+        format: 'MM/DD/YYYY',
+        separator: ' to ',
+        locale: {
+            applyLabel: 'Submit',
+            cancelLabel: 'Clear',
+            fromLabel: 'From',
+            toLabel: 'To',
+            customRangeLabel: 'Custom',
+            daysOfWeek: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+            monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            firstDay: 1
+        }
+    };
+
+    $('#reportrange span').html(moment().subtract(29, 'days').format('MMMM D, YYYY') + ' - ' + moment().format('MMMM D, YYYY'));
+    $('#reportrange').daterangepicker(optionSet1, cb);
+
+    // When date range is applied, update the chart
+    $('#reportrange').on('apply.daterangepicker', function (ev, picker) {
+        console.log("apply event fired, start/end dates are " + picker.startDate.format('MMMM D, YYYY') + " to " + picker.endDate.format('MMMM D, YYYY'));
+        updateProfitLossChart(picker.startDate, picker.endDate);  // Update the chart here
+    });
+}
 
 $(document).ready(function () {
     $('#menu_toggle').on('click', function () {
@@ -442,4 +591,6 @@ $(document).ready(function () {
 
     init_gauge(); // Initialize the Gauge.js when the document is ready
     init_echarts(); // Initialize the ECharts when the document is ready
+    init_charts();
+    init_daterangepicker();
 });
