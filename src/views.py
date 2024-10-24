@@ -18,7 +18,75 @@ import os
 # Create a Blueprint for user-related routes
 views = Blueprint('user', __name__, template_folder='templates')
 
+def get_dashboard_data(user_id):
+    user = current_app.mongo.cx['CE-301'].users.find_one({"_id": ObjectId(user_id)})
+    if 'profile_pic' not in user:
+        user['profile_pic'] = 'default_profile.png'
 
+    total_income = calculate_total_income(user_id)
+    total_expense = calculate_total_expense(user_id)
+    total_credit_card_outstanding = get_total_outstanding(user_id)
+    loans = Loan.get_all_loans_by_user(ObjectId(user_id))
+    total_loan_outstanding = sum(loan['outstanding_balance'] + loan['interest_balance'] for loan in loans)
+    total_other_liabilities = OtherLiability.get_total_other_liabilities(user_id)
+    total_outstanding = total_credit_card_outstanding + total_loan_outstanding + total_other_liabilities
+
+    total_investment = calculate_total_investment_profit_loss(user_id)
+    net_cash_flow = get_net_cash_flow(user_id)
+    total_other_assets = OtherAsset.get_total_other_assets(user_id)
+    total_assets = net_cash_flow + total_other_assets
+    net_worth = total_assets + total_investment - total_outstanding
+
+    saving_goals = SavingGoal.get_goals_by_user(user_id)
+    for goal in saving_goals:
+        SavingGoal.calculate_current_amount(goal['_id'], user_id)
+
+    if total_expense > 0:
+        income_expense_ratio = round((total_expense / total_income) * 100, 2)
+    elif total_income > 0:
+        income_expense_ratio = 0.00  # Set the ratio to 0 if income exists but expense is nil
+    else:
+        income_expense_ratio = 100.00
+
+    budget = BudgetManager.get_latest_budget(user_id)
+    radar_data = BudgetManager.prepare_radar_chart_data(
+        user_id,
+        budget['categories'] if budget else [],
+        budget['budget_amounts'] if budget else [],
+        budget['start_date'] if budget else None,
+        budget['end_date'] if budget else None
+    ) if budget else {}
+    radar_data_json = json.dumps(radar_data)
+    budget_message = "No active budget. Please set a budget." if not budget else ""
+
+    notifications = Notification.get_active_notifications(user_id)
+    top_asset_categories, total_amount = get_top_asset_categories(user_id)
+    sorted_loans = sorted(loans, key=lambda x: x['original_amount'], reverse=True)
+    top_5_loans = sorted_loans[:5]
+
+    return {
+        "user": user,
+        "total_income": total_income,
+        "total_expense": total_expense,
+        "total_credit_card_outstanding": total_credit_card_outstanding,
+        "loans": loans,
+        "total_loan_outstanding": total_loan_outstanding,
+        "total_other_liabilities": total_other_liabilities,
+        "total_outstanding": total_outstanding,
+        "total_investment": total_investment,
+        "net_cash_flow": net_cash_flow,
+        "total_assets": total_assets,
+        "net_worth": net_worth,
+        "saving_goals": saving_goals,
+        "income_expense_ratio": income_expense_ratio,
+        "budget_message": budget_message,
+        "radar_data_json": radar_data_json,
+        "notifications": notifications,
+        "top_asset_categories": top_asset_categories,
+        "top_5_loans": top_5_loans, 
+        "total_amount": total_amount
+    }
+    
 @views.route('/')
 def home():
     return redirect(url_for('auth.login'))
@@ -29,88 +97,24 @@ def dashboard():
         return redirect(url_for('auth.login'))
 
     user_id = session['user_id']
-    user = current_app.mongo.cx['CE-301'].users.find_one({"_id": ObjectId(user_id)})
-    if 'profile_pic' not in user:
-        user['profile_pic'] = 'default_profile.png'
-
-    total_income = calculate_total_income(user_id)
-    total_expense = calculate_total_expense(user_id)
-    total_credit_card_outstanding = get_total_outstanding(user_id)
-
-    loans = Loan.get_all_loans_by_user(ObjectId(user_id))
-    total_loan_outstanding = sum(loan['outstanding_balance'] + loan['interest_balance'] for loan in loans)
-    
-    total_other_liabilities = OtherLiability.get_total_other_liabilities(user_id)
-    total_outstanding = total_credit_card_outstanding + total_loan_outstanding + total_other_liabilities
-
-    total_investment = calculate_total_investment_profit_loss(user_id)
-
-    net_cash_flow = get_net_cash_flow(user_id)
-    total_other_assets = OtherAsset.get_total_other_assets(user_id)
-    total_assets = net_cash_flow + total_other_assets
-
-    net_worth = total_assets + total_investment - total_outstanding
-
-    saving_goals = SavingGoal.get_goals_by_user(user_id)
-    for goal in saving_goals:
-        # Update the current amount before rendering the dashboard
-        SavingGoal.calculate_current_amount(goal['_id'], user_id)
-
-    if total_expense > 0:
-        income_expense_ratio = round((total_expense / total_income) * 100, 2)
-    elif total_income > 0:
-        income_expense_ratio = 0.00  # Set the ratio to 0 if income exists but expense is nil
-    else:
-        income_expense_ratio = 100.00
-
-    send_income_expense_ratio_notification(user_id, income_expense_ratio)
-
-    budget = BudgetManager.get_latest_budget(user_id)
-
-    if budget:
-        radar_data = BudgetManager.prepare_radar_chart_data(
-            user_id, 
-            budget['categories'], 
-            budget['budget_amounts'], 
-            budget['start_date'], 
-            budget['end_date']
-        )
-        send_budget_vs_spending_notification(user_id, radar_data)
-        radar_data_json = json.dumps(radar_data)
-        budget_message = ""
-    else:
-        radar_data = "{}"
-        budget_message = "No active budget. Please set a budget."
-
-    # radar_data_json = json.dumps(radar_data)
-
-    notifications = Notification.get_active_notifications(user_id)
-
-    top_asset_categories, total_amount = get_top_asset_categories(user_id)
-
-    # Sort loans by original amount (highest to lowest)
-    sorted_loans = sorted(loans, key=lambda x: x['original_amount'], reverse=True)
-    
-    # Limit to top 5 largest loans
-    top_5_loans = sorted_loans[:5]
-    
+    data = get_dashboard_data(user_id)
 
     return render_template('dashboard.html', 
-                           user=user,
-                           total_income=total_income, 
-                           total_expense=total_expense, 
-                           total_outstanding=total_outstanding, 
-                           total_investment=total_investment, 
-                           total_assets=total_assets,
-                           net_worth=net_worth,
-                           saving_goals=saving_goals,
-                           income_expense_ratio=income_expense_ratio,
+                           user=data['user'],
+                           total_income=data['total_income'], 
+                           total_expense=data['total_expense'], 
+                           total_outstanding=data['total_outstanding'], 
+                           total_investment=data['total_investment'], 
+                           total_assets=data['total_assets'],
+                           net_worth=data['net_worth'],
+                           saving_goals=data['saving_goals'],
+                           income_expense_ratio=data['income_expense_ratio'],
                            datetime=datetime,
-                           budget_message=budget_message,
-                           notifications=notifications,
-                           top_asset_categories=top_asset_categories,
-                           total_amount=total_amount,
-                           top_5_loans=top_5_loans)
+                           budget_message=data['budget_message'],
+                           notifications=data['notifications'],
+                           top_asset_categories=data['top_asset_categories'],
+                           total_amount=data['total_amount'],
+                           top_5_loans=data['top_5_loans'])
 
 @views.route('/transactions')
 def transactions():
