@@ -1,8 +1,8 @@
 # src/investment.py
 from flask import Blueprint, render_template, session, redirect, url_for, current_app, request, jsonify
 from bson.objectid import ObjectId
-from .utils import get_stock_data, get_crypto_data, get_formatted_crypto_data, get_formatted_stock_data
-from datetime import datetime
+from .utils import get_stock_data, get_crypto_data, get_formatted_crypto_data, get_formatted_stock_data, get_historical_crypto_data
+from datetime import datetime, timedelta
 import pytz
 import time
 
@@ -216,3 +216,47 @@ def delete_crypto_holding():
         return jsonify({'success': True})
     else:
         return jsonify({'success': False, 'error': 'Failed to delete crypto holding'})
+
+@investment.route('/api/profit_loss_over_time', methods=['GET'])
+def profit_loss_over_time():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'User not logged in'}), 401
+
+    # Get start_date and end_date from query parameters
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
+
+    try:
+        # Convert start_date and end_date to datetime objects
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+    except ValueError:
+        return jsonify({'error': 'Invalid date format'}), 400
+
+    # Fetch user holdings
+    crypto_holdings = list(current_app.mongo.db.crypto_holdings.find({'userId': ObjectId(user_id)}))
+
+    # Get historical prices for crypto assets for the specified time range
+    crypto_list = [holding['asset'] for holding in crypto_holdings]
+    historical_prices = get_historical_crypto_data(crypto_list, start_date, end_date)
+
+    # Calculate profit/loss for each holding and sum them up
+    profit_loss_data = []
+    for holding in crypto_holdings:
+        asset = holding['asset'].lower()
+        buy_price = holding['buy_price']
+        quantity = holding['quantity']
+        
+        # Loop through the historical prices and calculate profit/loss at each point in time
+        for date, price in historical_prices.get(asset, {}).items():
+            profit_loss = (price - buy_price) * quantity
+            profit_loss_data.append({
+                'date': date,
+                'profit_loss': profit_loss
+            })
+
+    # Sort the data by date (for charting purposes)
+    profit_loss_data.sort(key=lambda x: x['date'])
+
+    return jsonify(profit_loss_data)
