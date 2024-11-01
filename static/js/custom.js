@@ -465,17 +465,48 @@ function init_chart_doughnut() {
 //     }     
 // }
 
+// Function to update the chart with new data (move outside init_charts to make it global)
+function updateProfitLossChart(startDate, endDate, hourlyMode = false) {
+    $.ajax({
+        url: '/api/profit_loss_over_time',
+        method: 'GET',
+        data: { 
+            start_date: startDate.format(hourlyMode ? 'YYYY-MM-DDTHH:mm:ss' : 'YYYY-MM-DD'),  // Use full ISO for hourly, date-only for daily
+            end_date: endDate.format(hourlyMode ? 'YYYY-MM-DDTHH:mm:ss' : 'YYYY-MM-DD'),
+            hourly_mode: hourlyMode  // Indicate whether hourly mode is enabled
+        },
+        success: function(response) {
+            if (response.error) {
+                alert(response.error);
+                return;
+            }
+
+            const dates = response.map(item => item.date);
+            const profitLossValues = response.map(item => parseFloat(item.profit_loss).toFixed(2));
+
+            lineChart.data.labels = dates;
+            lineChart.data.datasets[0].data = profitLossValues;
+            lineChart.update();
+        },
+        error: function(err) {
+            console.error('Error fetching data', err);
+        }
+    });
+}
+
+
+
 function init_charts() {
     if ($('#lineChart').length) {
 
         // Initialize the chart
         var ctx = document.getElementById("lineChart").getContext('2d');
-        var lineChart = new Chart(ctx, {
+        window.lineChart = new Chart(ctx, {  // Make lineChart global for access in update function
             type: 'line',
             data: {
                 labels: [],  // We will dynamically update these labels (dates)
                 datasets: [{
-                    label: "Profit/Loss Over Time",
+                    label: "Crypto's Profit/Loss",
                     backgroundColor: "rgba(38, 185, 154, 0.31)",
                     borderColor: "rgba(38, 185, 154, 0.7)",
                     pointBorderColor: "rgba(38, 185, 154, 0.7)",
@@ -488,39 +519,9 @@ function init_charts() {
             },
         });
 
-        // Function to update the chart with new data
-        function updateProfitLossChart(startDate, endDate) {
-            $.ajax({
-                url: '/api/profit_loss_over_time',  // Your API endpoint
-                method: 'GET',
-                data: { 
-                    start_date: startDate.format('YYYY-MM-DD'),  // Send start date
-                    end_date: endDate.format('YYYY-MM-DD')       // Send end date
-                },
-                success: function(response) {
-                    if (response.error) {
-                        alert(response.error);
-                        return;
-                    }
-
-                    // Extract the dates and profit/loss values
-                    const dates = response.map(item => item.date);
-                    const profitLossValues = response.map(item => item.profit_loss);
-
-                    // Update chart labels and data
-                    lineChart.data.labels = dates;  // Update x-axis with the dates
-                    lineChart.data.datasets[0].data = profitLossValues;  // Update y-axis with profit/loss values
-                    lineChart.update();
-                },
-                error: function(err) {
-                    console.error('Error fetching data', err);
-                }
-            });
-        }
-
         // Initial chart update for the 'Last 7 Days' (default range)
-        const start = moment().subtract(6, 'days');  // 7 days ago
-        const end = moment();  // Today
+        const start = moment.utc().subtract(6, 'days');  // 7 days ago
+        const end = moment.utc();  // Today
         updateProfitLossChart(start, end);
     }
 }
@@ -531,8 +532,34 @@ function init_daterangepicker() {
     console.log('init_daterangepicker');
 
     var cb = function (start, end, label) {
-        console.log(start.toISOString(), end.toISOString(), label);
-        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+        // Adjust display to use end date as the day before for selections like "Yesterday"
+        // let displayStart = label === "Yesterday" ? start.clone().subtract(1, 'days') : start;
+        // let displayEnd = label === "Yesterday" ? end.clone().subtract(1, 'days') : end;
+        // Adjust display dates for specific labels
+        let displayStart, displayEnd;
+
+        if (label === "Yesterday") {
+            displayStart = start.clone().subtract(1, 'days');
+            displayEnd = end.clone().subtract(1, 'days');
+        } else if (label === "Last 7 Days") {
+            displayStart = start.clone().subtract(1, 'days');
+            displayEnd = moment().subtract(1, 'days');
+        } else if (label === "Last 30 Days") {
+            displayStart = start.clone().subtract(1, 'days');
+            displayEnd = moment().subtract(1, 'days');
+        } else if (label === "Last Month") {
+            displayStart = start.clone().subtract(1, 'days');
+            displayEnd = moment().subtract(1, 'days');
+        } else {
+            displayStart = start;
+            displayEnd = end;
+        }
+
+        // Console display for debugging purposes
+        console.log(displayStart.toISOString(), displayEnd.toISOString(), label);
+
+        // Adjust HTML span display
+        $('#reportrange span').html(displayStart.format('MMMM D, YYYY') + ' - ' + displayEnd.format('MMMM D, YYYY'));
     };
 
     var optionSet1 = {
@@ -550,11 +577,11 @@ function init_daterangepicker() {
         timePicker12Hour: true,
         ranges: {
             'Today': [moment(), moment()],
-            'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-            'This Month': [moment().startOf('month'), moment().endOf('month')],
-            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            'Yesterday': [moment(), moment()],
+            'Last 7 Days': [moment.utc().subtract(6, 'days'), moment.utc()],
+            'Last 30 Days': [moment.utc().subtract(29, 'days'), moment.utc()],
+            'This Month': [moment.utc().startOf('month'), moment.utc().endOf('month')],
+            'Last Month': [moment.utc().subtract(1,'month').startOf('month').add(1, 'day'), moment.utc().subtract(1,'month').endOf('month').add(1, 'day')]
         },
         opens: 'left',
         buttonClasses: ['btn btn-default'],
@@ -579,10 +606,20 @@ function init_daterangepicker() {
 
     // When date range is applied, update the chart
     $('#reportrange').on('apply.daterangepicker', function (ev, picker) {
-        console.log("apply event fired, start/end dates are " + picker.startDate.format('MMMM D, YYYY') + " to " + picker.endDate.format('MMMM D, YYYY'));
-        updateProfitLossChart(picker.startDate, picker.endDate);  // Update the chart here
+        const startDateUTC = picker.startDate.utc();
+        const endDateUTC = picker.endDate.utc();
+
+        // For "Today," adjust to the last 24 hours
+        if (picker.chosenLabel === "Today") {
+            const last24HoursStart = moment().subtract(24, 'hours').utc();
+            updateProfitLossChart(last24HoursStart, endDateUTC, true); // Hourly mode for last 24 hours
+        } else {
+            updateProfitLossChart(startDateUTC, endDateUTC, false); // Regular range mode
+        }
     });
 }
+
+
 
 $(document).ready(function () {
     $('#menu_toggle').on('click', function () {
