@@ -165,7 +165,10 @@
           <div class="form-group">
             <label for="stockSelect">Select Stock</label>
             <select id="stockSelect" class="form-control" required>
-              <!-- Populate stock options dynamically if needed -->
+              <option value="" disabled selected>Select a stock</option>
+              {% for stock in stocks_data %}
+              <option value="{{ stock['symbol'] }}">{{ stock['symbol'] }}</option>
+              {% endfor %}
             </select>
           </div>
           <div class="form-group">
@@ -178,15 +181,15 @@
           </div>
           <div class="form-group">
             <label for="stockBuyPrice">Buy Price per Unit</label>
-            <input type="number" id="stockBuyPrice" class="form-control" required>
+            <input type="number" step="0.0001" id="stockBuyPrice" class="form-control" required>
           </div>
           <div class="form-group">
             <label for="stockAmountBought">Total Amount Bought</label>
-            <input type="number" id="stockAmountBought" class="form-control" required>
+            <input type="number" step="0.0001" id="stockAmountBought" class="form-control" required>
           </div>
           <div class="form-group">
             <label for="stockTransactionFee">Transaction Fee (Optional)</label>
-            <input type="number" id="stockTransactionFee" class="form-control">
+            <input type="number" step="0.01" id="stockTransactionFee" class="form-control">
           </div>
           <div class="form-check">
             <input type="checkbox" class="form-check-input" id="stockDeductCash">
@@ -320,9 +323,9 @@
             asset: stockSelect,
             date: transactionDate,
             time: transactionTime,
-            buyPrice: buyPrice,
-            amountBought: amountBought,
-            transactionFee: transactionFee,
+            buyPrice: parseFloat(buyPrice).toFixed(4),  // Ensure it handles decimal points
+            amountBought: parseFloat(amountBought).toFixed(4),  // Ensure it handles decimal points
+            transactionFee: transactionFee ? parseFloat(transactionFee).toFixed(2) : 0, 
             deductCash: deductCash
         };
 
@@ -366,7 +369,7 @@
             time: transactionTime,
             buyPrice: parseFloat(buyPrice).toFixed(4),  // Ensure it handles decimal points
             amountBought: parseFloat(amountBought).toFixed(4),  // Ensure it handles decimal points
-            transactionFee: parseFloat(transactionFee).toFixed(2),
+            transactionFee: transactionFee ? parseFloat(transactionFee).toFixed(2) : 0, 
             deductCash: deductCash
         };
 

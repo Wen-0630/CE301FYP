@@ -5,134 +5,232 @@ from .utils import get_stock_data, get_crypto_data, get_formatted_crypto_data, g
 from datetime import datetime
 import pytz
 import time
+import websocket
+import threading
+import json
+
 
 investment = Blueprint('investment', __name__, template_folder='templates')
 
-CACHE = {}
-CACHE_TIMEOUT = 300  # 5 minutes in seconds
+# CACHE = {}
+# CACHE_TIMEOUT = 300  # 5 minutes in seconds
 
-def get_cached_data(key):
-    current_time = time.time()
-    if key in CACHE and current_time - CACHE[key]['timestamp'] < CACHE_TIMEOUT:
-        return CACHE[key]['data']
-    return None
+# def get_cached_data(key):
+#     current_time = time.time()
+#     if key in CACHE and current_time - CACHE[key]['timestamp'] < CACHE_TIMEOUT:
+#         return CACHE[key]['data']
+#     return None
 
-def set_cached_data(key, data):
-    CACHE[key] = {
-        'timestamp': time.time(),
-        'data': data
-    }
+# def set_cached_data(key, data):
+#     CACHE[key] = {
+#         'timestamp': time.time(),
+#         'data': data
+#     }
 
-def convert_to_singapore_time(timestamp):
-    # Convert timestamp to Singapore time
-    utc_time = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
-    utc_time = utc_time.replace(tzinfo=pytz.utc)
-    singapore_time = utc_time.astimezone(pytz.timezone('Asia/Singapore'))
-    return singapore_time.strftime("%Y-%m-%d %H:%M:%S")
+# def convert_to_singapore_time(timestamp):
+#     # Convert timestamp to Singapore time
+#     utc_time = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+#     utc_time = utc_time.replace(tzinfo=pytz.utc)
+#     singapore_time = utc_time.astimezone(pytz.timezone('Asia/Singapore'))
+#     return singapore_time.strftime("%Y-%m-%d %H:%M:%S")
 
-@investment.route('/update_data')
-def update_data():
-    if 'user_id' not in session:
-        return redirect(url_for('auth.login'))
+# @investment.route('/update_data')
+# def update_data():
+#     if 'user_id' not in session:
+#         return redirect(url_for('auth.login'))
     
-    cache_key = 'market_data'
-    cached_data = get_cached_data(cache_key)
-    if cached_data:
-        return jsonify({'success': True, 'message': 'Data loaded from cache'})
+#     cache_key = 'market_data'
+#     cached_data = get_cached_data(cache_key)
+#     if cached_data:
+#         return jsonify({'success': True, 'message': 'Data loaded from cache'})
 
-    stock_symbols = {
-        'AAPL': 'Apple Inc.',
-        'GOOGL': 'Alphabet Inc.',
-        'MSFT': 'Microsoft Corp.'
-    }
+#     stock_symbols = {
+#         'AAPL': 'Apple Inc.',
+#         'GOOGL': 'Alphabet Inc.',
+#         'MSFT': 'Microsoft Corp.'
+#     }
 
-    stocks = {}
-    for symbol, name in stock_symbols.items():
-        data = get_formatted_stock_data(symbol)
-        if data:
-            latest_timestamp = sorted(data.keys())[-1]
-            latest_data = data[latest_timestamp]
-            latest_timestamp_sg = convert_to_singapore_time(latest_timestamp)
-            stocks[symbol] = {
-                'name': name,
-                'latest_date': latest_timestamp_sg,
-                'latest_close': latest_data['close'],
-                'data': {convert_to_singapore_time(ts): val for ts, val in data.items()}
-            }
+#     stocks = {}
+#     for symbol, name in stock_symbols.items():
+#         data = get_formatted_stock_data(symbol)
+#         if data:
+#             latest_timestamp = sorted(data.keys())[-1]
+#             latest_data = data[latest_timestamp]
+#             latest_timestamp_sg = convert_to_singapore_time(latest_timestamp)
+#             stocks[symbol] = {
+#                 'name': name,
+#                 'latest_date': latest_timestamp_sg,
+#                 'latest_close': latest_data['close'],
+#                 'data': {convert_to_singapore_time(ts): val for ts, val in data.items()}
+#             }
 
-    crypto_list = ['bitcoin', 'ethereum', 'litecoin']
-    crypto_data = get_formatted_crypto_data(crypto_list)
+#     crypto_list = ['bitcoin', 'ethereum', 'litecoin']
+#     crypto_data = get_formatted_crypto_data(crypto_list)
 
-    user_id = session['user_id']
-    current_app.mongo.db.markets.update_one(
-        {'userId': ObjectId(user_id)},
-        {"$set": {'stocks': stocks, 'crypto': crypto_data}},
-        upsert=True
+    # user_id = session['user_id']    
+    # current_app.mongo.db.markets.update_one(
+    #     {'userId': ObjectId(user_id)},
+    #     {"$set": {'stocks': stocks, 'crypto': crypto_data}},
+    #     upsert=True
+    # )
+
+    # set_cached_data(cache_key, {'stocks': stocks, 'crypto': crypto_data})
+
+    # return "Data updated successfully"
+
+def start_websocket(app):
+    def on_message(ws, message):
+        data = json.loads(message)
+        
+        if data['type'] == 'trade':
+            with app.app_context():  # Push application context here
+                for trade in data['data']:
+                    symbol = trade['s']
+                    last_price = trade['p']
+                    volume = trade['v']
+                    timestamp = datetime.fromtimestamp(trade['t'] / 1000)  # Convert ms to seconds
+                    
+                    # Store in MongoDB
+                    current_app.mongo.db.stocks.update_one(
+                        {'symbol': symbol},
+                        {
+                            '$set': {
+                                'last_price': last_price,
+                                'volume': volume,
+                                'timestamp': timestamp
+                            }
+                        },
+                        upsert=True
+                    )
+    def on_error(ws, error):
+        print(f"WebSocket error: {error}")
+
+    def on_close(ws, close_status_code, close_msg):
+        print("### WebSocket closed ###")
+        print(f"Code: {close_status_code}, Message: {close_msg}")
+
+    def on_open(ws):
+        symbols = [
+            'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'FB', 'TSLA', 'BRK.B', 'JPM', 'V',
+            'JNJ', 'WMT', 'PG', 'UNH', 'MA', 'NVDA', 'HD', 'DIS', 'BAC', 'VZ', 'KO',
+            'PFE', 'NFLX', 'INTC', 'CMCSA', 'PEP', 'CSCO', 'T', 'XOM', 'BA', 'ORCL',
+            'C', 'ABBV', 'MCD', 'ABT', 'NKE', 'LLY', 'CRM', 'ACN', 'DHR', 'MDT',
+            'QCOM', 'TXN', 'HON', 'MRK', 'IBM', 'RTX', 'GS', 'CAT', 'MMM', 'GE'
+        ]
+        for symbol in symbols:
+            ws.send(json.dumps({"type": "subscribe", "symbol": symbol}))
+
+    ws = websocket.WebSocketApp(
+        "wss://ws.finnhub.io?token=csgj1bpr01qldu0cq0ugcsgj1bpr01qldu0cq0v0",
+        on_message=on_message,
+        on_error=on_error,
+        on_close=on_close
     )
+    ws.on_open = on_open
+    ws.run_forever()
 
-    set_cached_data(cache_key, {'stocks': stocks, 'crypto': crypto_data})
-
-    return "Data updated successfully"
+# Start WebSocket in a new thread to keep it running alongside the Flask app
+def start_websocket_thread(app):
+    threading.Thread(target=start_websocket, args=(app,), daemon=True).start()
 
 @investment.route('/markets')
 def markets():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
 
-    user_id = session['user_id']
-    user_data = current_app.mongo.db.markets.find_one({'userId': ObjectId(user_id)})
+    stocks = list(current_app.mongo.db.stocks.find())
+    crypto_data = get_crypto_data()  # Fetch crypto data directly from the API
 
-    if user_data:
-        stocks = user_data.get('stocks', {})
-        crypto_data = user_data.get('crypto', [])
-    else:
-        stocks = {}
-        crypto_data = []
+    # print("Stock Data:", stocks)  # Debugging line to check stock data
+    # print("Crypto Data:", crypto_data)  # Debugging line to check crypto dat
 
     return render_template('markets.html', stocks=stocks, crypto_data=crypto_data)
+
+# @investment.route('/add_transaction', methods=['POST'])
+# def add_transaction():
+#     if 'user_id' not in session:
+#         return jsonify({'success': False, 'error': 'User not logged in'}), 401
+
+#     data = request.get_json()
+#     transaction_type = data['type']
+#     asset = data['asset']
+#     date = data['date']
+#     time = data['time']
+#     buy_price = float(data['buyPrice'])
+#     amount_bought = float(data['amountBought'])
+#     transaction_fee = float(data.get('transactionFee' or 0))
+#     deduct_cash = "Yes" if data['deductCash'] else "No"
+
+#     user_id = session['user_id']
+
+#     # Convert date and time to datetime object
+#     datetime_str = f"{date} {time}"
+#     transaction_datetime = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M')
+
+#     # Calculate quantity
+#     quantity = amount_bought / buy_price
+
+#     holding = {
+#         'userId': ObjectId(user_id),
+#         'asset': asset,
+#         'datetime': transaction_datetime,
+#         'buy_price': buy_price,
+#         'amount_bought': amount_bought,
+#         'quantity': quantity,
+#         'transaction_fee': transaction_fee,
+#         'deduct_cash': deduct_cash,
+#         'type': transaction_type  # Add type to the holding
+#     }
+
+#     if transaction_type == 'stock':
+#         current_app.mongo.db.stock_holdings.insert_one(holding)
+#     elif transaction_type == 'crypto':
+#         current_app.mongo.db.crypto_holdings.insert_one(holding)
+
+#     return jsonify({'success': True})
 
 @investment.route('/add_transaction', methods=['POST'])
 def add_transaction():
     if 'user_id' not in session:
         return jsonify({'success': False, 'error': 'User not logged in'}), 401
 
-    data = request.get_json()
-    transaction_type = data['type']
-    asset = data['asset']
-    date = data['date']
-    time = data['time']
-    buy_price = float(data['buyPrice'])
-    amount_bought = float(data['amountBought'])
-    transaction_fee = float(data.get('transactionFee' or 0))
-    deduct_cash = "Yes" if data['deductCash'] else "No"
+    try:
+        data = request.get_json()
+        transaction_type = data['type']
+        asset = data['asset']
+        date = data['date']
+        time = data['time']
+        buy_price = float(data['buyPrice'])
+        amount_bought = float(data['amountBought'])
+        transaction_fee = float(data.get('transactionFee', 0))
+        deduct_cash = "Yes" if data['deductCash'] else "No"
 
-    user_id = session['user_id']
+        user_id = session['user_id']
+        datetime_str = f"{date} {time}"
+        transaction_datetime = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M')
+        quantity = amount_bought / buy_price
 
-    # Convert date and time to datetime object
-    datetime_str = f"{date} {time}"
-    transaction_datetime = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M')
+        holding = {
+            'userId': ObjectId(user_id),
+            'asset': asset,
+            'datetime': transaction_datetime,
+            'buy_price': buy_price,
+            'amount_bought': amount_bought,
+            'quantity': quantity,
+            'transaction_fee': transaction_fee,
+            'deduct_cash': deduct_cash,
+            'type': transaction_type
+        }
 
-    # Calculate quantity
-    quantity = amount_bought / buy_price
+        if transaction_type == 'stock':
+            current_app.mongo.db.stock_holdings.insert_one(holding)
+        elif transaction_type == 'crypto':
+            current_app.mongo.db.crypto_holdings.insert_one(holding)
 
-    holding = {
-        'userId': ObjectId(user_id),
-        'asset': asset,
-        'datetime': transaction_datetime,
-        'buy_price': buy_price,
-        'amount_bought': amount_bought,
-        'quantity': quantity,
-        'transaction_fee': transaction_fee,
-        'deduct_cash': deduct_cash,
-        'type': transaction_type  # Add type to the holding
-    }
+        return jsonify({'success': True})
 
-    if transaction_type == 'stock':
-        current_app.mongo.db.stock_holdings.insert_one(holding)
-    elif transaction_type == 'crypto':
-        current_app.mongo.db.crypto_holdings.insert_one(holding)
-
-    return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @investment.route('/holdings')
@@ -147,11 +245,15 @@ def holdings():
     crypto_holdings = list(current_app.mongo.db.crypto_holdings.find({'userId': ObjectId(user_id)}))
     
     # Fetch and format crypto data
-    crypto_list = ['bitcoin', 'ethereum', 'litecoin']
-    crypto_data = get_formatted_crypto_data(crypto_list)
-    
+
+    crypto_data = get_crypto_data()
+    stocks_data = list(current_app.mongo.db.stocks.find())
+
     # Create a dictionary to map crypto IDs to current prices
-    current_prices = {crypto['id']: crypto['current_price'] for crypto in crypto_data}
+    current_prices = {crypto['name']: crypto['current_price'] for crypto in crypto_data}
+
+    stock_current_prices = {stock['symbol']: stock['last_price'] for stock in stocks_data}
+
     
     # Calculate profit/loss for crypto holdings
     for holding in crypto_holdings:
@@ -165,7 +267,19 @@ def holdings():
         else:
             holding['profit_loss'] = 0  # Initialize profit_loss to 0 if current price is not available
 
-    return render_template('holdings.html', holdings={'stock_holdings': stock_holdings, 'crypto_holdings': crypto_holdings}, crypto_data=crypto_data)
+        # Calculate profit/loss for crypto holdings
+    for holding in stock_holdings:
+        stock_current_price = stock_current_prices.get(holding['asset'].lower())
+        if current_price:
+            holding['profit_loss'] = (stock_current_price - holding['buy_price']) * holding['quantity']
+            current_app.mongo.db.stock_holdings.update_one(
+                {'_id': holding['_id']},
+                {'$set': {'profit_loss': holding['profit_loss']}}
+            )
+        else:
+            holding['profit_loss'] = 0 
+
+    return render_template('holdings.html', holdings={'stock_holdings': stock_holdings, 'crypto_holdings': crypto_holdings}, stocks_data = stocks_data, crypto_data=crypto_data)
 
 
 
@@ -216,3 +330,62 @@ def delete_crypto_holding():
         return jsonify({'success': True})
     else:
         return jsonify({'success': False, 'error': 'Failed to delete crypto holding'})
+
+def parse_date(date_str):
+    """Parse date string in either 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS' format."""
+    try:
+        # Try parsing as full date-time if available
+        return datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+    except ValueError:
+        # Fallback to date-only format
+        return datetime.strptime(date_str, '%Y-%m-%d')
+
+@investment.route('/api/profit_loss_over_time', methods=['GET'])
+def profit_loss_over_time():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'User not logged in'}), 401
+
+    # Get start_date and end_date from query parameters
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
+    hourly_mode = request.args.get('hourly_mode', 'false').lower() == 'true'
+
+    try:
+        # Parse dates according to the expected format
+        start_date = parse_date(start_date_str)
+        end_date = parse_date(end_date_str)
+    except ValueError:
+        return jsonify({'error': 'Invalid date format'}), 400
+
+    try:
+        # Fetch user holdings and handle data retrieval accordingly
+        crypto_holdings = list(current_app.mongo.db.crypto_holdings.find({'userId': ObjectId(user_id)}))
+        crypto_list = [holding['asset'] for holding in crypto_holdings]
+
+        # Fetch historical data using the hourly mode if specified
+        historical_prices = get_historical_crypto_data(crypto_list, start_date, end_date, hourly_mode=hourly_mode)
+
+        # Calculate profit/loss for each holding and format the response
+        profit_loss_data = []
+        for holding in crypto_holdings:
+            asset = holding['asset'].lower()
+            buy_price = holding['buy_price']
+            quantity = holding['quantity']
+            
+            for date, price in historical_prices.get(asset, {}).items():
+                profit_loss = (price - buy_price) * quantity
+                profit_loss_data.append({
+                    'date': date,
+                    'profit_loss': profit_loss
+                })
+
+        # Sort data by date
+        profit_loss_data.sort(key=lambda x: x['date'])
+
+        return jsonify(profit_loss_data)
+
+    except KeyError as e:
+        return jsonify({'error': str(e)}), 500
+    except Exception as e:
+        return jsonify({'error': 'Failed to retrieve profit/loss data'}), 500

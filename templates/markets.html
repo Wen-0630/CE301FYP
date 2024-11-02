@@ -1,5 +1,27 @@
-<!-- templates/markets.html -->
 {% extends "base.html" %}
+
+{% block head %}
+<!-- Inheriting the base template's head and adding DataTables CSS -->
+{{ super() }}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+{% endblock %}
+
+{% block scripts %}
+<!-- Inheriting base scripts and adding DataTables JS -->
+{{ super() }}
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#cryptoTable').DataTable({
+        "paging":true,
+        "lengthChange": true,  // This enables the "Show entries" dropdown
+        "lengthMenu": [10, 25, 50, 100],  // Options for "Show entries"
+        "searching": true,
+    });  // Initialize DataTables on the crypto table
+});
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -25,57 +47,26 @@
         <div class="tab-content">
           <div id="overview" class="container tab-pane active"><br>
             <h3>Overview</h3>
+            <p>Welcome to the Markets Overview. Here you can view your stocks and crypto holdings.</p>
           </div>
           <div id="stocks" class="container tab-pane fade"><br>
             <h3>Stocks</h3>
-            <input class="form-control" id="stockSearch" type="text" placeholder="Search for stocks..">
-            <br>
             <table class="table">
               <thead>
                 <tr>
-                  <th>Name</th>
                   <th>Symbol</th>
-                  <th>Latest Date</th>
-                  <th>Latest Close</th>
-                  <th>Details</th>
+                  <th>Last Price</th>
+                  <th>Volume</th>
+                  <th>Time</th>
                 </tr>
               </thead>
-              <tbody id="stockTable">
-                {% for symbol, stock in stocks.items() %}
+              <tbody>
+                {% for stock in stocks %}
                 <tr>
-                  <td>{{ stock['name'] }}</td>
-                  <td>{{ symbol }}</td>
-                  <td>{{ stock['latest_date'] }}</td>
-                  <td>{{ stock['latest_close'] }}</td>
-                  <td><button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#details-{{ symbol }}" aria-expanded="false" aria-controls="details-{{ symbol }}">View History</button></td>
-                </tr>
-                <tr id="details-{{ symbol }}" class="collapse">
-                  <td colspan="5">
-                    <table class="table">
-                      <thead>
-                        <tr>
-                          <th>Date</th>
-                          <th>Open</th>
-                          <th>High</th>
-                          <th>Low</th>
-                          <th>Close</th>
-                          <th>Volume</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {% for date, data in stock['data'].items() %}
-                        <tr>
-                          <td>{{ date }}</td>
-                          <td>{{ data['1. open'] }}</td>
-                          <td>{{ data['2. high'] }}</td>
-                          <td>{{ data['3. low'] }}</td>
-                          <td>{{ data['4. close'] }}</td>
-                          <td>{{ data['5. volume'] }}</td>
-                        </tr>
-                        {% endfor %}
-                      </tbody>
-                    </table>
-                  </td>
+                  <td>{{ stock.symbol }}</td>
+                  <td>{{ stock.last_price }}</td>
+                  <td>{{ stock.volume }}</td>
+                  <td>{{ stock.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                 </tr>
                 {% endfor %}
               </tbody>
@@ -83,24 +74,24 @@
           </div>
           <div id="crypto" class="container tab-pane fade"><br>
             <h3>Crypto</h3>
-            <table class="table">
+            <table class="table" id="cryptoTable">
               <thead>
                 <tr>
                   <th>Name</th>
                   <th>Current Price</th>
                   <th>Market Cap</th>
                   <th>Volume</th>
-                  <th>24h Change</th>
+                  <th>24h Change (%)</th>
                 </tr>
               </thead>
               <tbody>
                 {% for coin in crypto_data %}
                 <tr>
                   <td>{{ coin['name'] }}</td>
-                  <td>{{ coin['current_price'] }}</td>
-                  <td>{{ coin['market_cap'] }}</td>
-                  <td>{{ coin['total_volume'] }}</td>
-                  <td>{{ coin['price_change_percentage_24h'] }}%</td>
+                  <td>${{ coin['current_price'] | format_currency }}</td>
+                  <td>${{ coin['market_cap'] | format_currency }}</td>
+                  <td>{{ coin['total_volume'] | format_currency }}</td>
+                  <td>{{ '%.2f' | format(coin['price_change_percentage_24h']) }}%</td>
                 </tr>
                 {% endfor %}
               </tbody>
@@ -111,25 +102,4 @@
     </div>
   </div>
 </div>
-
-<script>
-    document.getElementById("stockSearch").addEventListener("keyup", function() {
-      var filter = this.value.toUpperCase();
-      var rows = document.getElementById("stockTable").getElementsByTagName("tr");
-  
-      for (var i = 0; i < rows.length; i++) {
-        var nameCell = rows[i].getElementsByTagName("td")[0];
-        var symbolCell = rows[i].getElementsByTagName("td")[1];
-        if (nameCell || symbolCell) {
-          var nameText = nameCell.textContent || nameCell.innerText;
-          var symbolText = symbolCell.textContent || symbolCell.innerText;
-          if (nameText.toUpperCase().indexOf(filter) > -1 || symbolText.toUpperCase().indexOf(filter) > -1) {
-            rows[i].style.display = "";
-          } else {
-            rows[i].style.display = "none";
-          }
-        }       
-      }
-    });
-  </script>
 {% endblock %}
