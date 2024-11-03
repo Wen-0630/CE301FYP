@@ -349,6 +349,286 @@ function init_echarts() {
             }]
         });
     }
+
+    if ($('#echart_pie').length) {
+
+        var echartPie = echarts.init(document.getElementById('echart_pie'), theme);
+
+        echartPie.setOption({
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                x: 'center',
+                y: 'bottom',
+                data: ['Direct Access', 'E-mail Marketing', 'Union Ad', 'Video Ads', 'Search Engine']
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    magicType: {
+                        show: true,
+                        type: ['pie', 'funnel'],
+                        option: {
+                            funnel: {
+                                x: '25%',
+                                width: '50%',
+                                funnelAlign: 'left',
+                                max: 1548
+                            }
+                        }
+                    },
+                    restore: {
+                        show: true,
+                        title: "Restore"
+                    },
+                    saveAsImage: {
+                        show: true,
+                        title: "Save Image"
+                    }
+                }
+            },
+            calculable: true,
+            series: [{
+                name: '访问来源',
+                type: 'pie',
+                radius: '55%',
+                center: ['50%', '48%'],
+                data: [{
+                    value: 335,
+                    name: 'Direct Access'
+                }, {
+                    value: 310,
+                    name: 'E-mail Marketing'
+                }, {
+                    value: 234,
+                    name: 'Union Ad'
+                }, {
+                    value: 135,
+                    name: 'Video Ads'
+                }, {
+                    value: 1548,
+                    name: 'Search Engine'
+                }]
+            }]
+        });
+
+        var dataStyle = {
+            normal: {
+                label: {
+                    show: false
+                },
+                labelLine: {
+                    show: false
+                }
+            }
+        };
+
+        var placeHolderStyle = {
+            normal: {
+                color: 'rgba(0,0,0,0)',
+                label: {
+                    show: false
+                },
+                labelLine: {
+                    show: false
+                }
+            },
+            emphasis: {
+                color: 'rgba(0,0,0,0)'
+            }
+        };
+
+    }
+
+    if ($('#echart_donut').length) {
+
+        var echartDonut = echarts.init(document.getElementById('echart_donut'), theme);
+
+        echartDonut.setOption({
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            calculable: true,
+            legend: {
+                x: 'center',
+                y: 'bottom',
+                data: ['Direct Access', 'E-mail Marketing', 'Union Ad', 'Video Ads', 'Search Engine']
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    magicType: {
+                        show: true,
+                        type: ['pie', 'funnel'],
+                        option: {
+                            funnel: {
+                                x: '25%',
+                                width: '50%',
+                                funnelAlign: 'center',
+                                max: 1548
+                            }
+                        }
+                    },
+                    restore: {
+                        show: true,
+                        title: "Restore"
+                    },
+                    saveAsImage: {
+                        show: true,
+                        title: "Save Image"
+                    }
+                }
+            },
+            series: [{
+                name: 'Access to the resource',
+                type: 'pie',
+                radius: ['35%', '55%'],
+                itemStyle: {
+                    normal: {
+                        label: {
+                            show: true
+                        },
+                        labelLine: {
+                            show: true
+                        }
+                    },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            position: 'center',
+                            textStyle: {
+                                fontSize: '14',
+                                fontWeight: 'normal'
+                            }
+                        }
+                    }
+                },
+                data: [{
+                    value: 335,
+                    name: 'Direct Access'
+                }, {
+                    value: 310,
+                    name: 'E-mail Marketing'
+                }, {
+                    value: 234,
+                    name: 'Union Ad'
+                }, {
+                    value: 135,
+                    name: 'Video Ads'
+                }, {
+                    value: 1548,
+                    name: 'Search Engine'
+                }]
+            }]
+        });
+
+    }
+
+    if ($('#echart_mini_pie').length) {
+
+        var echartMiniPie = echarts.init(document.getElementById('echart_mini_pie'), theme);
+
+        echartMiniPie.setOption({
+            title: {
+                text: 'Chart #2',
+                subtext: 'From ExcelHome',
+                sublink: 'http://e.weibo.com/1341556070/AhQXtjbqh',
+                x: 'center',
+                y: 'center',
+                itemGap: 20,
+                textStyle: {
+                    color: 'rgba(30,144,255,0.8)',
+                    fontFamily: '微软雅黑',
+                    fontSize: 35,
+                    fontWeight: 'bolder'
+                }
+            },
+            tooltip: {
+                show: true,
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                x: 170,
+                y: 45,
+                itemGap: 12,
+                data: ['68%Something #1', '29%Something #2', '3%Something #3'],
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    mark: {
+                        show: true
+                    },
+                    dataView: {
+                        show: true,
+                        title: "Text View",
+                        lang: [
+                            "Text View",
+                            "Close",
+                            "Refresh",
+                        ],
+                        readOnly: false
+                    },
+                    restore: {
+                        show: true,
+                        title: "Restore"
+                    },
+                    saveAsImage: {
+                        show: true,
+                        title: "Save Image"
+                    }
+                }
+            },
+            series: [{
+                name: '1',
+                type: 'pie',
+                clockWise: false,
+                radius: [105, 130],
+                itemStyle: dataStyle,
+                data: [{
+                    value: 68,
+                    name: '68%Something #1'
+                }, {
+                    value: 32,
+                    name: 'invisible',
+                    itemStyle: placeHolderStyle
+                }]
+            }, {
+                name: '2',
+                type: 'pie',
+                clockWise: false,
+                radius: [80, 105],
+                itemStyle: dataStyle,
+                data: [{
+                    value: 29,
+                    name: '29%Something #2'
+                }, {
+                    value: 71,
+                    name: 'invisible',
+                    itemStyle: placeHolderStyle
+                }]
+            }, {
+                name: '3',
+                type: 'pie',
+                clockWise: false,
+                radius: [25, 80],
+                itemStyle: dataStyle,
+                data: [{
+                    value: 3,
+                    name: '3%Something #3'
+                }, {
+                    value: 97,
+                    name: 'invisible',
+                    itemStyle: placeHolderStyle
+                }]
+            }]
+        });
+
+    }
 };
 
 function init_chart_doughnut() {
