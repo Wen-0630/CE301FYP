@@ -631,3 +631,88 @@ $(document).ready(function () {
     init_charts();
     init_daterangepicker();
 });
+
+$(document).ready(function () {
+
+    // Show the modal for adding a new task
+    $('#addTaskBtn').click(function () {
+        $('#taskInput').val('');
+        $('#taskId').val('');
+        $('#taskModalLabel').text('Add Task');
+        $('#taskModal').modal('show');
+    });
+
+    // Save or update a task
+    $('#saveTaskBtn').click(function () {
+        const taskId = $('#taskId').val();
+        const task = $('#taskInput').val().trim();
+    
+        if (!task) {
+            alert('Please enter a task description.');
+            return;
+        }
+        
+        const requestType = taskId ? 'PUT' : 'POST';
+        const url = taskId ? `/api/tasks/${taskId}` : '/api/tasks';
+        
+        $.ajax({
+            url: url,
+            method: requestType,
+            contentType: 'application/json',
+            data: JSON.stringify({ task: task, completed: false }),
+            success: function () {
+                $('#taskModal').modal('hide');
+                loadTasks();
+            },
+            error: function (xhr, status, error) {
+                console.error('Error Details:', xhr.responseText);
+                alert(`An error occurred while saving the task: ${xhr.responseText}`);
+            }
+        });
+    });
+    
+
+    // Load tasks into the to-do list
+    function loadTasks() {
+        $('#todoList').empty();
+        $.get('/api/tasks', function (tasks) {
+            tasks.forEach(task => {
+                $('#todoList').append(`
+                    <li data-id="${task._id}">
+                        <p>
+                            <input type="checkbox" class="flat" ${task.completed ? 'checked' : ''}>
+                            ${task.task}
+                            <a href="#" class="editTask" data-id="${task._id}"><i class="fa fa-pencil"></i></a>
+                            <a href="#" class="deleteTask" data-id="${task._id}"><i class="fa fa-trash"></i></a>
+                        </p>
+                    </li>
+                `);
+            });
+        });
+    }
+
+    // Edit task
+    $(document).on('click', '.editTask', function () {
+        const taskId = $(this).data('id');
+        const taskText = $(this).closest('p').text().trim();
+        $('#taskInput').val(taskText);
+        $('#taskId').val(taskId);
+        $('#taskModalLabel').text('Edit Task');
+        $('#taskModal').modal('show');
+    });
+
+    // Delete task
+    $(document).on('click', '.deleteTask', function () {
+        const taskId = $(this).data('id');
+        $.ajax({
+            url: `/api/tasks/${taskId}`,
+            method: 'DELETE',
+            success: function () {
+                loadTasks();
+            },
+            error: function () {
+                alert('An error occurred while deleting the task.');
+            }
+        });
+    });
+});

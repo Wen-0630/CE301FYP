@@ -286,70 +286,43 @@
 </div>
 
 <div class="row">
-  <div class="col-md-4 col-sm-4 ">
+  <!-- Updated To-Do List Panel in dashboard.html -->
+  <div class="col-md-4 col-sm-4">
     <div class="x_panel">
-      <div class="x_title">
-        <h2>To Do List <small>Sample tasks</small></h2>
-        <ul class="nav navbar-right panel_toolbox">
-          <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-          </li>
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <a class="dropdown-item" href="#">Settings 1</a>
-                <a class="dropdown-item" href="#">Settings 2</a>
-              </div>
-          </li>
-          <li><a class="close-link"><i class="fa fa-close"></i></a>
-          </li>
-        </ul>
-        <div class="clearfix"></div>
-      </div>
-      <div class="x_content">
-
-        <div class="">
-          <ul class="to_do">
-            <li>
-              <p>
-                <input type="checkbox" class="flat"> To do 1 </p>
-            </li>
-            <li>
-              <p>
-                <input type="checkbox" class="flat"> To do 2 </p>
-            </li>
-            <li>
-              <p>
-                <input type="checkbox" class="flat"> To do 3 </p>
-            </li>
-            <li>
-              <p>
-                <input type="checkbox" class="flat"> To do 4 </p>
-            </li>
-            <li>
-              <p>
-                <input type="checkbox" class="flat"> To do 5 </p>
-            </li>
-            <li>
-              <p>
-                <input type="checkbox" class="flat"> To do 6 </p>
-            </li>
-            <li>
-              <p>
-                <input type="checkbox" class="flat"> To do 7 </p>
-            </li>
-            <li>
-              <p>
-                <input type="checkbox" class="flat"> To do 8 </p>
-            </li>
-            <li>
-              <p>
-                <input type="checkbox" class="flat"> To do 9 </p>
-            </li>
-          </ul>
+        <div class="x_title">
+            <h2>To-Do List <small>Tasks</small></h2>
+            <ul class="nav navbar-right panel_toolbox">
+                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                        <i class="fa fa-wrench"></i>
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" href="#" id="addTaskBtn">Add Task</a>
+                    </div>
+                </li>
+                <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+            </ul>
+            <div class="clearfix"></div>
         </div>
-      </div>
+        <div class="x_content">
+            <ul class="to_do" id="todoList">
+                <!-- Render tasks using Jinja -->
+                {% for task in tasks %}
+                <li data-id="{{ task._id }}">
+                    <p>
+                        <input type="checkbox" class="flat" {% if task.completed %}checked{% endif %}>
+                        {{ task.task }}
+                        <a href="#" class="editTask" data-id="{{ task._id }}"><i class="fa fa-pencil"></i></a>
+                        <a href="#" class="deleteTask" data-id="{{ task._id }}"><i class="fa fa-trash"></i></a>
+                    </p>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
   </div>
+
 
   <div class="col-md-4 col-sm-4  ">
     <div class="x_panel">
@@ -491,6 +464,28 @@
             <button type="submit" class="btn btn-primary">Save Budget</button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Task Modal for Adding/Editing Tasks -->
+<div class="modal fade" id="taskModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="taskModalLabel">Add/Edit Task</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="taskInput" class="form-control" placeholder="Enter task description" required>
+        <input type="hidden" id="taskId">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="saveTaskBtn">Save</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
       </div>
     </div>
   </div>
