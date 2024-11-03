@@ -288,7 +288,7 @@
 <div class="row">
   <!-- Updated To-Do List Panel in dashboard.html -->
   <div class="col-md-4 col-sm-4">
-    <div class="x_panel">
+    <div class="x_panel" style="height: 448.5px;">
         <div class="x_title">
             <h2>To-Do List <small>Tasks</small></h2>
             <ul class="nav navbar-right panel_toolbox">
@@ -307,18 +307,22 @@
         </div>
         <div class="x_content">
             <ul class="to_do" id="todoList">
-                <!-- Render tasks using Jinja -->
-                {% for task in tasks %}
-                <li data-id="{{ task._id }}">
-                    <p>
-                        <input type="checkbox" class="flat" {% if task.completed %}checked{% endif %}>
-                        {{ task.task }}
-                        <a href="#" class="editTask" data-id="{{ task._id }}"><i class="fa fa-pencil"></i></a>
-                        <a href="#" class="deleteTask" data-id="{{ task._id }}"><i class="fa fa-trash"></i></a>
-                    </p>
-                </li>
-                {% endfor %}
-            </ul>
+              {% for task in tasks %}
+              <li data-id="{{ task._id }}" style="display: flex; align-items: center;">
+                  <p style="flex: 1; margin: 0;">
+                      <input type="checkbox" class="flat" {% if task.completed %}checked{% endif %}> {{ task.task }}
+                  </p>
+                  <div style="margin-left: auto;">
+                      <a href="#" class="editTask" data-id="{{ task._id }}" style="margin-right: 10px;">
+                          <i class="fa fa-pencil-square-o"></i>
+                      </a>
+                      <a href="#" class="deleteTask" data-id="{{ task._id }}">
+                          <i class="fa fa-trash"></i>
+                      </a>
+                  </div>
+              </li>
+              {% endfor %}
+          </ul>
         </div>
     </div>
   </div>
@@ -353,7 +357,7 @@
   </div>
 
   <div class="col-md-4 col-sm-4  ">
-    <div class="x_panel">
+    <div class="x_panel" style="height: 448.5px;">
       <div class="x_title">
         <h2>Income vs. Expense Ratio</h2>
         <ul class="nav navbar-right panel_toolbox">

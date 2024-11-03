@@ -632,6 +632,8 @@ $(document).ready(function () {
     init_daterangepicker();
 });
 
+
+// To do list
 $(document).ready(function () {
 
     // Show the modal for adding a new task
@@ -715,4 +717,16 @@ $(document).ready(function () {
             }
         });
     });
+});
+
+//icheck
+$(document).ready(function () {
+    if ($("input.flat")[0]) {
+        $(document).ready(function () {
+            $('input.flat').iCheck({
+                checkboxClass: 'icheckbox_flat-green',
+                radioClass: 'iradio_flat-green'
+            });
+        });
+    }
 });
