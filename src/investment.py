@@ -250,30 +250,33 @@ def holdings():
     # Fetch and format crypto data
 
     crypto_data = get_crypto_data()
+    print("Crypto Data:", crypto_data)
     stocks_data = list(current_app.mongo.db.stocks.find())
 
     # Create a dictionary to map crypto IDs to current prices
-    current_prices = {crypto['name']: crypto['current_price'] for crypto in crypto_data}
+    current_prices = {crypto['name'].title(): crypto['current_price'] for crypto in crypto_data}
+    print("Current Prices:", current_prices) 
 
     stock_current_prices = {stock['symbol']: stock['last_price'] for stock in stocks_data}
 
     
     # Calculate profit/loss for crypto holdings
     for holding in crypto_holdings:
-        current_price = current_prices.get(holding['asset'].lower())
+        current_price = current_prices.get(holding['asset'].title())
         if current_price:
             holding['profit_loss'] = (current_price - holding['buy_price']) * holding['quantity']
             current_app.mongo.db.crypto_holdings.update_one(
                 {'_id': holding['_id']},
                 {'$set': {'profit_loss': holding['profit_loss']}}
             )
+
         else:
             holding['profit_loss'] = 0  # Initialize profit_loss to 0 if current price is not available
 
         # Calculate profit/loss for crypto holdings
     for holding in stock_holdings:
-        stock_current_price = stock_current_prices.get(holding['asset'].lower())
-        if current_price:
+        stock_current_price = stock_current_prices.get(holding['asset'].upper())
+        if stock_current_price:
             holding['profit_loss'] = (stock_current_price - holding['buy_price']) * holding['quantity']
             current_app.mongo.db.stock_holdings.update_one(
                 {'_id': holding['_id']},
