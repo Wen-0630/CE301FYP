@@ -71,13 +71,14 @@ def generate_chatbot_response(user_query, user_data):
         f"Saving Goals: " + ", ".join([f"{goal['name']}: Target ${goal['target_amount']}, Current ${goal['current_amount']}" for goal in user_data['saving_goals']]),
         f"Notifications: " + ", ".join([notif['message'] for notif in user_data['notifications']]),
         f"Top Asset Categories: " + ", ".join([f"{category['name']}: ${category['amount']}" for category in user_data['top_asset_categories']]),
-        f"Top 5 Loans: " + ", ".join([f"{loan['name']}: Outstanding ${loan['outstanding_balance']}" for loan in user_data['top_5_loans']])
+        f"Top 5 Loans: " + ", ".join([f"{loan['name']}: Outstanding ${loan['outstanding_balance']}" for loan in user_data['top_5_loans']]),
+
     ]
 
     context = "\n".join(context_lines)
 
     # Define your prompt template
-    template = """You are a financial assistant.
+    template = """You are a helpful assistant.
 When provided, use the following context to answer the user's question. If the context is relevant to the question, incorporate it into your answer. If the context is not relevant, or if it doesn't contain the information needed, answer the question based on your general knowledge.
 {context}
 

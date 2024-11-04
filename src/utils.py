@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 import time
 import logging
+import websocket
 from datetime import timedelta
 
 # Configure logging
@@ -16,23 +17,20 @@ def get_stock_data(symbol):
     data = response.json()
     return data
 
-def get_crypto_data(crypto_list):
-    url = f'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids={",".join(crypto_list)}'
-    
-    while True:
+
+def get_crypto_data():
+    try:
+        url = f'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&x_cg_demo_api_key=CG-1PFuk2DsTNsYUoWvgaqaubCA'
         response = requests.get(url)
         
         if response.status_code == 200:
-            data = response.json()
-            return data
-        elif response.status_code == 429:
-            retry_after = int(response.headers.get('Retry-After', 60))  # Default to 60 seconds if header is not present
-            print(f"Rate limit exceeded. Retrying after {retry_after} seconds...")
-            time.sleep(retry_after)
+            return format_crypto_data(response.json())
         else:
-            response.raise_for_status()
-
-    return None
+            logging.error("Failed to fetch crypto data: %s", response.status_code)
+            return []
+    except requests.RequestException as e:
+        logging.error("Request failed: %s", e)
+        return []
 
 
 def format_stock_data(data):
@@ -50,22 +48,19 @@ def format_stock_data(data):
         }
     return formatted_data
 
+
 def format_crypto_data(data):
     formatted_data = []
     for crypto in data:
         formatted_data.append({
-            'id': crypto['id'],
-            'symbol': crypto['symbol'],
             'name': crypto['name'],
             'current_price': crypto['current_price'],
             'market_cap': crypto['market_cap'],
             'total_volume': crypto['total_volume'],
-            'high_24h': crypto['high_24h'],
-            'low_24h': crypto['low_24h'],
-            'price_change_24h': crypto['price_change_24h'],
             'price_change_percentage_24h': crypto['price_change_percentage_24h']
         })
     return formatted_data
+
 
 def get_formatted_stock_data(symbol):
     data = get_stock_data(symbol)

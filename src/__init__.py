@@ -8,7 +8,7 @@ from src.views import views
 from src.transactions import transactions
 from src.creditCard import credit_card
 from src.loan import loan
-from src.investment import investment
+from src.investment import investment,start_websocket_thread 
 from src.cashFlow import cashflow_bp
 import certifi
 import logging
@@ -104,6 +104,8 @@ def create_app():
     app.jinja_env.filters['format_with_commas'] = format_with_commas
 
     app.jinja_env.filters['format_balance'] = format_balance
+    start_websocket_thread(app)  # Start the WebSocket thread here
+
 
     return app
 
