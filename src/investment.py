@@ -217,6 +217,15 @@ def delete_crypto_holding():
     else:
         return jsonify({'success': False, 'error': 'Failed to delete crypto holding'})
 
+def parse_date(date_str):
+    """Parse date string in either 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS' format."""
+    try:
+        # Try parsing as full date-time if available
+        return datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+    except ValueError:
+        # Fallback to date-only format
+        return datetime.strptime(date_str, '%Y-%m-%d')
+
 @investment.route('/api/profit_loss_over_time', methods=['GET'])
 def profit_loss_over_time():
     user_id = session.get('user_id')
@@ -226,37 +235,43 @@ def profit_loss_over_time():
     # Get start_date and end_date from query parameters
     start_date_str = request.args.get('start_date')
     end_date_str = request.args.get('end_date')
+    hourly_mode = request.args.get('hourly_mode', 'false').lower() == 'true'
 
     try:
-        # Convert start_date and end_date to datetime objects
-        start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-        end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+        # Parse dates according to the expected format
+        start_date = parse_date(start_date_str)
+        end_date = parse_date(end_date_str)
     except ValueError:
         return jsonify({'error': 'Invalid date format'}), 400
 
-    # Fetch user holdings
-    crypto_holdings = list(current_app.mongo.db.crypto_holdings.find({'userId': ObjectId(user_id)}))
+    try:
+        # Fetch user holdings and handle data retrieval accordingly
+        crypto_holdings = list(current_app.mongo.db.crypto_holdings.find({'userId': ObjectId(user_id)}))
+        crypto_list = [holding['asset'] for holding in crypto_holdings]
 
-    # Get historical prices for crypto assets for the specified time range
-    crypto_list = [holding['asset'] for holding in crypto_holdings]
-    historical_prices = get_historical_crypto_data(crypto_list, start_date, end_date)
+        # Fetch historical data using the hourly mode if specified
+        historical_prices = get_historical_crypto_data(crypto_list, start_date, end_date, hourly_mode=hourly_mode)
 
-    # Calculate profit/loss for each holding and sum them up
-    profit_loss_data = []
-    for holding in crypto_holdings:
-        asset = holding['asset'].lower()
-        buy_price = holding['buy_price']
-        quantity = holding['quantity']
-        
-        # Loop through the historical prices and calculate profit/loss at each point in time
-        for date, price in historical_prices.get(asset, {}).items():
-            profit_loss = (price - buy_price) * quantity
-            profit_loss_data.append({
-                'date': date,
-                'profit_loss': profit_loss
-            })
+        # Calculate profit/loss for each holding and format the response
+        profit_loss_data = []
+        for holding in crypto_holdings:
+            asset = holding['asset'].lower()
+            buy_price = holding['buy_price']
+            quantity = holding['quantity']
+            
+            for date, price in historical_prices.get(asset, {}).items():
+                profit_loss = (price - buy_price) * quantity
+                profit_loss_data.append({
+                    'date': date,
+                    'profit_loss': profit_loss
+                })
 
-    # Sort the data by date (for charting purposes)
-    profit_loss_data.sort(key=lambda x: x['date'])
+        # Sort data by date
+        profit_loss_data.sort(key=lambda x: x['date'])
 
-    return jsonify(profit_loss_data)
+        return jsonify(profit_loss_data)
+
+    except KeyError as e:
+        return jsonify({'error': str(e)}), 500
+    except Exception as e:
+        return jsonify({'error': 'Failed to retrieve profit/loss data'}), 500

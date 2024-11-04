@@ -11,6 +11,7 @@ from .budget import BudgetManager
 from .notifications import Notification, send_income_expense_ratio_notification, send_budget_vs_spending_notification
 from .other_assets import OtherAsset
 from .other_liabilities import OtherLiability
+from .todo import get_tasks
 import datetime 
 import json
 import os
@@ -64,6 +65,10 @@ def get_dashboard_data(user_id):
     sorted_loans = sorted(loans, key=lambda x: x['original_amount'], reverse=True)
     top_5_loans = sorted_loans[:5]
 
+    tasks = list(current_app.mongo.db.todo_tasks.find({"user_id": ObjectId(user_id)}))
+    for task in tasks:
+        task['_id'] = str(task['_id'])
+
     return {
         "user": user,
         "total_income": total_income,
@@ -84,7 +89,8 @@ def get_dashboard_data(user_id):
         "notifications": notifications,
         "top_asset_categories": top_asset_categories,
         "top_5_loans": top_5_loans, 
-        "total_amount": total_amount
+        "total_amount": total_amount,
+        "tasks": tasks
     }
     
 @views.route('/')
@@ -114,7 +120,8 @@ def dashboard():
                            notifications=data['notifications'],
                            top_asset_categories=data['top_asset_categories'],
                            total_amount=data['total_amount'],
-                           top_5_loans=data['top_5_loans'])
+                           top_5_loans=data['top_5_loans'],
+                           tasks=data['tasks'])
 
 @views.route('/transactions')
 def transactions():

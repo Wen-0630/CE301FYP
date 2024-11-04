@@ -349,6 +349,286 @@ function init_echarts() {
             }]
         });
     }
+
+    if ($('#echart_pie').length) {
+
+        var echartPie = echarts.init(document.getElementById('echart_pie'), theme);
+
+        echartPie.setOption({
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                x: 'center',
+                y: 'bottom',
+                data: ['Direct Access', 'E-mail Marketing', 'Union Ad', 'Video Ads', 'Search Engine']
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    magicType: {
+                        show: true,
+                        type: ['pie', 'funnel'],
+                        option: {
+                            funnel: {
+                                x: '25%',
+                                width: '50%',
+                                funnelAlign: 'left',
+                                max: 1548
+                            }
+                        }
+                    },
+                    restore: {
+                        show: true,
+                        title: "Restore"
+                    },
+                    saveAsImage: {
+                        show: true,
+                        title: "Save Image"
+                    }
+                }
+            },
+            calculable: true,
+            series: [{
+                name: '访问来源',
+                type: 'pie',
+                radius: '55%',
+                center: ['50%', '48%'],
+                data: [{
+                    value: 335,
+                    name: 'Direct Access'
+                }, {
+                    value: 310,
+                    name: 'E-mail Marketing'
+                }, {
+                    value: 234,
+                    name: 'Union Ad'
+                }, {
+                    value: 135,
+                    name: 'Video Ads'
+                }, {
+                    value: 1548,
+                    name: 'Search Engine'
+                }]
+            }]
+        });
+
+        var dataStyle = {
+            normal: {
+                label: {
+                    show: false
+                },
+                labelLine: {
+                    show: false
+                }
+            }
+        };
+
+        var placeHolderStyle = {
+            normal: {
+                color: 'rgba(0,0,0,0)',
+                label: {
+                    show: false
+                },
+                labelLine: {
+                    show: false
+                }
+            },
+            emphasis: {
+                color: 'rgba(0,0,0,0)'
+            }
+        };
+
+    }
+
+    if ($('#echart_donut').length) {
+
+        var echartDonut = echarts.init(document.getElementById('echart_donut'), theme);
+
+        echartDonut.setOption({
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            calculable: true,
+            legend: {
+                x: 'center',
+                y: 'bottom',
+                data: ['Direct Access', 'E-mail Marketing', 'Union Ad', 'Video Ads', 'Search Engine']
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    magicType: {
+                        show: true,
+                        type: ['pie', 'funnel'],
+                        option: {
+                            funnel: {
+                                x: '25%',
+                                width: '50%',
+                                funnelAlign: 'center',
+                                max: 1548
+                            }
+                        }
+                    },
+                    restore: {
+                        show: true,
+                        title: "Restore"
+                    },
+                    saveAsImage: {
+                        show: true,
+                        title: "Save Image"
+                    }
+                }
+            },
+            series: [{
+                name: 'Access to the resource',
+                type: 'pie',
+                radius: ['35%', '55%'],
+                itemStyle: {
+                    normal: {
+                        label: {
+                            show: true
+                        },
+                        labelLine: {
+                            show: true
+                        }
+                    },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            position: 'center',
+                            textStyle: {
+                                fontSize: '14',
+                                fontWeight: 'normal'
+                            }
+                        }
+                    }
+                },
+                data: [{
+                    value: 335,
+                    name: 'Direct Access'
+                }, {
+                    value: 310,
+                    name: 'E-mail Marketing'
+                }, {
+                    value: 234,
+                    name: 'Union Ad'
+                }, {
+                    value: 135,
+                    name: 'Video Ads'
+                }, {
+                    value: 1548,
+                    name: 'Search Engine'
+                }]
+            }]
+        });
+
+    }
+
+    if ($('#echart_mini_pie').length) {
+
+        var echartMiniPie = echarts.init(document.getElementById('echart_mini_pie'), theme);
+
+        echartMiniPie.setOption({
+            title: {
+                text: 'Chart #2',
+                subtext: 'From ExcelHome',
+                sublink: 'http://e.weibo.com/1341556070/AhQXtjbqh',
+                x: 'center',
+                y: 'center',
+                itemGap: 20,
+                textStyle: {
+                    color: 'rgba(30,144,255,0.8)',
+                    fontFamily: '微软雅黑',
+                    fontSize: 35,
+                    fontWeight: 'bolder'
+                }
+            },
+            tooltip: {
+                show: true,
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                x: 170,
+                y: 45,
+                itemGap: 12,
+                data: ['68%Something #1', '29%Something #2', '3%Something #3'],
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    mark: {
+                        show: true
+                    },
+                    dataView: {
+                        show: true,
+                        title: "Text View",
+                        lang: [
+                            "Text View",
+                            "Close",
+                            "Refresh",
+                        ],
+                        readOnly: false
+                    },
+                    restore: {
+                        show: true,
+                        title: "Restore"
+                    },
+                    saveAsImage: {
+                        show: true,
+                        title: "Save Image"
+                    }
+                }
+            },
+            series: [{
+                name: '1',
+                type: 'pie',
+                clockWise: false,
+                radius: [105, 130],
+                itemStyle: dataStyle,
+                data: [{
+                    value: 68,
+                    name: '68%Something #1'
+                }, {
+                    value: 32,
+                    name: 'invisible',
+                    itemStyle: placeHolderStyle
+                }]
+            }, {
+                name: '2',
+                type: 'pie',
+                clockWise: false,
+                radius: [80, 105],
+                itemStyle: dataStyle,
+                data: [{
+                    value: 29,
+                    name: '29%Something #2'
+                }, {
+                    value: 71,
+                    name: 'invisible',
+                    itemStyle: placeHolderStyle
+                }]
+            }, {
+                name: '3',
+                type: 'pie',
+                clockWise: false,
+                radius: [25, 80],
+                itemStyle: dataStyle,
+                data: [{
+                    value: 3,
+                    name: '3%Something #3'
+                }, {
+                    value: 97,
+                    name: 'invisible',
+                    itemStyle: placeHolderStyle
+                }]
+            }]
+        });
+
+    }
 };
 
 function init_chart_doughnut() {
@@ -465,17 +745,48 @@ function init_chart_doughnut() {
 //     }     
 // }
 
+// Function to update the chart with new data (move outside init_charts to make it global)
+function updateProfitLossChart(startDate, endDate, hourlyMode = false) {
+    $.ajax({
+        url: '/api/profit_loss_over_time',
+        method: 'GET',
+        data: { 
+            start_date: startDate.format(hourlyMode ? 'YYYY-MM-DDTHH:mm:ss' : 'YYYY-MM-DD'),  // Use full ISO for hourly, date-only for daily
+            end_date: endDate.format(hourlyMode ? 'YYYY-MM-DDTHH:mm:ss' : 'YYYY-MM-DD'),
+            hourly_mode: hourlyMode  // Indicate whether hourly mode is enabled
+        },
+        success: function(response) {
+            if (response.error) {
+                alert(response.error);
+                return;
+            }
+
+            const dates = response.map(item => item.date);
+            const profitLossValues = response.map(item => parseFloat(item.profit_loss).toFixed(2));
+
+            lineChart.data.labels = dates;
+            lineChart.data.datasets[0].data = profitLossValues;
+            lineChart.update();
+        },
+        error: function(err) {
+            console.error('Error fetching data', err);
+        }
+    });
+}
+
+
+
 function init_charts() {
     if ($('#lineChart').length) {
 
         // Initialize the chart
         var ctx = document.getElementById("lineChart").getContext('2d');
-        var lineChart = new Chart(ctx, {
+        window.lineChart = new Chart(ctx, {  // Make lineChart global for access in update function
             type: 'line',
             data: {
                 labels: [],  // We will dynamically update these labels (dates)
                 datasets: [{
-                    label: "Profit/Loss Over Time",
+                    label: "Crypto's Profit/Loss",
                     backgroundColor: "rgba(38, 185, 154, 0.31)",
                     borderColor: "rgba(38, 185, 154, 0.7)",
                     pointBorderColor: "rgba(38, 185, 154, 0.7)",
@@ -488,39 +799,9 @@ function init_charts() {
             },
         });
 
-        // Function to update the chart with new data
-        function updateProfitLossChart(startDate, endDate) {
-            $.ajax({
-                url: '/api/profit_loss_over_time',  // Your API endpoint
-                method: 'GET',
-                data: { 
-                    start_date: startDate.format('YYYY-MM-DD'),  // Send start date
-                    end_date: endDate.format('YYYY-MM-DD')       // Send end date
-                },
-                success: function(response) {
-                    if (response.error) {
-                        alert(response.error);
-                        return;
-                    }
-
-                    // Extract the dates and profit/loss values
-                    const dates = response.map(item => item.date);
-                    const profitLossValues = response.map(item => item.profit_loss);
-
-                    // Update chart labels and data
-                    lineChart.data.labels = dates;  // Update x-axis with the dates
-                    lineChart.data.datasets[0].data = profitLossValues;  // Update y-axis with profit/loss values
-                    lineChart.update();
-                },
-                error: function(err) {
-                    console.error('Error fetching data', err);
-                }
-            });
-        }
-
         // Initial chart update for the 'Last 7 Days' (default range)
-        const start = moment().subtract(6, 'days');  // 7 days ago
-        const end = moment();  // Today
+        const start = moment.utc().subtract(6, 'days');  // 7 days ago
+        const end = moment.utc();  // Today
         updateProfitLossChart(start, end);
     }
 }
@@ -531,8 +812,34 @@ function init_daterangepicker() {
     console.log('init_daterangepicker');
 
     var cb = function (start, end, label) {
-        console.log(start.toISOString(), end.toISOString(), label);
-        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+        // Adjust display to use end date as the day before for selections like "Yesterday"
+        // let displayStart = label === "Yesterday" ? start.clone().subtract(1, 'days') : start;
+        // let displayEnd = label === "Yesterday" ? end.clone().subtract(1, 'days') : end;
+        // Adjust display dates for specific labels
+        let displayStart, displayEnd;
+
+        if (label === "Yesterday") {
+            displayStart = start.clone().subtract(1, 'days');
+            displayEnd = end.clone().subtract(1, 'days');
+        } else if (label === "Last 7 Days") {
+            displayStart = start.clone().subtract(1, 'days');
+            displayEnd = moment().subtract(1, 'days');
+        } else if (label === "Last 30 Days") {
+            displayStart = start.clone().subtract(1, 'days');
+            displayEnd = moment().subtract(1, 'days');
+        } else if (label === "Last Month") {
+            displayStart = start.clone().subtract(1, 'days');
+            displayEnd = moment().subtract(1, 'days');
+        } else {
+            displayStart = start;
+            displayEnd = end;
+        }
+
+        // Console display for debugging purposes
+        console.log(displayStart.toISOString(), displayEnd.toISOString(), label);
+
+        // Adjust HTML span display
+        $('#reportrange span').html(displayStart.format('MMMM D, YYYY') + ' - ' + displayEnd.format('MMMM D, YYYY'));
     };
 
     var optionSet1 = {
@@ -550,11 +857,11 @@ function init_daterangepicker() {
         timePicker12Hour: true,
         ranges: {
             'Today': [moment(), moment()],
-            'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-            'This Month': [moment().startOf('month'), moment().endOf('month')],
-            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            'Yesterday': [moment(), moment()],
+            'Last 7 Days': [moment.utc().subtract(6, 'days'), moment.utc()],
+            'Last 30 Days': [moment.utc().subtract(29, 'days'), moment.utc()],
+            'This Month': [moment.utc().startOf('month'), moment.utc().endOf('month')],
+            'Last Month': [moment.utc().subtract(1,'month').startOf('month').add(1, 'day'), moment.utc().subtract(1,'month').endOf('month').add(1, 'day')]
         },
         opens: 'left',
         buttonClasses: ['btn btn-default'],
@@ -579,10 +886,20 @@ function init_daterangepicker() {
 
     // When date range is applied, update the chart
     $('#reportrange').on('apply.daterangepicker', function (ev, picker) {
-        console.log("apply event fired, start/end dates are " + picker.startDate.format('MMMM D, YYYY') + " to " + picker.endDate.format('MMMM D, YYYY'));
-        updateProfitLossChart(picker.startDate, picker.endDate);  // Update the chart here
+        const startDateUTC = picker.startDate.utc();
+        const endDateUTC = picker.endDate.utc();
+
+        // For "Today," adjust to the last 24 hours
+        if (picker.chosenLabel === "Today") {
+            const last24HoursStart = moment().subtract(24, 'hours').utc();
+            updateProfitLossChart(last24HoursStart, endDateUTC, true); // Hourly mode for last 24 hours
+        } else {
+            updateProfitLossChart(startDateUTC, endDateUTC, false); // Regular range mode
+        }
     });
 }
+
+
 
 $(document).ready(function () {
     $('#menu_toggle').on('click', function () {
@@ -593,4 +910,103 @@ $(document).ready(function () {
     init_echarts(); // Initialize the ECharts when the document is ready
     init_charts();
     init_daterangepicker();
+});
+
+
+// To do list
+$(document).ready(function () {
+
+    // Show the modal for adding a new task
+    $('#addTaskBtn').click(function () {
+        $('#taskInput').val('');
+        $('#taskId').val('');
+        $('#taskModalLabel').text('Add Task');
+        $('#taskModal').modal('show');
+    });
+
+    // Save or update a task
+    $('#saveTaskBtn').click(function () {
+        const taskId = $('#taskId').val();
+        const task = $('#taskInput').val().trim();
+    
+        if (!task) {
+            alert('Please enter a task description.');
+            return;
+        }
+        
+        const requestType = taskId ? 'PUT' : 'POST';
+        const url = taskId ? `/api/tasks/${taskId}` : '/api/tasks';
+        
+        $.ajax({
+            url: url,
+            method: requestType,
+            contentType: 'application/json',
+            data: JSON.stringify({ task: task, completed: false }),
+            success: function () {
+                $('#taskModal').modal('hide');
+                loadTasks();
+            },
+            error: function (xhr, status, error) {
+                console.error('Error Details:', xhr.responseText);
+                alert(`An error occurred while saving the task: ${xhr.responseText}`);
+            }
+        });
+    });
+    
+
+    // Load tasks into the to-do list
+    function loadTasks() {
+        $('#todoList').empty();
+        $.get('/api/tasks', function (tasks) {
+            tasks.forEach(task => {
+                $('#todoList').append(`
+                    <li data-id="${task._id}">
+                        <p>
+                            <input type="checkbox" class="flat" ${task.completed ? 'checked' : ''}>
+                            ${task.task}
+                            <a href="#" class="editTask" data-id="${task._id}"><i class="fa fa-pencil"></i></a>
+                            <a href="#" class="deleteTask" data-id="${task._id}"><i class="fa fa-trash"></i></a>
+                        </p>
+                    </li>
+                `);
+            });
+        });
+    }
+
+    // Edit task
+    $(document).on('click', '.editTask', function () {
+        const taskId = $(this).data('id');
+        const taskText = $(this).closest('p').text().trim();
+        $('#taskInput').val(taskText);
+        $('#taskId').val(taskId);
+        $('#taskModalLabel').text('Edit Task');
+        $('#taskModal').modal('show');
+    });
+
+    // Delete task
+    $(document).on('click', '.deleteTask', function () {
+        const taskId = $(this).data('id');
+        $.ajax({
+            url: `/api/tasks/${taskId}`,
+            method: 'DELETE',
+            success: function () {
+                loadTasks();
+            },
+            error: function () {
+                alert('An error occurred while deleting the task.');
+            }
+        });
+    });
+});
+
+//icheck
+$(document).ready(function () {
+    if ($("input.flat")[0]) {
+        $(document).ready(function () {
+            $('input.flat').iCheck({
+                checkboxClass: 'icheckbox_flat-green',
+                radioClass: 'iradio_flat-green'
+            });
+        });
+    }
 });
