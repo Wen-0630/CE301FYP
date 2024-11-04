@@ -61,7 +61,7 @@ def generate_chatbot_response(user_query, user_data):
         f"Total Loan Outstanding: ${user_data['total_loan_outstanding']}",
         f"Total Other Liabilities: ${user_data['total_other_liabilities']}",
         f"Total Outstanding Debt (Loans + Liabilities): ${user_data['total_outstanding']}",
-        f"Total Investment: ${user_data['total_investment']}",
+        f"Positive amount of total investment is profit, negative amount is loss: ${user_data['total_investment']}. ",
         f"Net Cash Flow: ${user_data['net_cash_flow']}",
         f"Total Assets: ${user_data['total_assets']}",
         f"Net Worth: ${user_data['net_worth']}",
@@ -77,7 +77,7 @@ def generate_chatbot_response(user_query, user_data):
     context = "\n".join(context_lines)
 
     # Define your prompt template
-    template = """You are a helpful assistant.
+    template = """You are a financial assistant.
 When provided, use the following context to answer the user's question. If the context is relevant to the question, incorporate it into your answer. If the context is not relevant, or if it doesn't contain the information needed, answer the question based on your general knowledge.
 {context}
 
