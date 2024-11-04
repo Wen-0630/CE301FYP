@@ -108,6 +108,9 @@ def start_websocket(app):
     def on_close(ws, close_status_code, close_msg):
         print("### WebSocket closed ###")
         print(f"Code: {close_status_code}, Message: {close_msg}")
+        time.sleep(5)  # Wait before reconnecting
+        start_websocket(app)  # Attempt reconnection
+
 
     def on_open(ws):
         symbols = [
