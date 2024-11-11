@@ -18,6 +18,35 @@ Transactions - Net Plus
 
     <div class="clearfix"></div>
 
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-sm-8">
+            <div class="x_panel">
+              <div class="x_title">
+                <h2>Income vs. Expense</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                  <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                  </li>
+                  <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" href="#">Settings 1</a>
+                        <a class="dropdown-item" href="#">Settings 2</a>
+                      </div>
+                  </li>
+                  <li><a class="close-link"><i class="fa fa-close"></i></a>
+                  </li>
+                </ul>
+                <div class="clearfix"></div>
+              </div>
+              <div class="x_content">
+
+                <div id="mainb" style="height:350px;"></div>
+
+              </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-md-12">
             <button class="btn btn-secondary" id="toggleFormBtn">Add Transaction</button>
@@ -298,7 +327,7 @@ Transactions - Net Plus
         var categories = [];
 
         if (type === 'Income') {
-            categories = ['Salary', 'Business', 'Other'];
+            categories = ['Salary', 'Business', 'Rental Income', 'Dividend Income', 'Interest Income', 'Other'];
         } else if (type === 'Expense') {
             categories = ['Food', 'Shopping', 'Transport', 'Interest Expense', 'Loan Expense', 'Other'];
         }

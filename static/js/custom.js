@@ -233,10 +233,6 @@ function init_echarts() {
         });
     });
 
-    
-
-
-
     // echart Gauge
     if ($('#echart_gauge').length) {
         var incomeExpenseRatio = $('#echart_gauge').data('ratio');
@@ -351,69 +347,79 @@ function init_echarts() {
     }
 
     if ($('#echart_pie').length) {
-
         var echartPie = echarts.init(document.getElementById('echart_pie'), theme);
-
-        echartPie.setOption({
-            tooltip: {
-                trigger: 'item',
-                formatter: "{a} <br/>{b} : {c} ({d}%)"
-            },
-            legend: {
-                x: 'center',
-                y: 'bottom',
-                data: ['Direct Access', 'E-mail Marketing', 'Union Ad', 'Video Ads', 'Search Engine']
-            },
-            toolbox: {
-                show: true,
-                feature: {
-                    magicType: {
+    
+        // Fetch data for income categories from the API
+        $.ajax({
+            url: '/api/income_categories_data',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                console.log('Income categories data:', response);
+    
+                // Check if there are no categories or values
+                if (response.categories.length === 0 || response.values.length === 0) {
+                    console.log('No income data available for the current month.');
+                    $('#echart_pie').text('No income data available for the current month.');
+                    return;  // Exit if there's no data to display
+                }
+    
+                // Proceed with rendering the chart if data is available
+                echartPie.setOption({
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: "{a} <br/>{b} : {c} ({d}%)"
+                    },
+                    legend: {
+                        x: 'center',
+                        y: 'bottom',
+                        data: response.categories
+                    },
+                    toolbox: {
                         show: true,
-                        type: ['pie', 'funnel'],
-                        option: {
-                            funnel: {
-                                x: '25%',
-                                width: '50%',
-                                funnelAlign: 'left',
-                                max: 1548
+                        feature: {
+                            magicType: {
+                                show: true,
+                                type: ['pie', 'funnel'],
+                                option: {
+                                    funnel: {
+                                        x: '25%',
+                                        width: '50%',
+                                        funnelAlign: 'left',
+                                        max: 1548
+                                    }
+                                }
+                            },
+                            restore: {
+                                show: true,
+                                title: "Restore"
+                            },
+                            saveAsImage: {
+                                show: true,
+                                title: "Save Image"
                             }
                         }
                     },
-                    restore: {
-                        show: true,
-                        title: "Restore"
-                    },
-                    saveAsImage: {
-                        show: true,
-                        title: "Save Image"
-                    }
-                }
+                    calculable: true,
+                    series: [{
+                        name: 'Income Source',
+                        type: 'pie',
+                        radius: '55%',
+                        center: ['50%', '48%'],
+                        data: response.categories.map((category, index) => ({
+                            value: response.values[index],
+                            name: category
+                        }))
+                    }]
+                });
             },
-            calculable: true,
-            series: [{
-                name: '访问来源',
-                type: 'pie',
-                radius: '55%',
-                center: ['50%', '48%'],
-                data: [{
-                    value: 335,
-                    name: 'Direct Access'
-                }, {
-                    value: 310,
-                    name: 'E-mail Marketing'
-                }, {
-                    value: 234,
-                    name: 'Union Ad'
-                }, {
-                    value: 135,
-                    name: 'Video Ads'
-                }, {
-                    value: 1548,
-                    name: 'Search Engine'
-                }]
-            }]
+            error: function(xhr, status, error) {
+                console.error('Error fetching income categories data:', error);
+                $('#echart_pie').text('Error loading data. Please try again.');
+            }
         });
-
+    
+        // Original dataStyle and placeHolderStyle definitions remain, even if not directly used
         var dataStyle = {
             normal: {
                 label: {
@@ -424,7 +430,7 @@ function init_echarts() {
                 }
             }
         };
-
+    
         var placeHolderStyle = {
             normal: {
                 color: 'rgba(0,0,0,0)',
@@ -439,93 +445,101 @@ function init_echarts() {
                 color: 'rgba(0,0,0,0)'
             }
         };
-
-    }
+    }    
 
     if ($('#echart_donut').length) {
-
         var echartDonut = echarts.init(document.getElementById('echart_donut'), theme);
-
-        echartDonut.setOption({
-            tooltip: {
-                trigger: 'item',
-                formatter: "{a} <br/>{b} : {c} ({d}%)"
-            },
-            calculable: true,
-            legend: {
-                x: 'center',
-                y: 'bottom',
-                data: ['Direct Access', 'E-mail Marketing', 'Union Ad', 'Video Ads', 'Search Engine']
-            },
-            toolbox: {
-                show: true,
-                feature: {
-                    magicType: {
-                        show: true,
-                        type: ['pie', 'funnel'],
-                        option: {
-                            funnel: {
-                                x: '25%',
-                                width: '50%',
-                                funnelAlign: 'center',
-                                max: 1548
-                            }
-                        }
-                    },
-                    restore: {
-                        show: true,
-                        title: "Restore"
-                    },
-                    saveAsImage: {
-                        show: true,
-                        title: "Save Image"
-                    }
+    
+        // Fetch data for expense categories from the API
+        $.ajax({
+            url: '/api/expense_categories_data',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                console.log('Expense categories data:', response);
+    
+                // Check if there are no categories or values
+                if (response.categories.length === 0 || response.values.length === 0) {
+                    console.log('No expense data available for the current month.');
+                    $('#echart_donut').text('No expense data available for the current month.');
+                    return;  // Exit if there's no data to display
                 }
-            },
-            series: [{
-                name: 'Access to the resource',
-                type: 'pie',
-                radius: ['35%', '55%'],
-                itemStyle: {
-                    normal: {
-                        label: {
-                            show: true
-                        },
-                        labelLine: {
-                            show: true
-                        }
+    
+                // Proceed with rendering the chart if data is available
+                echartDonut.setOption({
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: "{a} <br/>{b} : {c} ({d}%)"
                     },
-                    emphasis: {
-                        label: {
-                            show: true,
-                            position: 'center',
-                            textStyle: {
-                                fontSize: '14',
-                                fontWeight: 'normal'
+                    calculable: true,
+                    legend: {
+                        x: 'center',
+                        y: 'bottom',
+                        data: response.categories  // Dynamic legend based on expense categories
+                    },
+                    toolbox: {
+                        show: true,
+                        feature: {
+                            magicType: {
+                                show: true,
+                                type: ['pie', 'funnel'],
+                                option: {
+                                    funnel: {
+                                        x: '25%',
+                                        width: '50%',
+                                        funnelAlign: 'center',
+                                        max: 1548
+                                    }
+                                }
+                            },
+                            restore: {
+                                show: true,
+                                title: "Restore"
+                            },
+                            saveAsImage: {
+                                show: true,
+                                title: "Save Image"
                             }
                         }
-                    }
-                },
-                data: [{
-                    value: 335,
-                    name: 'Direct Access'
-                }, {
-                    value: 310,
-                    name: 'E-mail Marketing'
-                }, {
-                    value: 234,
-                    name: 'Union Ad'
-                }, {
-                    value: 135,
-                    name: 'Video Ads'
-                }, {
-                    value: 1548,
-                    name: 'Search Engine'
-                }]
-            }]
+                    },
+                    series: [{
+                        name: 'Expense Category',
+                        type: 'pie',
+                        radius: ['35%', '55%'],  // Set to donut style
+                        itemStyle: {
+                            normal: {
+                                label: {
+                                    show: true
+                                },
+                                labelLine: {
+                                    show: true
+                                }
+                            },
+                            emphasis: {
+                                label: {
+                                    show: true,
+                                    position: 'center',
+                                    textStyle: {
+                                        fontSize: '14',
+                                        fontWeight: 'normal'
+                                    }
+                                }
+                            }
+                        },
+                        data: response.categories.map((category, index) => ({
+                            value: response.values[index],
+                            name: category
+                        }))
+                    }]
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching expense categories data:', error);
+                $('#echart_donut').text('Error loading data. Please try again.');
+            }
         });
-
     }
+    
 
     if ($('#echart_mini_pie').length) {
 
@@ -629,6 +643,187 @@ function init_echarts() {
         });
 
     }
+
+    if ($('#mainb').length) {
+        var echartBar = echarts.init(document.getElementById('mainb'), theme);
+    
+        // Fetch monthly income and expense data from the API
+        $.ajax({
+            url: '/api/monthly_income_expense',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.error) {
+                    console.error("Error fetching data:", response.error);
+                    $('#mainb').text('Error loading data. Please try again.');
+                    return;
+                }
+    
+                // Prepare the data for the bar chart
+                var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                var incomeData = response.income;
+                var expenseData = response.expense;
+    
+                // Update echartBar options with dynamic data
+                echartBar.setOption({
+                    title: {
+                        text: 'Monthly Income and Expense',
+                        subtext: 'Current Year'
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data: ['Income', 'Expense']
+                    },
+                    toolbox: {
+                        show: false
+                    },
+                    calculable: false,
+                    xAxis: [{
+                        type: 'category',
+                        data: months
+                    }],
+                    yAxis: [{
+                        type: 'value'
+                    }],
+                    series: [{
+                        name: 'Income',
+                        type: 'bar',
+                        data: incomeData,
+                        markPoint: {
+                            data: [{
+                                type: 'max',
+                                name: 'Max'
+                            }, {
+                                type: 'min',
+                                name: 'Min'
+                            }]
+                        },
+                        markLine: {
+                            data: [{
+                                type: 'average',
+                                name: 'Average'
+                            }]
+                        }
+                    }, {
+                        name: 'Expense',
+                        type: 'bar',
+                        data: expenseData,
+                        markPoint: {
+                            data: [{
+                                type: 'max',
+                                name: 'Max'
+                            }, {
+                                type: 'min',
+                                name: 'Min'
+                            }]
+                        },
+                        markLine: {
+                            data: [{
+                                type: 'average',
+                                name: 'Average'
+                            }]
+                        }
+                    }]
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching monthly income and expense data:', error);
+                $('#mainb').text('Error loading data. Please try again.');
+            }
+        });
+    }
+
+    if ($('#echart_line').length) {
+
+        var echartLine = echarts.init(document.getElementById('echart_line'), theme);
+
+        echartLine.setOption({
+            title: {
+                text: 'Line Graph',
+                subtext: 'Subtitle'
+            },
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                x: 220,
+                y: 40,
+                data: ['Intent', 'Pre-order', 'Deal']
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    magicType: {
+                        show: true,
+                        title: {
+                            line: 'Line',
+                            bar: 'Bar',
+                            stack: 'Stack',
+                            tiled: 'Tiled'
+                        },
+                        type: ['line', 'bar', 'stack', 'tiled']
+                    },
+                    restore: {
+                        show: true,
+                        title: "Restore"
+                    },
+                    saveAsImage: {
+                        show: true,
+                        title: "Save Image"
+                    }
+                }
+            },
+            calculable: true,
+            xAxis: [{
+                type: 'category',
+                boundaryGap: false,
+                data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+            }],
+            yAxis: [{
+                type: 'value'
+            }],
+            series: [{
+                name: 'Deal',
+                type: 'line',
+                smooth: true,
+                itemStyle: {
+                    normal: {
+                        areaStyle: {
+                            type: 'default'
+                        }
+                    }
+                },
+                data: [10, 12, 21, 54, 260, 830, 710]
+            }, {
+                name: 'Pre-order',
+                type: 'line',
+                smooth: true,
+                itemStyle: {
+                    normal: {
+                        areaStyle: {
+                            type: 'default'
+                        }
+                    }
+                },
+                data: [30, 182, 434, 791, 390, 30, 10]
+            }, {
+                name: 'Intent',
+                type: 'line',
+                smooth: true,
+                itemStyle: {
+                    normal: {
+                        areaStyle: {
+                            type: 'default'
+                        }
+                    }
+                },
+                data: [1320, 1132, 601, 234, 120, 90, 20]
+            }]
+        });
+
+    }
 };
 
 function init_chart_doughnut() {
@@ -711,39 +906,6 @@ function init_chart_doughnut() {
         console.log('No canvasDoughnut elements found on the page');
     }
 }
-
-// function init_charts() {
-//     if ($('#lineChart').length) {
-//         var ctx = document.getElementById("lineChart");
-//         var lineChart = new Chart(ctx, {
-//             type: 'line',
-//             data: {
-//                 labels: ["January", "February", "March", "April", "May", "June", "July"],
-//                 datasets: [{
-//                     label: "My First dataset",
-//                     backgroundColor: "rgba(38, 185, 154, 0.31)",
-//                     borderColor: "rgba(38, 185, 154, 0.7)",
-//                     pointBorderColor: "rgba(38, 185, 154, 0.7)",
-//                     pointBackgroundColor: "rgba(38, 185, 154, 0.7)",
-//                     pointHoverBackgroundColor: "#fff",
-//                     pointHoverBorderColor: "rgba(220,220,220,1)",
-//                     pointBorderWidth: 1,
-//                     data: [31, 74, 6, 39, 20, 85, 7]
-//                 }, {
-//                     label: "My Second dataset",
-//                     backgroundColor: "rgba(3, 88, 106, 0.3)",
-//                     borderColor: "rgba(3, 88, 106, 0.70)",
-//                     pointBorderColor: "rgba(3, 88, 106, 0.70)",
-//                     pointBackgroundColor: "rgba(3, 88, 106, 0.70)",
-//                     pointHoverBackgroundColor: "#fff",
-//                     pointHoverBorderColor: "rgba(151,187,205,1)",
-//                     pointBorderWidth: 1,
-//                     data: [82, 23, 66, 9, 99, 4, 2]
-//                 }]
-//             },
-//         });
-//     }     
-// }
 
 // Function to update the chart with new data (move outside init_charts to make it global)
 function updateProfitLossChart(startDate, endDate, hourlyMode = false) {
@@ -913,7 +1075,7 @@ $(document).ready(function () {
 });
 
 
-// To do list
+// To-do list
 $(document).ready(function () {
 
     // Show the modal for adding a new task
@@ -944,7 +1106,7 @@ $(document).ready(function () {
             data: JSON.stringify({ task: task, completed: false }),
             success: function () {
                 $('#taskModal').modal('hide');
-                loadTasks();
+                location.reload();  // Reload the entire dashboard after adding or updating
             },
             error: function (xhr, status, error) {
                 console.error('Error Details:', xhr.responseText);
@@ -953,22 +1115,33 @@ $(document).ready(function () {
         });
     });
     
-
-    // Load tasks into the to-do list
+    // Load tasks into the to-do list (not needed if reloading page on every change)
     function loadTasks() {
         $('#todoList').empty();
         $.get('/api/tasks', function (tasks) {
             tasks.forEach(task => {
                 $('#todoList').append(`
                     <li data-id="${task._id}">
-                        <p>
+                        <p style="display: flex; align-items: center;">
                             <input type="checkbox" class="flat" ${task.completed ? 'checked' : ''}>
                             ${task.task}
-                            <a href="#" class="editTask" data-id="${task._id}"><i class="fa fa-pencil"></i></a>
-                            <a href="#" class="deleteTask" data-id="${task._id}"><i class="fa fa-trash"></i></a>
+                            <div style="margin-left: auto;">
+                                <a href="#" class="editTask" data-id="${task._id}" style="margin-right: 10px;">
+                                    <i class="fa fa-pencil-square-o"></i>
+                                </a>
+                                <a href="#" class="deleteTask" data-id="${task._id}">
+                                    <i class="fa fa-trash"></i>
+                                </a>
+                            </div>
                         </p>
                     </li>
                 `);
+            });
+            
+            // Reinitialize iCheck for new checkboxes
+            $('input.flat').iCheck({
+                checkboxClass: 'icheckbox_flat-green',
+                radioClass: 'iradio_flat-green'
             });
         });
     }
@@ -990,7 +1163,7 @@ $(document).ready(function () {
             url: `/api/tasks/${taskId}`,
             method: 'DELETE',
             success: function () {
-                loadTasks();
+                location.reload();  // Reload the entire dashboard after deleting
             },
             error: function () {
                 alert('An error occurred while deleting the task.');
@@ -998,6 +1171,7 @@ $(document).ready(function () {
         });
     });
 });
+
 
 //icheck
 $(document).ready(function () {
