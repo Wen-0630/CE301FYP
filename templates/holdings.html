@@ -8,7 +8,7 @@
   <div class="col-md-12">
     <div class="x_panel">
       <div class="x_title">
-        <h2>Holdings</h2>
+        <h3>Holdings<small>View stocks holdings and crypto holdings</small></h3>
         <div class="clearfix"></div>
       </div>
       <div class="x_content">
@@ -28,12 +28,12 @@
         <!-- Tab panes -->
         <div class="tab-content">
           <div class="tab-pane active" id="overview" role="tabpanel">
-            <h3>Holdings Overview</h3>
+            <h2>Holdings Overview</h2>
               <div class="row justify-content-center">
                 <div class="col-md-6 col-sm-6  ">
                   <div class="x_panel">
                     <div class="x_title">
-                      <h2>Line Graph</h2>
+                      <h2>Stock Holdings vs. Crypto Holdings</h2>
                       <ul class="nav navbar-right panel_toolbox">
                         <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                         </li>
@@ -57,6 +57,22 @@
                   </div>
                 </div>
               </div>
+              
+              <div class="row justify-content-center mt-4">
+                  <div class="col-md-6 col-sm-6">
+                      <div class="x_panel">
+                          <div class="x_title">
+                              <h2>Total Current Holdings</h2>
+                              <div class="clearfix"></div>
+                          </div>
+                          <div class="x_content">
+                              <p><strong>Stock Holdings:</strong> $<span id="totalStockHoldings">0.00</span></p>
+                              <p><strong>Crypto Holdings:</strong> $<span id="totalCryptoHoldings">0.00</span></p>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
           </div>
           
           <!-- Stock Holdings Tab -->
@@ -99,7 +115,8 @@
                         <td>{{ holding['deduct_cash'] }}</td>
                         <td>{{ holding['profit_loss'] | default(0) | currency_with_decimals }}</td>
                         <td>
-                          <button class="btn btn-danger btn-sm" data-id="{{ holding['_id'] }}" data-type="stock" onclick="deleteHolding(this)">Delete</button>
+                          <button class="btn btn-primary btn-sm" data-id="{{ holding['_id'] }}" data-type="stock" onclick="openEditModal(this)"><i class="fa fa-edit"></i></button>
+                          <button class="btn btn-danger btn-sm" data-id="{{ holding['_id'] }}" data-type="stock" onclick="deleteHolding(this)"><i class="fa fa-trash"></i></button>
                         </td>
                       </tr>
                       {% endfor %}
@@ -155,7 +172,8 @@
                         <td>{{ holding['deduct_cash'] }}</td>
                         <td>{{ holding['profit_loss'] | default(0) | currency_with_decimals }}</td>
                         <td>
-                          <button class="btn btn-danger btn-sm" data-id="{{ holding['_id'] }}" data-type="crypto" onclick="deleteHolding(this)">Delete</button>
+                          <button class="btn btn-primary btn-sm" data-id="{{ holding['_id'] }}" data-type="crypto" onclick="openEditModal(this)"><i class="fa fa-edit"></i></button>
+                          <button class="btn btn-danger btn-sm" data-id="{{ holding['_id'] }}" data-type="crypto" onclick="deleteHolding(this)"><i class="fa fa-trash"></i></button>
                         </td>
                       </tr>
                       {% endfor %}
@@ -281,6 +299,48 @@
     </div>
   </div>
 </div>
+
+<!-- Edit Holding Modal -->
+<div class="modal fade" id="editHoldingModal" tabindex="-1" role="dialog" aria-labelledby="editHoldingModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="editHoldingModalLabel">Edit Holding</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              <form id="editHoldingForm">
+                  <input type="hidden" id="holdingId" name="holdingId">
+                  <input type="hidden" id="holdingType" name="holdingType">
+                  <div class="form-group">
+                      <label for="editAsset">Asset</label>
+                      <input type="text" id="editAsset" class="form-control" disabled>
+                  </div>
+                  <div class="form-group">
+                      <label for="editBuyPrice">Buy Price per Unit</label>
+                      <input type="number" step="0.0001" id="editBuyPrice" class="form-control" required>
+                  </div>
+                  <div class="form-group">
+                      <label for="editQuantity">Quantity</label>
+                      <input type="number" step="0.0001" id="editQuantity" class="form-control" required>
+                  </div>
+                  <div class="form-group">
+                      <label for="editAmountBought">Total Amount Bought</label>
+                      <input type="number" step="0.0001" id="editAmountBought" class="form-control" required>
+                  </div>
+                  <div class="form-group">
+                      <label for="editTransactionFee">Transaction Fee (Optional)</label>
+                      <input type="number" step="0.01" id="editTransactionFee" class="form-control">
+                  </div>
+                  <button type="submit" class="btn btn-primary">Save Changes</button>
+              </form>
+          </div>
+      </div>
+  </div>
+</div>
+
 
 <!-- <script src="https://code.jquery.com/jquery-3.5.1.js"></script> -->
 <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
@@ -446,6 +506,75 @@
             console.error('Error:', error);
         });
     }
+
+    function openEditModal(button) {
+        const holdingId = button.getAttribute('data-id');
+        const holdingType = button.getAttribute('data-type');
+        
+        fetch(`/api/get_holding/${holdingType}/${holdingId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('holdingId').value = holdingId;
+                document.getElementById('holdingType').value = holdingType;
+                document.getElementById('editAsset').value = data.asset;
+                document.getElementById('editBuyPrice').value = data.buy_price;
+                document.getElementById('editQuantity').value = data.quantity;
+                document.getElementById('editAmountBought').value = data.amount_bought;
+                document.getElementById('editTransactionFee').value = data.transaction_fee || 0;
+
+                $('#editHoldingModal').modal('show');
+            })
+            .catch(error => console.error('Error fetching holding:', error));
+    }
+
+    document.getElementById('editHoldingForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const holdingData = {
+            holdingId: document.getElementById('holdingId').value,
+            holdingType: document.getElementById('holdingType').value,
+            buy_price: parseFloat(document.getElementById('editBuyPrice').value).toFixed(4),
+            quantity: parseFloat(document.getElementById('editQuantity').value).toFixed(4),
+            amount_bought: parseFloat(document.getElementById('editAmountBought').value).toFixed(4),
+            transaction_fee: parseFloat(document.getElementById('editTransactionFee').value).toFixed(2)
+        };
+
+        fetch('/api/update_holding', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(holdingData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Holding updated successfully');
+                location.reload();
+            } else {
+                alert('Error updating holding: ' + data.error);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+
+    function formatWithCommas(number) {
+        return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/api/current_holdings_totals')
+            .then(response => response.json())
+            .then(data => {
+                if (data.stock_total !== undefined && data.crypto_total !== undefined) {
+                    // Apply format with commas
+                    document.getElementById('totalStockHoldings').textContent = formatWithCommas(data.stock_total.toFixed(2));
+                    document.getElementById('totalCryptoHoldings').textContent = formatWithCommas(data.crypto_total.toFixed(2));
+                } else {
+                    console.error('Error fetching holdings totals:', data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    });
 </script>
 
 {% endblock %}

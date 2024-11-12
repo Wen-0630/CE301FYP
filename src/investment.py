@@ -8,6 +8,7 @@ import time
 import websocket
 import threading
 import json
+from math import isnan
 
 
 investment = Blueprint('investment', __name__, template_folder='templates')
@@ -443,4 +444,82 @@ def holdings_over_time():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@investment.route('/api/current_holdings_totals', methods=['GET'])
+def current_holdings_totals():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'User not logged in'}), 401
+
+    stock_total = sum(holding['amount_bought'] for holding in current_app.mongo.db.stock_holdings.find({'userId': ObjectId(user_id)}))
+    crypto_total = sum(holding['amount_bought'] for holding in current_app.mongo.db.crypto_holdings.find({'userId': ObjectId(user_id)}))
+
+    return jsonify({'stock_total': stock_total, 'crypto_total': crypto_total})
+
+@investment.route('/api/get_holding/<holding_type>/<holding_id>', methods=['GET'])
+def get_holding(holding_type, holding_id):
+    try:
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'error': 'User not logged in'}), 401
+
+        # Determine the collection based on the holding type
+        if holding_type == 'stock':
+            collection = current_app.mongo.db.stock_holdings
+        elif holding_type == 'crypto':
+            collection = current_app.mongo.db.crypto_holdings
+        else:
+            return jsonify({'error': 'Invalid holding type'}), 400
+
+        # Fetch the holding document
+        holding = collection.find_one({'_id': ObjectId(holding_id), 'userId': ObjectId(user_id)})
+        if not holding:
+            return jsonify({'error': 'Holding not found'}), 404
+
+        # Convert ObjectId fields to string for JSON serialization
+        holding['_id'] = str(holding['_id'])
+        holding['userId'] = str(holding['userId'])
+
+        # Check for NaN in numeric fields and replace with 0
+        holding['buy_price'] = holding.get('buy_price') or 0
+        holding['transaction_fee'] = holding.get('transaction_fee') or 0
+        if isnan(holding['buy_price']):
+            holding['buy_price'] = 0
+        if isnan(holding['transaction_fee']):
+            holding['transaction_fee'] = 0
+
+        return jsonify(holding), 200
+
+    except Exception as e:
+        print(f"Error fetching holding: {e}")  # Print the error for debugging
+        return jsonify({'error': 'Internal server error'}), 500
+
+
+
+@investment.route('/api/update_holding', methods=['POST'])
+def update_holding():
+    if 'user_id' not in session:
+        return jsonify({'error': 'User not logged in'}), 401
+
+    data = request.get_json()
+    holding_id = data['holdingId']
+    holding_type = data['holdingType']
+    update_fields = {
+        'buy_price': float(data['buy_price']),
+        'quantity': float(data['quantity']),
+        'amount_bought': float(data['amount_bought']),
+        'transaction_fee': float(data['transaction_fee'])
+    }
+
+    collection = 'stock_holdings' if holding_type == 'stock' else 'crypto_holdings'
+    result = current_app.mongo.db[collection].update_one(
+        {'_id': ObjectId(holding_id)},
+        {'$set': update_fields}
+    )
+
+    if result.modified_count == 1:
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False, 'error': 'Failed to update holding'})
 
