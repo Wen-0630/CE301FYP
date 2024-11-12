@@ -735,95 +735,193 @@ function init_echarts() {
         });
     }
 
+    // if ($('#echart_line').length) {
+
+    //     var echartLine = echarts.init(document.getElementById('echart_line'), theme);
+
+    //     echartLine.setOption({
+    //         title: {
+    //             text: 'Line Graph',
+    //             subtext: 'Subtitle'
+    //         },
+    //         tooltip: {
+    //             trigger: 'axis'
+    //         },
+    //         legend: {
+    //             x: 220,
+    //             y: 40,
+    //             data: ['Intent', 'Pre-order', 'Deal']
+    //         },
+    //         toolbox: {
+    //             show: true,
+    //             feature: {
+    //                 magicType: {
+    //                     show: true,
+    //                     title: {
+    //                         line: 'Line',
+    //                         bar: 'Bar',
+    //                         stack: 'Stack',
+    //                         tiled: 'Tiled'
+    //                     },
+    //                     type: ['line', 'bar', 'stack', 'tiled']
+    //                 },
+    //                 restore: {
+    //                     show: true,
+    //                     title: "Restore"
+    //                 },
+    //                 saveAsImage: {
+    //                     show: true,
+    //                     title: "Save Image"
+    //                 }
+    //             }
+    //         },
+    //         calculable: true,
+    //         xAxis: [{
+    //             type: 'category',
+    //             boundaryGap: false,
+    //             data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    //         }],
+    //         yAxis: [{
+    //             type: 'value'
+    //         }],
+    //         series: [{
+    //             name: 'Deal',
+    //             type: 'line',
+    //             smooth: true,
+    //             itemStyle: {
+    //                 normal: {
+    //                     areaStyle: {
+    //                         type: 'default'
+    //                     }
+    //                 }
+    //             },
+    //             data: [10, 12, 21, 54, 260, 830, 710]
+    //         }, {
+    //             name: 'Pre-order',
+    //             type: 'line',
+    //             smooth: true,
+    //             itemStyle: {
+    //                 normal: {
+    //                     areaStyle: {
+    //                         type: 'default'
+    //                     }
+    //                 }
+    //             },
+    //             data: [30, 182, 434, 791, 390, 30, 10]
+    //         }, {
+    //             name: 'Intent',
+    //             type: 'line',
+    //             smooth: true,
+    //             itemStyle: {
+    //                 normal: {
+    //                     areaStyle: {
+    //                         type: 'default'
+    //                     }
+    //                 }
+    //             },
+    //             data: [1320, 1132, 601, 234, 120, 90, 20]
+    //         }]
+    //     });
+
+    // }
+
     if ($('#echart_line').length) {
-
         var echartLine = echarts.init(document.getElementById('echart_line'), theme);
-
-        echartLine.setOption({
-            title: {
-                text: 'Line Graph',
-                subtext: 'Subtitle'
-            },
-            tooltip: {
-                trigger: 'axis'
-            },
-            legend: {
-                x: 220,
-                y: 40,
-                data: ['Intent', 'Pre-order', 'Deal']
-            },
-            toolbox: {
-                show: true,
-                feature: {
-                    magicType: {
-                        show: true,
-                        title: {
-                            line: 'Line',
-                            bar: 'Bar',
-                            stack: 'Stack',
-                            tiled: 'Tiled'
-                        },
-                        type: ['line', 'bar', 'stack', 'tiled']
-                    },
-                    restore: {
-                        show: true,
-                        title: "Restore"
-                    },
-                    saveAsImage: {
-                        show: true,
-                        title: "Save Image"
-                    }
+    
+        // Fetch holdings data over time from the API
+        $.ajax({
+            url: '/api/holdings_over_time',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.error) {
+                    console.error("Error fetching data:", response.error);
+                    $('#echart_line').text('Error loading data. Please try again.');
+                    return;
                 }
+    
+                // Extract data for the chart
+                var months = response.months;
+                var stockTotals = response.stock_totals;
+                var cryptoTotals = response.crypto_totals;
+    
+                // Set options for the line chart
+                echartLine.setOption({
+                    title: {
+                        text: 'Total Holdings Over Time',
+                        subtext: 'Last 6 Months'
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data: ['Stock Holdings', 'Crypto Holdings']
+                    },
+                    toolbox: {
+                        show: true,
+                        feature: {
+                            magicType: {
+                                show: true,
+                                title: {
+                                    line: 'Line',
+                                    bar: 'Bar',
+                                    stack: 'Stack',
+                                    tiled: 'Tiled'
+                                },
+                                type: ['line', 'bar', 'stack', 'tiled']
+                            },
+                            restore: {
+                                show: true,
+                                title: "Restore"
+                            },
+                            saveAsImage: {
+                                show: true,
+                                title: "Save Image"
+                            }
+                        }
+                    },
+                    calculable: true,
+                    xAxis: [{
+                        type: 'category',
+                        boundaryGap: false,
+                        data: months  // Use dynamic month data
+                    }],
+                    yAxis: [{
+                        type: 'value'
+                    }],
+                    series: [{
+                        name: 'Stock Holdings',
+                        type: 'line',
+                        smooth: true,
+                        itemStyle: {
+                            normal: {
+                                areaStyle: {
+                                    type: 'default'
+                                }
+                            }
+                        },
+                        data: stockTotals  // Use dynamic stock data
+                    }, {
+                        name: 'Crypto Holdings',
+                        type: 'line',
+                        smooth: true,
+                        itemStyle: {
+                            normal: {
+                                areaStyle: {
+                                    type: 'default'
+                                }
+                            }
+                        },
+                        data: cryptoTotals  // Use dynamic crypto data
+                    }]
+                });
             },
-            calculable: true,
-            xAxis: [{
-                type: 'category',
-                boundaryGap: false,
-                data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-            }],
-            yAxis: [{
-                type: 'value'
-            }],
-            series: [{
-                name: 'Deal',
-                type: 'line',
-                smooth: true,
-                itemStyle: {
-                    normal: {
-                        areaStyle: {
-                            type: 'default'
-                        }
-                    }
-                },
-                data: [10, 12, 21, 54, 260, 830, 710]
-            }, {
-                name: 'Pre-order',
-                type: 'line',
-                smooth: true,
-                itemStyle: {
-                    normal: {
-                        areaStyle: {
-                            type: 'default'
-                        }
-                    }
-                },
-                data: [30, 182, 434, 791, 390, 30, 10]
-            }, {
-                name: 'Intent',
-                type: 'line',
-                smooth: true,
-                itemStyle: {
-                    normal: {
-                        areaStyle: {
-                            type: 'default'
-                        }
-                    }
-                },
-                data: [1320, 1132, 601, 234, 120, 90, 20]
-            }]
+            error: function(xhr, status, error) {
+                console.error('Error fetching holdings data:', error);
+                $('#echart_line').text('Error loading data. Please try again.');
+            }
         });
-
-    }
+    }    
 };
 
 function init_chart_doughnut() {

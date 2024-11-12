@@ -395,3 +395,52 @@ def profit_loss_over_time():
         return jsonify({'error': str(e)}), 500
     except Exception as e:
         return jsonify({'error': 'Failed to retrieve profit/loss data'}), 500
+    
+@investment.route('/api/holdings_over_time', methods=['GET'])
+def holdings_over_time():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'User not logged in'}), 401
+
+    # Set up date range for the last six months, capturing month start dates
+    end_date = datetime.now()
+    labels = [(end_date - timedelta(days=i * 30)).strftime('%Y-%m') for i in range(5, -1, -1)]
+    month_starts = [(end_date.replace(day=1) - timedelta(days=i * 30)).replace(day=1) for i in range(5, -1, -1)]
+
+    # Initialize data structure for cumulative stock and crypto amounts per month
+    monthly_holdings = {label: {'stock_total': 0, 'crypto_total': 0} for label in labels}
+
+    try:
+        # Get stock and crypto holdings from MongoDB
+        stock_holdings = list(current_app.mongo.db.stock_holdings.find({'userId': ObjectId(user_id)}))
+        crypto_holdings = list(current_app.mongo.db.crypto_holdings.find({'userId': ObjectId(user_id)}))
+
+        # Calculate cumulative holdings by month
+        def update_cumulative_holdings(holdings, holding_type):
+            # Sort holdings by date to make sure we handle them chronologically
+            holdings.sort(key=lambda h: h['datetime'])
+            cumulative_total = 0
+
+            for start, label in zip(month_starts, labels):
+                # Add holdings purchased before or in this month
+                while holdings and holdings[0]['datetime'] < start:
+                    cumulative_total += holdings.pop(0)['amount_bought']
+                
+                monthly_holdings[label][f'{holding_type}_total'] = cumulative_total
+
+        # Update cumulative holdings for stocks and crypto
+        update_cumulative_holdings(stock_holdings, 'stock')
+        update_cumulative_holdings(crypto_holdings, 'crypto')
+
+        # Prepare data for the chart
+        data = {
+            'months': labels,
+            'stock_totals': [monthly_holdings[month]['stock_total'] for month in labels],
+            'crypto_totals': [monthly_holdings[month]['crypto_total'] for month in labels],
+        }
+
+        return jsonify(data)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
