@@ -274,3 +274,57 @@ def api_top_asset_categories():
         "top_asset_categories": top_asset_categories,
         "total_amount": total_amount
     })
+
+@views.route('/api/asset_allocation', methods=['GET'])
+def get_asset_allocation():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+
+    user_id = session['user_id']
+    
+    # Fetch individual assets
+    net_cash_flow = get_net_cash_flow(user_id)
+    stocks = sum(holding['amount_bought'] for holding in current_app.mongo.db.stock_holdings.find({'userId': ObjectId(user_id)}))
+    crypto = sum(holding['amount_bought'] for holding in current_app.mongo.db.crypto_holdings.find({'userId': ObjectId(user_id)}))
+
+    # Sum up only "Bonds" category from other assets, skipping assets with zero or nil amounts
+    bonds = sum(
+        asset['amount'] for asset in OtherAsset.get_all_assets_by_user(user_id)
+        if asset.get('category') == 'Bonds' and asset.get('amount', 0) > 0
+    )
+
+    total_assets = net_cash_flow + bonds + stocks + crypto
+    if total_assets == 0:
+        return jsonify({"error": "No assets available"}), 200
+
+    # Calculate user allocation percentages
+    asset_allocation = [
+        {"name": "Cash", "value": net_cash_flow},
+        {"name": "Bonds", "value": bonds},
+        {"name": "Stocks", "value": stocks},
+        {"name": "Crypto", "value": crypto}
+    ]
+    asset_allocation = [asset for asset in asset_allocation if asset['value'] > 0]  # Filter out zero balances
+    allocation_percentages = {asset['name']: (asset['value'] / total_assets) * 100 for asset in asset_allocation}
+
+    # Define portfolio models with target percentages
+    portfolio_models = {
+        "Conservative": {"Bonds": 60, "Stocks": 25, "Cash": 10, "Crypto": 5},
+        "Moderate": {"Bonds": 30, "Stocks": 40, "Cash": 10, "Crypto": 20},
+        "Aggressive": {"Bonds": 20, "Stocks": 50, "Cash": 5, "Crypto": 25}
+    }
+
+    # Calculate the difference score for each portfolio
+    def calculate_difference(target, actual):
+        return sum(abs(target.get(asset, 0) - actual.get(asset, 0)) for asset in target)
+
+    # Find the closest portfolio match based on minimum difference score
+    best_match = min(portfolio_models, key=lambda model: calculate_difference(portfolio_models[model], allocation_percentages))
+    
+    # Return asset allocation and the best matching portfolio type
+    return jsonify({
+        "asset_allocation": asset_allocation,
+        "portfolio_type": best_match
+    })
+
+

@@ -243,19 +243,19 @@ function init_echarts() {
             tooltip: {
                 formatter: "{a} <br/>{b} : {c}%"
             },
-            // toolbox: {
-            //     show: true,
-            //     feature: {
-            //         restore: {
-            //             show: true,
-            //             title: "Restore"
-            //         },
-            //         saveAsImage: {
-            //             show: true,
-            //             title: "Save Image"
-            //         }
-            //     }
-            // },
+            toolbox: {
+                show: true,
+                feature: {
+                    restore: {
+                        show: true,
+                        title: "Restore"
+                    },
+                    saveAsImage: {
+                        show: true,
+                        title: "Save Image"
+                    }
+                }
+            },
             series: [{
                 name: 'Income vs. Expense Ratio',
                 type: 'gauge',
@@ -541,109 +541,70 @@ function init_echarts() {
     }
     
 
-    if ($('#echart_mini_pie').length) {
+    if ($('#echart_pie2').length) {
 
-        var echartMiniPie = echarts.init(document.getElementById('echart_mini_pie'), theme);
-
-        echartMiniPie.setOption({
-            title: {
-                text: 'Chart #2',
-                subtext: 'From ExcelHome',
-                sublink: 'http://e.weibo.com/1341556070/AhQXtjbqh',
-                x: 'center',
-                y: 'center',
-                itemGap: 20,
-                textStyle: {
-                    color: 'rgba(30,144,255,0.8)',
-                    fontFamily: '微软雅黑',
-                    fontSize: 35,
-                    fontWeight: 'bolder'
+        var echartPieCollapse = echarts.init(document.getElementById('echart_pie2'), theme);
+    
+        fetch('/api/asset_allocation')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error("Asset Allocation Error:", data.error);
+                    return;
                 }
-            },
-            tooltip: {
-                show: true,
-                formatter: "{a} <br/>{b} : {c} ({d}%)"
-            },
-            legend: {
-                orient: 'vertical',
-                x: 170,
-                y: 45,
-                itemGap: 12,
-                data: ['68%Something #1', '29%Something #2', '3%Something #3'],
-            },
-            toolbox: {
-                show: true,
-                feature: {
-                    mark: {
-                        show: true
+    
+                // Extract allocation and portfolio type
+                const { asset_allocation, portfolio_type } = data;
+                
+                echartPieCollapse.setOption({
+                    title: {
+                        text: 'Asset Allocation',
+                        subtext: `Portfolio Type: ${portfolio_type}`,  // Display portfolio type as subtitle
+                        // x: 'center'
                     },
-                    dataView: {
-                        show: true,
-                        title: "Text View",
-                        lang: [
-                            "Text View",
-                            "Close",
-                            "Refresh",
-                        ],
-                        readOnly: false
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: "{a} <br/>{b} : {c} ({d}%)"
                     },
-                    restore: {
-                        show: true,
-                        title: "Restore"
+                    legend: {
+                        x: 'center',
+                        y: 'bottom',
+                        data: asset_allocation.map(item => item.name)
                     },
-                    saveAsImage: {
+                    toolbox: {
                         show: true,
-                        title: "Save Image"
-                    }
-                }
-            },
-            series: [{
-                name: '1',
-                type: 'pie',
-                clockWise: false,
-                radius: [105, 130],
-                itemStyle: dataStyle,
-                data: [{
-                    value: 68,
-                    name: '68%Something #1'
-                }, {
-                    value: 32,
-                    name: 'invisible',
-                    itemStyle: placeHolderStyle
-                }]
-            }, {
-                name: '2',
-                type: 'pie',
-                clockWise: false,
-                radius: [80, 105],
-                itemStyle: dataStyle,
-                data: [{
-                    value: 29,
-                    name: '29%Something #2'
-                }, {
-                    value: 71,
-                    name: 'invisible',
-                    itemStyle: placeHolderStyle
-                }]
-            }, {
-                name: '3',
-                type: 'pie',
-                clockWise: false,
-                radius: [25, 80],
-                itemStyle: dataStyle,
-                data: [{
-                    value: 3,
-                    name: '3%Something #3'
-                }, {
-                    value: 97,
-                    name: 'invisible',
-                    itemStyle: placeHolderStyle
-                }]
-            }]
-        });
-
-    }
-
+                        feature: {
+                            magicType: {
+                                show: true,
+                                type: ['pie', 'funnel']
+                            },
+                            restore: {
+                                show: true,
+                                title: "Restore"
+                            },
+                            saveAsImage: {
+                                show: true,
+                                title: "Save Image"
+                            }
+                        }
+                    },
+                    calculable: true,
+                    series: [{
+                        name: 'Asset Allocation',
+                        type: 'pie',
+                        radius: [25, 90],
+                        center: ['50%', 170],
+                        roseType: 'area',
+                        data: asset_allocation.map(item => ({
+                            value: item.value,
+                            name: item.name
+                        }))
+                    }]
+                });
+            })
+            .catch(error => console.error('Error fetching asset allocation:', error));
+    }    
+       
     if ($('#mainb').length) {
         var echartBar = echarts.init(document.getElementById('mainb'), theme);
     
@@ -734,96 +695,6 @@ function init_echarts() {
             }
         });
     }
-
-    // if ($('#echart_line').length) {
-
-    //     var echartLine = echarts.init(document.getElementById('echart_line'), theme);
-
-    //     echartLine.setOption({
-    //         title: {
-    //             text: 'Line Graph',
-    //             subtext: 'Subtitle'
-    //         },
-    //         tooltip: {
-    //             trigger: 'axis'
-    //         },
-    //         legend: {
-    //             x: 220,
-    //             y: 40,
-    //             data: ['Intent', 'Pre-order', 'Deal']
-    //         },
-    //         toolbox: {
-    //             show: true,
-    //             feature: {
-    //                 magicType: {
-    //                     show: true,
-    //                     title: {
-    //                         line: 'Line',
-    //                         bar: 'Bar',
-    //                         stack: 'Stack',
-    //                         tiled: 'Tiled'
-    //                     },
-    //                     type: ['line', 'bar', 'stack', 'tiled']
-    //                 },
-    //                 restore: {
-    //                     show: true,
-    //                     title: "Restore"
-    //                 },
-    //                 saveAsImage: {
-    //                     show: true,
-    //                     title: "Save Image"
-    //                 }
-    //             }
-    //         },
-    //         calculable: true,
-    //         xAxis: [{
-    //             type: 'category',
-    //             boundaryGap: false,
-    //             data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    //         }],
-    //         yAxis: [{
-    //             type: 'value'
-    //         }],
-    //         series: [{
-    //             name: 'Deal',
-    //             type: 'line',
-    //             smooth: true,
-    //             itemStyle: {
-    //                 normal: {
-    //                     areaStyle: {
-    //                         type: 'default'
-    //                     }
-    //                 }
-    //             },
-    //             data: [10, 12, 21, 54, 260, 830, 710]
-    //         }, {
-    //             name: 'Pre-order',
-    //             type: 'line',
-    //             smooth: true,
-    //             itemStyle: {
-    //                 normal: {
-    //                     areaStyle: {
-    //                         type: 'default'
-    //                     }
-    //                 }
-    //             },
-    //             data: [30, 182, 434, 791, 390, 30, 10]
-    //         }, {
-    //             name: 'Intent',
-    //             type: 'line',
-    //             smooth: true,
-    //             itemStyle: {
-    //                 normal: {
-    //                     areaStyle: {
-    //                         type: 'default'
-    //                     }
-    //                 }
-    //             },
-    //             data: [1320, 1132, 601, 234, 120, 90, 20]
-    //         }]
-    //     });
-
-    // }
 
     if ($('#echart_line').length) {
         var echartLine = echarts.init(document.getElementById('echart_line'), theme);
