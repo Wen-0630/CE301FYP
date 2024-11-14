@@ -1,7 +1,7 @@
 # src/investment.py
 from flask import Blueprint, render_template, session, redirect, url_for, current_app, request, jsonify
 from bson.objectid import ObjectId
-from .utils import get_stock_data, get_crypto_data, get_formatted_crypto_data, get_formatted_stock_data, get_historical_crypto_data
+from .utils import  get_crypto_data, get_historical_crypto_data
 from datetime import datetime, timedelta
 import pytz
 import time

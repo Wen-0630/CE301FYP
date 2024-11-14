@@ -10,7 +10,6 @@ import datetime
 from .views import get_dashboard_data  
 
 
-# Import necessary modules and functions
 from .models import Transaction, Loan, SavingGoal
 from .transactions import calculate_total_income, calculate_total_expense
 from .creditCard import get_total_outstanding
@@ -18,8 +17,8 @@ from .investment import calculate_total_investment_profit_loss
 from .cashFlow import get_net_cash_flow
 from .budget import BudgetManager
 from .notifications import Notification
+import re 
 
-# Create a Blueprint for chatbot-related routes
 chatbot_bp = Blueprint('chatbot', __name__, template_folder='templates')
 
 @chatbot_bp.route('/chatbot', methods=['GET', 'POST'])
@@ -49,6 +48,15 @@ def generate_chatbot_response(user_query, user_data):
     openai_api_key = os.getenv("OPENAI_API_KEY")
     if not openai_api_key:
         raise Exception("OPENAI_API_KEY not found in environment variables")
+
+    # Check if the user is asking to update the initial cash amount
+    update_cash_match = re.search(r'(?:update|change|set).*initial cash(?: amount)?(?:\s*to)?\s*\$?([\d,]+(?:\.\d{2})?)(?!\d)', user_query, re.IGNORECASE)
+    if update_cash_match:
+        # Remove commas, then convert to float
+        new_cash_amount_str = update_cash_match.group(1).replace(",", "")
+        new_cash_amount = float(new_cash_amount_str)
+        update_initial_cash_amount(user_data['user']['_id'], new_cash_amount)
+        return f"Your initial cash amount has been updated to ${new_cash_amount:,.2f}."
 
     # Format the user data into a context string
     context_lines = [
@@ -97,3 +105,12 @@ Helpful Answer:"""
     response = llm([HumanMessage(content=prompt_text)])
 
     return response.content
+
+# Function to update initial cash amount in the database
+def update_initial_cash_amount(user_id, new_cash_amount):
+    cash_flow_collection = current_app.mongo.db.cash_flow
+    cash_flow_collection.update_one(
+        {'userId': ObjectId(user_id)},
+        {'$set': {'initial_cash': new_cash_amount}},
+        upsert=True
+    )
