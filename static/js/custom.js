@@ -1157,7 +1157,12 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
-    if ($(".progress .progress-bar")[0]) {
-        $('.progress .progress-bar').progressbar();
-    }
+    // Initialize progress bars dynamically
+    $(".progress .progress-bar").each(function () {
+        const progressValue = $(this).data('transitiongoal');
+        if (progressValue !== undefined) {
+            $(this).css('width', progressValue + '%'); // Set width dynamically
+            $(this).attr('aria-valuenow', progressValue); // Update ARIA attributes for accessibility
+        }
+    });
 });

@@ -292,11 +292,15 @@
           </div>
           <div class="w_center w_55">
             <div class="progress">
-              <!-- Safely calculate percentage based on loan expense and original amount -->
-              {% set progress = (loan['loan_expense'] and loan['original_amount']) and ((loan['loan_expense'] / loan['original_amount']) * 100) or 0 %}
-              <div class="progress-bar bg-green" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" data-progress="{{ progress }}">
-                  <span class="sr-only">{{ progress|round(2) }}% Complete</span>
-              </div>
+                {% set progress = (loan['loan_expense'] and loan['original_amount']) and ((loan['loan_expense'] / loan['original_amount']) * 100) or 0 %}
+                <div class="progress-bar bg-green" role="progressbar" 
+                    aria-valuenow="{{ progress }}" 
+                    aria-valuemin="0" 
+                    aria-valuemax="100" 
+                    data-progress="{{ progress }}" 
+                    data-transitiongoal="{{ progress|round(2) }}">
+                    <span class="sr-only">{{ progress|round(2) }}% Complete</span>
+                </div>
             </div>
           </div>
             <div class="w_right w_20">
