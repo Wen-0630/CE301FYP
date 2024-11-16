@@ -53,15 +53,15 @@ Loans - Net Plus
                                 <tr>
                                     <th>Name</th>
                                     <th>Type</th>
-                                    <th>Original Amount</th>
                                     <th>Loan Term</th>
                                     <th>Repayment Term</th>
                                     <th>Interest Rate</th>
+                                    <th>Original Amount</th>
+                                    <th>Loan Expense</th>
                                     <th>Outstanding Balance</th>
                                     <th>Interest Payable</th>
                                     <th>Interest Expense</th>
                                     <th>Interest Balance</th>
-                                    <th>Loan Expense</th>
                                     <th>Issue Date</th>
                                     <th>Maturity Date</th>
                                     <th>Description</th>
@@ -73,15 +73,15 @@ Loans - Net Plus
                                 <tr>
                                     <td>{{ loan.name }}</td>
                                     <td>{{ loan.loan_type }}</td>
-                                    <td>{{ loan.original_amount | format_with_commas }}</td>
                                     <td>{{ loan.loan_term }}</td>
                                     <td>{{ loan.repayment_term }}</td>
                                     <td>{{ loan.interest_rate | format_with_commas }}%</td>
+                                    <td>{{ loan.original_amount | format_with_commas }}</td>
+                                    <td>{{ loan.loan_expense | format_with_commas }}</td>
                                     <td>{{ loan.outstanding_balance | format_with_commas }}</td>
                                     <td>{{ loan.interest_payable | format_with_commas }}</td>
                                     <td>{{ loan.interest_expense | format_with_commas }}</td>
                                     <td>{{ loan.interest_balance | format_with_commas }}</td>
-                                    <td>{{ loan.loan_expense | format_with_commas }}</td>
                                     <td>{{ loan.issue_date.strftime('%Y-%m-%d') }}</td>
                                     <td>{{ loan.maturity_date.strftime('%Y-%m-%d') }}</td>
                                     <td>{{ loan.description }}</td>

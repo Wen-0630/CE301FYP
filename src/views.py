@@ -12,6 +12,7 @@ from .notifications import Notification, send_income_expense_ratio_notification,
 from .other_assets import OtherAsset
 from .other_liabilities import OtherLiability
 from .todo import get_tasks
+from .utils import get_crypto_data
 import datetime 
 import json
 import os
@@ -22,7 +23,7 @@ views = Blueprint('user', __name__, template_folder='templates')
 def get_dashboard_data(user_id):
     user = current_app.mongo.cx['CE-301'].users.find_one({"_id": ObjectId(user_id)})
     if 'profile_pic' not in user:
-        user['profile_pic'] = 'default_profile.png'
+        user['profile_pic'] = 'default_profile.jpeg'
 
     total_income = calculate_total_income(user_id)
     total_expense = calculate_total_expense(user_id)
@@ -69,6 +70,28 @@ def get_dashboard_data(user_id):
     for task in tasks:
         task['_id'] = str(task['_id'])
 
+    # Query the crypto holdings, sort by profit/loss in descending order, and limit to top 5
+    top_crypto_performance = list(
+        current_app.mongo.db.crypto_holdings.find({'userId': ObjectId(user_id)})
+        .sort('profit_loss', -1)
+        .limit(5)
+    )
+
+    # Extract asset names of top-performing crypto
+    top_crypto_names = [holding['asset'] for holding in top_crypto_performance]
+
+    # Fetch current market data for all crypto assets
+    market_data = get_crypto_data()
+    
+    # Map each crypto name to its current market price using lowercase comparison for matching
+    current_prices = {crypto['name'].lower(): crypto['current_price'] for crypto in market_data}
+
+    # Construct a list of dictionaries with asset names and their current prices
+    top_crypto_with_prices = [
+        {"name": asset_name, "current_price": current_prices.get(asset_name.lower(), "N/A")}
+        for asset_name in top_crypto_names
+    ]
+
     return {
         "user": user,
         "total_income": total_income,
@@ -90,7 +113,9 @@ def get_dashboard_data(user_id):
         "top_asset_categories": top_asset_categories,
         "top_5_loans": top_5_loans, 
         "total_amount": total_amount,
-        "tasks": tasks
+        "tasks": tasks,
+        "top_crypto_names": top_crypto_names,
+        "top_crypto_with_prices": top_crypto_with_prices
     }
     
 @views.route('/')
@@ -121,7 +146,9 @@ def dashboard():
                            top_asset_categories=data['top_asset_categories'],
                            total_amount=data['total_amount'],
                            top_5_loans=data['top_5_loans'],
-                           tasks=data['tasks'])
+                           tasks=data['tasks'],
+                           top_crypto_names=data['top_crypto_names'],
+                           top_crypto_with_prices=data['top_crypto_with_prices'])
 
 @views.route('/transactions')
 def transactions():
@@ -259,6 +286,10 @@ def get_top_asset_categories(user_id):
 
     # Calculate total amount for percentage
     total_amount = sum(item['amount'] for item in top_categories)
+
+    if not top_categories or total_amount == 0:
+        # Return a message if no assets are available
+        return [], 0
     
     return top_categories, total_amount
 
@@ -269,6 +300,14 @@ def api_top_asset_categories():
         return jsonify({"error": "User not logged in"}), 401
 
     top_asset_categories, total_amount = get_top_asset_categories(user_id)
+
+    # Check if no assets are available
+    if not top_asset_categories or total_amount == 0:
+        return jsonify({
+            "message": "No assets available to display.",
+            "top_asset_categories": [],
+            "total_amount": 0
+        }), 200
     
     return jsonify({
         "top_asset_categories": top_asset_categories,

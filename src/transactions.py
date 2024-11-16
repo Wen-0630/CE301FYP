@@ -148,7 +148,15 @@ def calculate_total_expense(user_id):
 
 def calculate_total_transaction(user_id):
     total_income = calculate_total_income(user_id)
-    total_expense = calculate_total_expense(user_id)
+    # Calculate total expense excluding credit card payments
+    total_expense_excluding_credit_card = current_app.mongo.db.transactions.aggregate([
+        {"$match": {"userId": ObjectId(user_id), "type": "Expense", "payment_method": {"$ne": "Credit Card"}}},
+        {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+    ])
+    
+    result = list(total_expense_excluding_credit_card)
+    total_expense = result[0]['total'] if result else 0
+
     return total_income - total_expense
 
 @transactions.route('/api/income_categories_data', methods=['GET'])

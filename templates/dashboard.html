@@ -6,33 +6,71 @@
   <div class="tile_count">
     <div class="col-md-2 col-sm-4  tile_stats_count">
       <span class="count_top"><i class="fa fa-user"></i> Net Worth</span>
-      <div class="count green">{{ net_worth | format_currency }}</div>
-      <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
+      <div class="count {% if net_worth >= 0 %}green{% else %}red{% endif %}">
+          {{ net_worth | format_currency }}
+      </div>
+      <span class="count_bottom">
+          <i class="fa fa-info-circle" 
+            data-toggle="tooltip" 
+            data-placement="bottom" 
+            title="This shows your net worth, calculated as total assets minus total liabilities including total investment gains or losses."></i> 
+          Info
+      </span>
     </div>    
     <div class="col-md-2 col-sm-4  tile_stats_count">
       <span class="count_top"><i class="fa fa-money"></i> Total Incomes</span>
       <div class="count green">{{ total_income | format_currency }}</div>
-      <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>3% </i> From last Week</span>
+      <span class="count_bottom">
+          <i class="fa fa-info-circle" 
+            data-toggle="tooltip" 
+            data-placement="bottom" 
+            title="This represents the total amount of income you have received."></i> 
+          Info
+      </span>
     </div>
     <div class="col-md-2 col-sm-4  tile_stats_count">
       <span class="count_top"><i class="fa fa-shopping-cart"></i> Total Expenses</span>
       <div class="count red">{{ total_expense | format_currency }}</div>
-      <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
+      <span class="count_bottom">
+          <i class="fa fa-info-circle" 
+            data-toggle="tooltip" 
+            data-placement="bottom" 
+            title="This represents the total amount of expenses incurred."></i> 
+          Info
+      </span>
     </div>
     <div class="col-md-2 col-sm-4  tile_stats_count">
       <span class="count_top"><i class="fa fa-balance-scale"></i> Total Assets</span>
       <div class="count green">{{ total_assets | format_currency }}</div>
-      <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
+      <span class="count_bottom">
+          <i class="fa fa-info-circle" 
+            data-toggle="tooltip" 
+            data-placement="bottom" 
+            title="This is the total value of all your owned assets included net cash flow and other assets."></i> 
+          Info
+      </span>
     </div>    
     <div class="col-md-2 col-sm-4  tile_stats_count">
       <span class="count_top"><i class="fa fa-balance-scale"></i> Total Outstanding</span>
       <div class="count red">{{ total_outstanding | format_currency }}</div>
-      <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
+      <span class="count_bottom">
+          <i class="fa fa-info-circle" 
+            data-toggle="tooltip" 
+            data-placement="bottom" 
+            title="This shows the total outstanding liabilities or debts you owe included credit cards, loans and other liabilities."></i> 
+          Info
+      </span>
     </div>
     <div class="col-md-2 col-sm-4  tile_stats_count">
-      <span class="count_top"><i class="fa fa-bar-chart"></i> Total Investments</span>
-      <div class="count green">{{ total_investment | format_currency }}</div>
-      <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>From last Week</span>
+      <span class="count_top"><i class="fa fa-bar-chart"></i> Total Investments Gain</span>
+      <div class="count {% if total_investment >= 0 %}green{% else %}red{% endif %}">{{ total_investment | format_currency }}</div>
+      <span class="count_bottom">
+          <i class="fa fa-info-circle" 
+            data-toggle="tooltip" 
+            data-placement="bottom" 
+            title="This represents the total value of your investments profit or loss."></i> 
+          Info
+      </span>
     </div>    
   </div>
 </div>
@@ -57,51 +95,24 @@
       <div class="col-md-9 col-sm-9 ">
         <canvas id="lineChart"></canvas>
       </div>
-      <div class="col-md-3 col-sm-3  bg-white">
-        <div class="x_title">
-          <h2>Top Performance</h2>
-          <div class="clearfix"></div>
-        </div>
-
-        <div class="col-md-12 col-sm-12 ">
-          <div>
-            <p>Etherium</p>
-            <div class="">
-              <div class="progress progress_sm" style="width: 76%;">
-                <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="80"></div>
-              </div>
-            </div>
+      <div class="col-md-3 col-sm-3 bg-white">
+          <div class="x_title">
+              <h2>Top Performance Gain</h2>
+              <div class="clearfix"></div>
           </div>
-          <div>
-            <p>Bitcoin</p>
-            <div class="">
-              <div class="progress progress_sm" style="width: 76%;">
-                <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="60"></div>
-              </div>
-            </div>
+      
+          <div class="col-md-12 col-sm-12">
+              {% if top_crypto_with_prices %}
+                  <div>
+                      {% for asset in top_crypto_with_prices %}
+                          <li>{{ asset.name }} - Current Market Price: {{ asset.current_price | format_currency }}</li>
+                      {% endfor %}
+                  </div>
+              {% else %}
+                  <p>No top-performing crypto assets available.</p>
+              {% endif %}
           </div>
-        </div>
-        <div class="col-md-12 col-sm-12 ">
-          <div>
-            <p>Litecoin</p>
-            <div class="">
-              <div class="progress progress_sm" style="width: 76%;">
-                <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="40"></div>
-              </div>
-            </div>
-          </div>
-          <div>
-            <p>Render</p>
-            <div class="">
-              <div class="progress progress_sm" style="width: 76%;">
-                <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="50"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
       </div>
-
       <div class="clearfix"></div>
     </div>
   </div>
@@ -174,8 +185,7 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <a class="dropdown-item" href="#">Settings 1</a>
-                <a class="dropdown-item" href="#">Settings 2</a>
+              <a class="dropdown-item" href="#" data-toggle="modal" data-target="#benchmarkInfoModal">Benchmark Info</a>
               </div>
           </li>
           <li><a class="close-link"><i class="fa fa-close"></i></a>
@@ -213,40 +223,42 @@
         <div class="clearfix"></div>
       </div>
       <div class="x_content">
-        <table class="" style="width:100%">
-          <tr>
-            <th style="width:37%;">
-              <p>Top {{ top_asset_categories|length }} Asset Categories</p>
-            </th>
-            <th>
-              <div class="col-lg-7 col-md-7 col-sm-7 ">
-                <p class="">Category</p>
-              </div>
-              <div class="col-lg-5 col-md-5 col-sm-5 ">
-                <p class="">Total(%)</p>
-              </div>
-            </th>
-          </tr>
-          <tr>
-            <td>
-              <!-- Canvas for doughnut chart -->
-              <canvas class="canvasDoughnut" height="140" width="140" style="margin: 15px 10px 10px 0"></canvas>
-            </td>
-            </td>
-            <td>
-              <table class="tile_info">
-                {% for asset in top_asset_categories %}
-                    <tr>
-                        <td>
-                            <p><i class="fa fa-square"></i> {{ asset.category }} </p>
-                        </td>
-                        <td>{{ (asset.amount / total_amount * 100) | round(2) }}%</td>
-                    </tr>
-                {% endfor %}
+          {% if top_asset_categories|length == 0 or total_amount == 0 %}
+              <p>No assets available to display.</p>
+          {% else %}
+              <table class="" style="width:100%">
+                  <tr>
+                      <th style="width:37%;">
+                          <p>Top {{ top_asset_categories|length }} Asset Categories</p>
+                      </th>
+                      <th>
+                          <div class="col-lg-7 col-md-7 col-sm-7 ">
+                              <p class="">Category</p>
+                          </div>
+                          <div class="col-lg-5 col-md-5 col-sm-5 ">
+                              <p class="">Total(%)</p>
+                          </div>
+                      </th>
+                  </tr>
+                  <tr>
+                      <td>
+                          <canvas class="canvasDoughnut" height="140" width="140" style="margin: 15px 10px 10px 0"></canvas>
+                      </td>
+                      <td>
+                          <table class="tile_info">
+                              {% for asset in top_asset_categories %}
+                                  <tr>
+                                      <td>
+                                          <p><i class="fa fa-square"></i> {{ asset.category }} </p>
+                                      </td>
+                                      <td>{{ (asset.amount / total_amount * 100) | round(2) }}%</td>
+                                  </tr>
+                              {% endfor %}
+                          </table>
+                      </td>
+                  </tr>
               </table>
-            </td>
-          </tr>
-        </table>
+          {% endif %}
       </div>
     </div>
   </div>
@@ -271,9 +283,9 @@
         <div class="clearfix"></div>
       </div>
       <div class="x_content">
+        {% for loan in top_5_loans %}
         <h4>Top Largest Loans</h4>
         <!-- Loop through the top_5_loans passed from the backend -->
-        {% for loan in top_5_loans %}
         <div class="widget_summary">
           <div class="w_left w_25">
             <span>{{ loan['name'] }}</span>  <!-- Loan name -->
@@ -371,7 +383,7 @@
   <div class="col-md-4 col-sm-4  ">
     <div class="x_panel">
       <div class="x_title">
-        <h2>Budget vs. Actual Spending</h2>
+        <h2>Budget vs. Actual Spend</h2>
         <ul class="nav navbar-right panel_toolbox">
           <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
           </li>
@@ -440,23 +452,27 @@
             <div class="clearfix"></div>
         </div>
         <div class="x_content">
-            <ul class="to_do" id="todoList">
-              {% for task in tasks %}
-              <li data-id="{{ task._id }}" style="display: flex; align-items: center;">
-                  <p style="flex: 1; margin: 0;">
-                      <input type="checkbox" class="flat" {% if task.completed %}checked{% endif %}> {{ task.task }}
-                  </p>
-                  <div style="margin-left: auto;">
-                      <a href="#" class="editTask" data-id="{{ task._id }}" style="margin-right: 10px;">
-                          <i class="fa fa-pencil-square-o"></i>
-                      </a>
-                      <a href="#" class="deleteTask" data-id="{{ task._id }}">
-                          <i class="fa fa-trash"></i>
-                      </a>
-                  </div>
-              </li>
-              {% endfor %}
-          </ul>
+            {% if tasks|length == 0 %}
+                <p>No tasks available. Add a new task to get started!</p>
+            {% else %}
+                <ul class="to_do" id="todoList">
+                    {% for task in tasks %}
+                    <li data-id="{{ task._id }}" style="display: flex; align-items: center;">
+                        <p style="flex: 1; margin: 0;">
+                            <input type="checkbox" class="flat" {% if task.completed %}checked{% endif %}> {{ task.task }}
+                        </p>
+                        <div style="margin-left: auto;">
+                            <a href="#" class="editTask" data-id="{{ task._id }}" style="margin-right: 10px;">
+                                <i class="fa fa-pencil-square-o"></i>
+                            </a>
+                            <a href="#" class="deleteTask" data-id="{{ task._id }}">
+                                <i class="fa fa-trash"></i>
+                            </a>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}    
         </div>
     </div>
   </div>
@@ -574,6 +590,43 @@
     </div>
   </div>
 </div>
+
+<!-- Benchmark Info Modal -->
+<div class="modal fade" id="benchmarkInfoModal" tabindex="-1" role="dialog" aria-labelledby="benchmarkInfoModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h2 class="modal-title" id="benchmarkInfoModalLabel">Benchmark Info</h2>
+              </button>
+          </div>
+          <div class="modal-body">
+              <!-- Add your benchmark information here -->
+              <h2>An asset allocation model, adjusting the typical conservative, moderate, and aggressive frameworks:</h2>
+
+              <p>Conservative Portfolio:</p>
+                <ul>- 60% Bonds</ul>
+                <ul>- 25% Stocks</ul>
+                <ul>- 10% Cash</ul>
+                <ul>- 5% Cryptocurrency</ul>
+
+              <p>Moderate Portfolio:</p>
+                <ul>-  40% Stocks</ul>
+                <ul>-  30% Bonds</ul>
+                <ul>-  10% Cash</ul>
+                <ul>-  20% Cryptocurrencies and alternative investments</ul>
+
+              <p>Aggressive Portfolio:</p>
+              <ul>-  50% Stocks</ul>
+              <ul>-  20% Bonds</ul>
+              <ul>-  5% Cash</ul>
+              <ul>-  25% Cryptocurrencies and other high-risk investments</ul>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+      </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -636,6 +689,9 @@
       }
   });
 
+  $(document).ready(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+  });
 
 </script>
 {% endblock %}

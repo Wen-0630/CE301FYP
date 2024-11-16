@@ -122,3 +122,8 @@ table.tile_info span.right {
     color: inherit !important;
     text-decoration: none !important;
 } */
+
+.count.green {
+    color: #1ABB9C; /* Apply the green color */
+}
+

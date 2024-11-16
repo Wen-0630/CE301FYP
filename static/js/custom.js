@@ -548,8 +548,10 @@ function init_echarts() {
         fetch('/api/asset_allocation')
             .then(response => response.json())
             .then(data => {
-                if (data.error) {
-                    console.error("Asset Allocation Error:", data.error);
+                if (data.error || !data.asset_allocation || data.asset_allocation.length === 0) {
+                    // Handle case where no asset allocation is available
+                    console.error("Asset Allocation Error:", data.error || "No assets available for allocation.");
+                    document.getElementById('echart_pie2').innerHTML = '<p>No assets available for allocation.</p>';
                     return;
                 }
     
@@ -719,14 +721,14 @@ function init_echarts() {
                 // Set options for the line chart
                 echartLine.setOption({
                     title: {
-                        text: 'Total Holdings Over Time',
+                        text: 'Holdings Over Time',
                         subtext: 'Last 6 Months'
                     },
                     tooltip: {
                         trigger: 'axis'
                     },
                     legend: {
-                        data: ['Stock Holdings', 'Crypto Holdings']
+                        data: ['Stock', 'Crypto']
                     },
                     toolbox: {
                         show: true,
@@ -761,7 +763,7 @@ function init_echarts() {
                         type: 'value'
                     }],
                     series: [{
-                        name: 'Stock Holdings',
+                        name: 'Stock',
                         type: 'line',
                         smooth: true,
                         itemStyle: {
@@ -773,7 +775,7 @@ function init_echarts() {
                         },
                         data: stockTotals  // Use dynamic stock data
                     }, {
-                        name: 'Crypto Holdings',
+                        name: 'Crypto',
                         type: 'line',
                         smooth: true,
                         itemStyle: {
@@ -812,8 +814,8 @@ function init_chart_doughnut() {
                 var topAssetCategories = data.top_asset_categories;
                 var totalAmount = data.total_amount;
 
-                if (!Array.isArray(topAssetCategories) || topAssetCategories.length === 0) {
-                    console.log('topAssetCategories data not found or invalid');
+                if (!Array.isArray(topAssetCategories) || topAssetCategories.length === 0 || totalAmount === 0) {
+                    console.log('No asset categories available to display.');
                     return;
                 }
 
@@ -974,42 +976,42 @@ function init_daterangepicker() {
     };
 
     var optionSet1 = {
-        startDate: moment().subtract(29, 'days'),
-        endDate: moment(),
-        minDate: '01/01/2012',
-        maxDate: '12/31/2015',
-        dateLimit: {
-            days: 60
-        },
+        // startDate: moment().subtract(29, 'days'),
+        // endDate: moment(),
+        // minDate: '01/01/2012',
+        // maxDate: '12/31/2015',
+        // dateLimit: {
+        //     days: 60
+        // },
         showDropdowns: true,
         showWeekNumbers: true,
         timePicker: false,
         timePickerIncrement: 1,
         timePicker12Hour: true,
         ranges: {
-            'Today': [moment(), moment()],
+            // 'Today': [moment(), moment()],
             'Yesterday': [moment(), moment()],
             'Last 7 Days': [moment.utc().subtract(6, 'days'), moment.utc()],
             'Last 30 Days': [moment.utc().subtract(29, 'days'), moment.utc()],
             'This Month': [moment.utc().startOf('month'), moment.utc().endOf('month')],
             'Last Month': [moment.utc().subtract(1,'month').startOf('month').add(1, 'day'), moment.utc().subtract(1,'month').endOf('month').add(1, 'day')]
         },
-        opens: 'left',
-        buttonClasses: ['btn btn-default'],
-        applyClass: 'btn-small btn-primary',
-        cancelClass: 'btn-small',
-        format: 'MM/DD/YYYY',
-        separator: ' to ',
-        locale: {
-            applyLabel: 'Submit',
-            cancelLabel: 'Clear',
-            fromLabel: 'From',
-            toLabel: 'To',
-            customRangeLabel: 'Custom',
-            daysOfWeek: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
-            monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-            firstDay: 1
-        }
+        // opens: 'left',
+        // buttonClasses: ['btn btn-default'],
+        // applyClass: 'btn-small btn-primary',
+        // cancelClass: 'btn-small',
+        // format: 'MM/DD/YYYY',
+        // separator: ' to ',
+        // locale: {
+        //     applyLabel: 'Submit',
+        //     cancelLabel: 'Clear',
+        //     fromLabel: 'From',
+        //     toLabel: 'To',
+        //     customRangeLabel: 'Custom',
+        //     daysOfWeek: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+        //     monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        //     firstDay: 1
+        // }
     };
 
     $('#reportrange span').html(moment().subtract(29, 'days').format('MMMM D, YYYY') + ' - ' + moment().format('MMMM D, YYYY'));
@@ -1151,5 +1153,11 @@ $(document).ready(function () {
                 radioClass: 'iradio_flat-green'
             });
         });
+    }
+});
+
+$(document).ready(function () {
+    if ($(".progress .progress-bar")[0]) {
+        $('.progress .progress-bar').progressbar();
     }
 });

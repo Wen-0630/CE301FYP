@@ -6,6 +6,7 @@ from bson.objectid import ObjectId
 auth = Blueprint('auth', __name__, template_folder='../templates')
 
 def create_user(mongo, user_data):
+    user_data['profile_pic'] = user_data.get('profile_pic', 'default_profile.jpeg')
     mongo.cx['CE-301'].users.insert_one(user_data)  # Insert into "users" collection
 
 @auth.route('/login', methods=['GET', 'POST'])
@@ -52,7 +53,7 @@ def signup():
                 else:
                     bcrypt = current_app.bcrypt
                     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-                    user_data = {'username': username, 'email': email, 'password': hashed_password}
+                    user_data = {'username': username, 'email': email, 'password': hashed_password, 'profile_pic': 'default_profile.jpeg'}
                     create_user(mongo, user_data)
                     print("User registered successfully")  # Debug statement
                     flash('Registration successful! Please log in.', category='success')

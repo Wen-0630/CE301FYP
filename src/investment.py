@@ -201,7 +201,7 @@ def add_transaction():
     try:
         data = request.get_json()
         transaction_type = data['type']
-        asset = data['asset']
+        asset = data['name']
         date = data['date']
         time = data['time']
         buy_price = float(data['buyPrice'])
@@ -505,6 +505,7 @@ def update_holding():
     data = request.get_json()
     holding_id = data['holdingId']
     holding_type = data['holdingType']
+    
     update_fields = {
         'buy_price': float(data['buy_price']),
         'quantity': float(data['quantity']),
