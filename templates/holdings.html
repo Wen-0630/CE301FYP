@@ -263,11 +263,11 @@
           <div class="form-group">
             <label for="cryptoSelect">Select Crypto</label>
             <select id="cryptoSelect" class="form-control" required>
-              <option value="" disabled selected>Select a crypto</option>
-              {% for crypto in crypto_data %}
-              <option value="{{ crypto['id'] }}">{{ crypto['name'] }}</option>
-              {% endfor %}
-            </select>
+                <option value="" disabled selected>Select a crypto</option>
+                {% for crypto in crypto_data %}
+                <option value="{{ crypto['name'] }}">{{ crypto['name'] }}</option>
+                {% endfor %}
+            </select>          
           </div>
           <div class="form-group">
             <label for="cryptoTransactionDate">Date</label>
@@ -324,7 +324,7 @@
                   </div>
                   <div class="form-group">
                       <label for="editQuantity">Quantity</label>
-                      <input type="number" step="0.0001" id="editQuantity" class="form-control" required>
+                      <input type="number" step="0.0001" id="editQuantity" class="form-control" disabled>
                   </div>
                   <div class="form-group">
                       <label for="editAmountBought">Total Amount Bought</label>
@@ -355,9 +355,18 @@
 
 <script>
     $(document).ready(function() {
+        // Check the hash in the URL and activate the correct tab
+        const hash = window.location.hash;
+
+        if (hash === '#stock') {
+            $('a[href="#stock"]').tab('show'); // Show the stock tab
+        } else if (hash === '#crypto') {
+            $('a[href="#crypto"]').tab('show'); // Show the crypto tab
+        }
+
         $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             var target = $(e.target).attr("href"); // Get the tab that was activated
-            
+
             if (target === '#stock' && !$.fn.DataTable.isDataTable('#stockHoldingsTable')) {
                 $('#stockHoldingsTable').DataTable({
                     "paging": true,
@@ -391,6 +400,7 @@
             }
         });
     });
+
 
 
     document.getElementById('addStockTransactionForm').addEventListener('submit', function(event) {
@@ -438,74 +448,89 @@
     });
 
     document.getElementById('addCryptoTransactionForm').addEventListener('submit', function(event) {
-        event.preventDefault();
+      event.preventDefault();
 
-        const cryptoSelect = document.getElementById('cryptoSelect').value;
-        const transactionDate = document.getElementById('cryptoTransactionDate').value;
-        const transactionTime = document.getElementById('cryptoTransactionTime').value;
-        const buyPrice = document.getElementById('cryptoBuyPrice').value;
-        const amountBought = document.getElementById('cryptoAmountBought').value;
-        const transactionFee = document.getElementById('cryptoTransactionFee').value;
-        const deductCash = document.getElementById('cryptoDeductCash').checked;
-        const transactionType = document.getElementById('transactionTypeCrypto').value;
+      const cryptoSelect = document.getElementById('cryptoSelect').value; // Selected crypto asset
+      const transactionDate = document.getElementById('cryptoTransactionDate').value;
+      const transactionTime = document.getElementById('cryptoTransactionTime').value;
+      const buyPrice = document.getElementById('cryptoBuyPrice').value;
+      const amountBought = document.getElementById('cryptoAmountBought').value;
+      const transactionFee = document.getElementById('cryptoTransactionFee').value;
+      const deductCash = document.getElementById('cryptoDeductCash').checked;
+      const transactionType = document.getElementById('transactionTypeCrypto').value;
 
-        const transactionData = {
-            type: transactionType,
-            asset: cryptoSelect,
-            date: transactionDate,
-            time: transactionTime,
-            buyPrice: parseFloat(buyPrice).toFixed(4),  // Ensure it handles decimal points
-            amountBought: parseFloat(amountBought).toFixed(4),  // Ensure it handles decimal points
-            transactionFee: transactionFee ? parseFloat(transactionFee).toFixed(2) : 0, 
-            deductCash: deductCash
-        };
+      // Build transaction data
+      const transactionData = {
+          type: transactionType,
+          asset: cryptoSelect, // Ensure the asset name is sent
+          date: transactionDate,
+          time: transactionTime,
+          buyPrice: parseFloat(buyPrice).toFixed(4),
+          amountBought: parseFloat(amountBought).toFixed(4),
+          transactionFee: transactionFee ? parseFloat(transactionFee).toFixed(2) : 0,
+          deductCash: deductCash
+      };
 
-        fetch('/add_transaction', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(transactionData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Transaction added successfully');
-                location.reload();
-            } else {
-                alert('Error adding transaction: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    });
+      console.log('Transaction Data:', transactionData); // Debugging log
 
-    function deleteHolding(button) {
-        const id = button.getAttribute('data-id');
-        const type = button.getAttribute('data-type');
-        const url = type === 'stock' ? '/delete_stock_holding' : '/delete_crypto_holding';
-        
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ holdingId: id })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Holding deleted successfully');
-                location.reload();
-            } else {
-                alert('Error deleting holding: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    }
+      fetch('/add_transaction', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(transactionData)
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              alert('Transaction added successfully');
+              location.reload();
+          } else {
+              alert('Error adding transaction: ' + data.error);
+          }
+      })
+      .catch(error => {
+          console.error('Error:', error);
+      });
+  });
+
+
+
+
+  function deleteHolding(button) {
+      const id = button.getAttribute('data-id');
+      const type = button.getAttribute('data-type');
+      const url = type === 'stock' ? '/delete_stock_holding' : '/delete_crypto_holding';
+
+      fetch(url, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ holdingId: id })
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              alert('Holding deleted successfully');
+
+              // Set the hash based on the type
+              if (type === 'stock') {
+                  window.location.hash = '#stock';
+              } else if (type === 'crypto') {
+                  window.location.hash = '#crypto';
+              }
+
+              location.reload();
+          } else {
+              alert('Error deleting holding: ' + data.error);
+          }
+      })
+      .catch(error => {
+          console.error('Error:', error);
+      });
+  }
+
 
     function openEditModal(button) {
         const holdingId = button.getAttribute('data-id');
@@ -530,13 +555,15 @@
     document.getElementById('editHoldingForm').addEventListener('submit', function(event) {
         event.preventDefault();
 
+        const holdingType = document.getElementById('holdingType').value;
+
         const holdingData = {
             holdingId: document.getElementById('holdingId').value,
-            holdingType: document.getElementById('holdingType').value,
+            holdingType: holdingType,
             buy_price: parseFloat(document.getElementById('editBuyPrice').value).toFixed(4),
-            quantity: parseFloat(document.getElementById('editQuantity').value).toFixed(4),
             amount_bought: parseFloat(document.getElementById('editAmountBought').value).toFixed(4),
             transaction_fee: parseFloat(document.getElementById('editTransactionFee').value).toFixed(2)
+            // Quantity is recalculated on the server-side and doesn't need to be included
         };
 
         fetch('/api/update_holding', {
@@ -548,14 +575,21 @@
         .then(data => {
             if (data.success) {
                 alert('Holding updated successfully');
-                location.reload();
+                
+                // Dynamically set the hash based on the holding type
+                if (holdingType === 'stock') {
+                    window.location.hash = '#stock';
+                } else if (holdingType === 'crypto') {
+                    window.location.hash = '#crypto';
+                }
+
+                location.reload(); // Reload the page to reflect changes
             } else {
                 alert('Error updating holding: ' + data.error);
             }
         })
         .catch(error => console.error('Error:', error));
     });
-
 
     function formatWithCommas(number) {
         return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -575,6 +609,18 @@
             })
             .catch(error => console.error('Error:', error));
     });
+
+    document.getElementById('editBuyPrice').addEventListener('input', recalculateQuantity);
+    document.getElementById('editAmountBought').addEventListener('input', recalculateQuantity);
+
+    function recalculateQuantity() {
+        const buyPrice = parseFloat(document.getElementById('editBuyPrice').value) || 0;
+        const amountBought = parseFloat(document.getElementById('editAmountBought').value) || 0;
+
+        const quantity = (buyPrice > 0) ? (amountBought / buyPrice).toFixed(4) : 0;
+        document.getElementById('editQuantity').value = quantity;
+    }
+
 </script>
 
 {% endblock %}

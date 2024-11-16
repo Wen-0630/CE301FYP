@@ -200,8 +200,14 @@ def add_transaction():
 
     try:
         data = request.get_json()
-        transaction_type = data['type']
-        asset = data['name']
+        print(f"Received data: {data}")  # Debugging log
+
+        transaction_type = data['type']  # Either 'stock' or 'crypto'
+        asset = data.get('asset', '').strip()  # Get the asset name
+
+        if not asset:
+            return jsonify({'success': False, 'error': 'Asset name is required'}), 400
+
         date = data['date']
         time = data['time']
         buy_price = float(data['buyPrice'])
@@ -216,7 +222,7 @@ def add_transaction():
 
         holding = {
             'userId': ObjectId(user_id),
-            'asset': asset,
+            'asset': asset.title(),  # Ensure consistent formatting
             'datetime': transaction_datetime,
             'buy_price': buy_price,
             'amount_bought': amount_bought,
@@ -234,7 +240,9 @@ def add_transaction():
         return jsonify({'success': True})
 
     except Exception as e:
+        print(f"Error adding transaction: {str(e)}")  # Debugging log
         return jsonify({'success': False, 'error': str(e)}), 500
+
 
 
 @investment.route('/holdings')
@@ -263,16 +271,15 @@ def holdings():
     
     # Calculate profit/loss for crypto holdings
     for holding in crypto_holdings:
-        current_price = current_prices.get(holding['asset'].title())
+        current_price = current_prices.get(holding['asset'].strip().title())  # Normalize formatting
         if current_price:
             holding['profit_loss'] = (current_price - holding['buy_price']) * holding['quantity']
             current_app.mongo.db.crypto_holdings.update_one(
                 {'_id': holding['_id']},
                 {'$set': {'profit_loss': holding['profit_loss']}}
             )
-
         else:
-            holding['profit_loss'] = 0  # Initialize profit_loss to 0 if current price is not available
+            holding['profit_loss'] = 0  # No current price available
 
         # Calculate profit/loss for crypto holdings
     for holding in stock_holdings:
@@ -506,21 +513,42 @@ def update_holding():
     holding_id = data['holdingId']
     holding_type = data['holdingType']
     
-    update_fields = {
-        'buy_price': float(data['buy_price']),
-        'quantity': float(data['quantity']),
-        'amount_bought': float(data['amount_bought']),
-        'transaction_fee': float(data['transaction_fee'])
-    }
+    try:
+        # Fetch the existing holding document
+        collection = 'stock_holdings' if holding_type == 'stock' else 'crypto_holdings'
+        holding = current_app.mongo.db[collection].find_one({'_id': ObjectId(holding_id)})
+        if not holding:
+            return jsonify({'success': False, 'error': 'Holding not found'}), 404
 
-    collection = 'stock_holdings' if holding_type == 'stock' else 'crypto_holdings'
-    result = current_app.mongo.db[collection].update_one(
-        {'_id': ObjectId(holding_id)},
-        {'$set': update_fields}
-    )
+        # Extract and validate updated fields
+        buy_price = float(data['buy_price'])
+        amount_bought = float(data['amount_bought'])
+        transaction_fee = float(data['transaction_fee'])
 
-    if result.modified_count == 1:
-        return jsonify({'success': True})
-    else:
-        return jsonify({'success': False, 'error': 'Failed to update holding'})
+        # Recalculate the quantity
+        quantity = amount_bought / buy_price
+
+        # Prepare updated fields
+        update_fields = {
+            'buy_price': buy_price,
+            'amount_bought': amount_bought,
+            'quantity': quantity,  # Recalculated value
+            'transaction_fee': transaction_fee
+        }
+
+        # Perform the update in MongoDB
+        result = current_app.mongo.db[collection].update_one(
+            {'_id': ObjectId(holding_id)},
+            {'$set': update_fields}
+        )
+
+        if result.modified_count == 1:
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'Failed to update holding'}), 500
+
+    except Exception as e:
+        print(f"Error updating holding: {str(e)}")  # Debugging log
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 

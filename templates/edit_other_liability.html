@@ -20,9 +20,12 @@ Edit Liability - Net Plus
         <div class="form-group">
             <label for="category">Category:</label>
             <select class="form-control" id="category" name="category">
-                <option value="Loans" {% if liability.category == "Loans" %} selected {% endif %}>Loans</option>
-                <option value="Credit Cards" {% if liability.category == "Credit Cards" %} selected {% endif %}>Credit Cards</option>
-                <option value="Mortgages" {% if liability.category == "Mortgages" %} selected {% endif %}>Mortgages</option>
+
+                <option value="Mortgages Insurances" {% if liability.category == "Mortgages Insurances" %} selected {% endif %}>Mortgages Insurances</option>
+                <option value="Vehicle Insurances" {% if liability.category == "Vehicle Insurances" %} selected {% endif %}>Vehicle Insurances</option>
+                <option value="Personal Debts" {% if liability.category == "Personal Debts" %} selected {% endif %}>Personal Debts</option>
+                <option value="Tax Owned" {% if liability.category == "Tax Owned" %} selected {% endif %}>Tax Owned</option>
+                <option value="Vendor Payments" {% if liability.category == "Vendor Payments" %} selected {% endif %}>Vendor Payments</option>
                 <option value="Other" {% if liability.category == "Other" %} selected {% endif %}>Other</option>
             </select>
         </div>
