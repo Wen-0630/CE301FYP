@@ -6,17 +6,7 @@ from langchain import PromptTemplate
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import HumanMessage
 from bson.objectid import ObjectId
-import datetime
 from .views import get_dashboard_data  
-
-
-from .models import Transaction, Loan, SavingGoal
-from .transactions import calculate_total_income, calculate_total_expense
-from .creditCard import get_total_outstanding
-from .investment import calculate_total_investment_profit_loss
-from .cashFlow import get_net_cash_flow
-from .budget import BudgetManager
-from .notifications import Notification
 import re 
 
 chatbot_bp = Blueprint('chatbot', __name__, template_folder='templates')

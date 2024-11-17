@@ -8,7 +8,7 @@ from .creditCard import get_total_outstanding
 from .investment import calculate_total_investment_profit_loss
 from .cashFlow import get_net_cash_flow
 from .budget import BudgetManager 
-from .notifications import Notification, send_income_expense_ratio_notification, send_budget_vs_spending_notification
+from .notifications import Notification
 from .other_assets import OtherAsset
 from .other_liabilities import OtherLiability
 from .todo import get_tasks

@@ -1,22 +1,10 @@
 import requests
-import os
 from datetime import datetime
-import time
 import logging
-import websocket
 from datetime import timedelta
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
-
-
-# def get_stock_data(symbol):
-#     api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
-#     url = f'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval=60min&apikey={api_key}'
-#     response = requests.get(url)
-#     data = response.json()
-#     return data
-
 
 def get_crypto_data():
     try:
@@ -60,15 +48,6 @@ def format_crypto_data(data):
             'price_change_percentage_24h': crypto['price_change_percentage_24h']
         })
     return formatted_data
-
-
-# def get_formatted_stock_data(symbol):
-#     data = get_stock_data(symbol)
-#     return format_stock_data(data)
-
-# def get_formatted_crypto_data(crypto_list):
-#     data = get_crypto_data(crypto_list)
-#     return format_crypto_data(data)
 
 def get_historical_crypto_data(crypto_list, start_date, end_date, hourly_mode=False):
     historical_prices = {}

@@ -3,7 +3,6 @@ from flask import Blueprint, render_template, session, redirect, url_for, curren
 from bson.objectid import ObjectId
 from .utils import  get_crypto_data, get_historical_crypto_data
 from datetime import datetime, timedelta
-import pytz
 import time
 import websocket
 import threading
@@ -12,72 +11,6 @@ from math import isnan
 
 
 investment = Blueprint('investment', __name__, template_folder='templates')
-
-# CACHE = {}
-# CACHE_TIMEOUT = 300  # 5 minutes in seconds
-
-# def get_cached_data(key):
-#     current_time = time.time()
-#     if key in CACHE and current_time - CACHE[key]['timestamp'] < CACHE_TIMEOUT:
-#         return CACHE[key]['data']
-#     return None
-
-# def set_cached_data(key, data):
-#     CACHE[key] = {
-#         'timestamp': time.time(),
-#         'data': data
-#     }
-
-# def convert_to_singapore_time(timestamp):
-#     # Convert timestamp to Singapore time
-#     utc_time = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
-#     utc_time = utc_time.replace(tzinfo=pytz.utc)
-#     singapore_time = utc_time.astimezone(pytz.timezone('Asia/Singapore'))
-#     return singapore_time.strftime("%Y-%m-%d %H:%M:%S")
-
-# @investment.route('/update_data')
-# def update_data():
-#     if 'user_id' not in session:
-#         return redirect(url_for('auth.login'))
-    
-#     cache_key = 'market_data'
-#     cached_data = get_cached_data(cache_key)
-#     if cached_data:
-#         return jsonify({'success': True, 'message': 'Data loaded from cache'})
-
-#     stock_symbols = {
-#         'AAPL': 'Apple Inc.',
-#         'GOOGL': 'Alphabet Inc.',
-#         'MSFT': 'Microsoft Corp.'
-#     }
-
-#     stocks = {}
-#     for symbol, name in stock_symbols.items():
-#         data = get_formatted_stock_data(symbol)
-#         if data:
-#             latest_timestamp = sorted(data.keys())[-1]
-#             latest_data = data[latest_timestamp]
-#             latest_timestamp_sg = convert_to_singapore_time(latest_timestamp)
-#             stocks[symbol] = {
-#                 'name': name,
-#                 'latest_date': latest_timestamp_sg,
-#                 'latest_close': latest_data['close'],
-#                 'data': {convert_to_singapore_time(ts): val for ts, val in data.items()}
-#             }
-
-#     crypto_list = ['bitcoin', 'ethereum', 'litecoin']
-#     crypto_data = get_formatted_crypto_data(crypto_list)
-
-    # user_id = session['user_id']    
-    # current_app.mongo.db.markets.update_one(
-    #     {'userId': ObjectId(user_id)},
-    #     {"$set": {'stocks': stocks, 'crypto': crypto_data}},
-    #     upsert=True
-    # )
-
-    # set_cached_data(cache_key, {'stocks': stocks, 'crypto': crypto_data})
-
-    # return "Data updated successfully"
 
 def start_websocket(app):
     def on_message(ws, message):
@@ -149,49 +82,6 @@ def markets():
     # print("Crypto Data:", crypto_data)  # Debugging line to check crypto dat
 
     return render_template('markets.html', stocks=stocks, crypto_data=crypto_data)
-
-# @investment.route('/add_transaction', methods=['POST'])
-# def add_transaction():
-#     if 'user_id' not in session:
-#         return jsonify({'success': False, 'error': 'User not logged in'}), 401
-
-#     data = request.get_json()
-#     transaction_type = data['type']
-#     asset = data['asset']
-#     date = data['date']
-#     time = data['time']
-#     buy_price = float(data['buyPrice'])
-#     amount_bought = float(data['amountBought'])
-#     transaction_fee = float(data.get('transactionFee' or 0))
-#     deduct_cash = "Yes" if data['deductCash'] else "No"
-
-#     user_id = session['user_id']
-
-#     # Convert date and time to datetime object
-#     datetime_str = f"{date} {time}"
-#     transaction_datetime = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M')
-
-#     # Calculate quantity
-#     quantity = amount_bought / buy_price
-
-#     holding = {
-#         'userId': ObjectId(user_id),
-#         'asset': asset,
-#         'datetime': transaction_datetime,
-#         'buy_price': buy_price,
-#         'amount_bought': amount_bought,
-#         'quantity': quantity,
-#         'transaction_fee': transaction_fee,
-#         'deduct_cash': deduct_cash,
-#         'type': transaction_type  # Add type to the holding
-#     }
-
-#     if transaction_type == 'stock':
-#         current_app.mongo.db.stock_holdings.insert_one(holding)
-#     elif transaction_type == 'crypto':
-#         current_app.mongo.db.crypto_holdings.insert_one(holding)
-
-#     return jsonify({'success': True})
 
 @investment.route('/add_transaction', methods=['POST'])
 def add_transaction():

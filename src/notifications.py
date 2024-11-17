@@ -31,8 +31,6 @@ class Notification:
 
     @staticmethod
     def update_notification(notification_id):
-        # notification_id = ObjectId("66ccdea30743914829c7684d")
-        # Update the is_dismissed field for the given notification_id
         current_app.mongo.db.notifications.update_one(
             {'_id': ObjectId(notification_id)},
             {'$set': {'is_dismissed': True}}

@@ -316,17 +316,6 @@ class SavingGoal:
         SavingGoal.update_goal(goal_id, {"current_amount": current_amount})
 
         return current_amount
-    
-    # @staticmethod
-    # def update_current_amount_in_db(goal_id, user_id):
-    #     """Calculates the current amount and updates it in the database."""
-    #     # Ensure goal_id and user_id are ObjectIds
-    #     goal_id = ObjectId(goal_id) if not isinstance(goal_id, ObjectId) else goal_id
-    #     user_id = ObjectId(user_id) if not isinstance(user_id, ObjectId) else user_id
-        
-    #     current_amount = SavingGoal.calculate_current_amount('_id', user_id)
-    #     SavingGoal.update_goal(goal_id, {"current_amount": current_amount})
-    #     return current_amount
 
     
     @staticmethod

@@ -945,10 +945,6 @@ function init_daterangepicker() {
     console.log('init_daterangepicker');
 
     var cb = function (start, end, label) {
-        // Adjust display to use end date as the day before for selections like "Yesterday"
-        // let displayStart = label === "Yesterday" ? start.clone().subtract(1, 'days') : start;
-        // let displayEnd = label === "Yesterday" ? end.clone().subtract(1, 'days') : end;
-        // Adjust display dates for specific labels
         let displayStart, displayEnd;
 
         if (label === "Yesterday") {
@@ -976,13 +972,6 @@ function init_daterangepicker() {
     };
 
     var optionSet1 = {
-        // startDate: moment().subtract(29, 'days'),
-        // endDate: moment(),
-        // minDate: '01/01/2012',
-        // maxDate: '12/31/2015',
-        // dateLimit: {
-        //     days: 60
-        // },
         showDropdowns: true,
         showWeekNumbers: true,
         timePicker: false,

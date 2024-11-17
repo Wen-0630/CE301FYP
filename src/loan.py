@@ -1,6 +1,6 @@
 # src/loan.py
-from flask import Blueprint, request, render_template, redirect, url_for, session, current_app
-from .models import Loan, Transaction
+from flask import Blueprint, request, render_template, redirect, url_for, session
+from .models import Loan
 import datetime
 from bson.objectid import ObjectId
 
@@ -85,11 +85,7 @@ def edit_loan(loan_id):
         loan_term = int(request.form['loan_term'])
         repayment_term = request.form['repayment_term']
         interest_rate = float(request.form['interest_rate'])
-        # outstanding_balance = float(request.form['outstanding_balance'])
         interest_payable = float(request.form['interest_payable'])
-        # interest_expense = float(request.form['interest_expense'])
-        # interest_balance = float(request.form['interest_balance'])
-        # loan_expense = float(request.form['loan_expense'])
         issue_date = datetime.datetime.strptime(request.form['issue_date'], '%Y-%m-%d')
         maturity_date = datetime.datetime.strptime(request.form['maturity_date'], '%Y-%m-%d')
         description = request.form.get('description', None)
@@ -101,11 +97,7 @@ def edit_loan(loan_id):
             'loan_term': loan_term,
             'repayment_term': repayment_term,
             'interest_rate': interest_rate,
-            # 'outstanding_balance': outstanding_balance,
             'interest_payable': interest_payable,
-            # 'interest_expense': interest_expense,
-            # 'interest_balance': interest_balance,
-            # 'loan_expense': loan_expense,
             'issue_date': issue_date,
             'maturity_date': maturity_date,
             'description': description

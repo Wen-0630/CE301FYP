@@ -22,6 +22,7 @@ The Net Plus project is a web application designed to manage financial records. 
 - **Backend**: Flask (Python)
 - **Frontend**: HTML, CSS, JavaScript
 - **Database**: MongoDB Atlas (cloud database)
+- **AI Chatbot**: A chatbot powered by OpenAI's GPT-3.5, integrated with Langchain for generating intelligent responses. The chatbot assists users with financial inquiries and actionable tasks.
 
 ## Prerequisites
 
@@ -29,6 +30,8 @@ Before setting up the project, ensure you have the following installed:
 - [Visual Studio Code](https://code.visualstudio.com/)
 - [Python](https://www.python.org/downloads/) (version 3.8 or higher)
 - [Git](https://git-scm.com/downloads)
+- [OpenAI API Key](https://platform.openai.com/signup/)
+- Optional: Obtain a CoinGecko API key and Finn Hub API key for rate-limiting exemptions (though the free tier may suffice for basic use).
 
 ## Setup Instructions
 
@@ -92,15 +95,20 @@ Before setting up the project, ensure you have the following installed:
 
 7. If you encounter issues, email the Net Plus team at "laiyiwen005@gmail.com" to receive an invitation and the connection string.
 
-### 7. Run the Project
+### 7. Configure API Access
+The application uses the CoinGecko API to fetch real-time and historical cryptocurrency data. No API key is required for basic access, but rate-limiting may apply. If needed, update the API URL in `utils.py` to include your CoinGecko API key. And Finn Hub API url in `investment.py`.
+
+### 8. Run the Project
 
 1. Create a `.env` file in the project root directory and add the following environment variables:
    ```env
    MONGO_URI=mongodb+srv://<username>:<password>@database.<xxxxxx>.mongodb.net/CE-301?retryWrites=true&w=majority&appName=Database
    SECRET_KEY=CE301-CapstoneProject-HHH
    DB_NAME=CE-301
+   OPENAI_API_KEY=your-openai-api-key
    ```
    Replace `<username>` and `<password>` with your MongoDB Atlas credentials.
+   credentials, and replace your-openai-api-key with your OpenAI API key.
 2. Open Visual Studio Code.
 3. Open a terminal in Visual Studio Code by pressing `Ctrl+` (backtick).
 4. Ensure the virtual environment is activated.
@@ -121,11 +129,18 @@ CE301-CapstoneProject-MVP/
 ├── src/
 │   ├── _init_.py/
 │   ├── auth.py/
+│   ├── budget.py/
 │   ├── cashFlow.py/
+│   ├── chatbot.py/
 │   ├── creditCard.py/
 │   ├── investment.py/
 │   ├── loan.py/
 │   ├── models.py/
+│   ├── notifications.py/
+│   ├── other_assets.py/
+│   ├── other_liabilities.py/
+│   ├── savingGoals.py/
+│   ├── todo.py/
 │   ├── transactions.py/
 │   ├── utils.py/
 │   ├── views.py/
@@ -139,15 +154,20 @@ CE301-CapstoneProject-MVP/
 │   ├── auth.base.html
 │   ├── base.html
 │   ├── cashflow.html
+│   ├── chatbot.html
 │   ├── creditCard.html
 │   ├── dashboard.html
 │   ├── edit_loan.html
+│   ├── edit_other_asset.html
+│   ├── edit_other_liability.html
 │   ├── edit_transaction.html
 │   ├── holdings.html
-│   ├── index.html
 │   ├── loan.html
 │   ├── login.html
 │   ├── markets.html
+│   ├── other_assets.html
+│   ├── other_liabilities.html
+│   ├── profile.html
 │   ├── signup.html
 │   ├── transactions.html
 ├── .env
@@ -165,7 +185,13 @@ Collections of database included:
 - repayments
 - transactions
 - stock_holdings
-- markets
+- budgets
+- notifications
+- other_assets
+- other_liabilities
+- saving_goals
+- stocks
+- todo_tasks
 
 ## Final Notes
 

@@ -46,26 +46,10 @@ Edit Loan - Net Plus
                     <label for="interest_rate">Interest Rate (% p.a.)</label>
                     <input type="number" name="interest_rate" id="interest_rate" class="form-control" step="0.01" value="{{ loan.interest_rate }}" required>
                 </div>
-                <!-- <div class="form-group">
-                    <label for="outstanding_balance">Outstanding Balance</label>
-                    <input type="number" name="outstanding_balance" id="outstanding_balance" class="form-control" step="0.01" value="{{ loan.outstanding_balance }}" required>
-                </div> -->
                 <div class="form-group">
                     <label for="interest_payable">Total Interest Payable</label>
                     <input type="number" name="interest_payable" id="interest_payable" class="form-control" step="0.01" value="{{ loan.interest_payable }}" required>
                 </div>
-                <!-- <div class="form-group">
-                    <label for="interest_expense">Interest Expense</label>
-                    <input type="number" name="interest_expense" id="interest_expense" class="form-control" step="0.01" value="{{ loan.interest_expense }}" required>
-                </div> -->
-                <!-- <div class="form-group">
-                    <label for="interest_balance">Interest Balance</label>
-                    <input type="number" name="interest_balance" id="interest_balance" class="form-control" step="0.01" value="{{ loan.interest_balance }}" required>
-                </div> -->
-                <!-- <div class="form-group">
-                    <label for="loan_expense">Loan Expense</label>
-                    <input type="number" name="loan_expense" id="loan_expense" class="form-control" step="0.01" value="{{ loan.loan_expense }}" required>
-                </div> -->
                 <div class="form-group">
                     <label for="issue_date">Issue Date</label>
                     <input type="date" name="issue_date" id="issue_date" class="form-control" value="{{ loan.issue_date.strftime('%Y-%m-%d') }}" required>
