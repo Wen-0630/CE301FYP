@@ -1,7 +1,7 @@
 
 # Net Plus Project - Detailed Setup Guide
 
-Welcome to the Net Plus project. This guide will walk you through the detailed steps required to set up and run the project using Visual Studio Code (VS Code). Please follow the steps carefully to ensure a successful setup. If you encounter any issues, feel free to call me at +65 81912109.
+Welcome to the Net Plus project. This guide will walk you through the detailed steps required to set up and run the project using Visual Studio Code (VS Code). Please follow the steps carefully to ensure a successful setup. 
 
 ## Table of Contents
 
@@ -93,8 +93,6 @@ Before setting up the project, ensure you have the following installed:
    - Create a collection named `users`.
    - Populate the database using `populateDB.py` with the connection string updated in `MongoClient`. You will see print("All data inserted successfully!"), meaning data is present correctly in the database.
 
-7. If you encounter issues, email the Net Plus team at "laiyiwen005@gmail.com" to receive an invitation and the connection string.
-
 ### 7. Configure API Access
 The application uses the CoinGecko API to fetch real-time and historical cryptocurrency data. No API key is required for basic access, but rate-limiting may apply. If needed, update the API URL in `utils.py` to include your CoinGecko API key. And Finn Hub API url in `investment.py`.
 
@@ -117,8 +115,6 @@ The application uses the CoinGecko API to fetch real-time and historical cryptoc
    flask run
    ```
 6. Run the main.py file and click on the provided link http://127.0.0.1:5000/ in the terminal to access the application.
-
-If you encounter any issues during the setup, please call me at +65 81912109 for assistance.
 
 ## Project Structure
 
